@@ -7,6 +7,7 @@ pub struct Random {
 }
 
 impl Random {
+    #[allow(dead_code)]
     pub fn init() -> Self {
         Self {
             rng: thread_rng(),
@@ -27,5 +28,15 @@ impl Random {
     #[allow(dead_code)]
     pub fn generate_one(&mut self) -> u16 {
         return self.rng.gen_range(self.min..=self.max)
+    }
+
+    #[allow(dead_code)]
+    pub fn generate_multi(&mut self, length: u16) -> Vec<u16> {
+        let mut result: Vec<u16> = Vec::new();
+        for _i in 0..length {
+            let r = self.rng.gen_range(self.min..=self.max);
+            result.push(r);
+        }
+        return result
     }
 }
