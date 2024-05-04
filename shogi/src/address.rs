@@ -14,6 +14,7 @@ impl Address {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new_from_string(string: &str) -> Self {
         Self {
             column: string.as_bytes()[0] - 48,
@@ -21,10 +22,12 @@ impl Address {
         }
     }
 
+    #[allow(dead_code)]
     pub fn to_index(&self) -> u8 {
         return self.row * 11 + self.column;
     }
 
+    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         let mut string = String::new();
         let column = common::integer_to_char(self.column);
@@ -37,18 +40,22 @@ impl Address {
 
 }
 
+#[allow(dead_code)]
 pub fn index_to_address(index: u8) -> Address {
     return self::Address::new_from_number(index)
 }
 
+#[allow(dead_code)]
 pub fn address_to_index(address: Address) -> u8 {
     return address.to_index()
 }
 
+#[allow(dead_code)]
 pub fn index_to_row(index: u8) -> u8 {
     return index / 11
 }
 
+#[allow(dead_code)]
 pub fn index_to_column(index: u8) -> u8 {
     return index % 11
 }
