@@ -1,4 +1,5 @@
 use crate::color::ColorType;
+use bitvec::prelude::*;
 
 use super::piece;
 use super::direction;
@@ -129,14 +130,54 @@ impl Piece {
     }
 
     #[allow(dead_code)]
-    pub fn from_string(string: String) -> Self {
-        let mut promote: u8 = 0;
-        let mut piece_str;
-        if string[0] == '+' {
+    pub fn from(color_type: ColorType, piece_type: PieceType) -> Self {
+        Self {
+            owner: color_type,
+            piece_type: piece_type,
+        }
+    }
 
+    #[allow(dead_code)]
+    pub fn from_integer(num: u8) -> Self {
+        let mut bits = bitvec![u8, Msb0; 0; 8];
+        bits.store_be::<u8>(num);
+        let owner = ColorType::from_u8(bits[0] as u8);
+        bits.shift_right(1);
+        let mut piece_type: u8 = 0;
+        let base: u8 = 2;
+        for i in 0..8 {
+            if bits[i] {
+                piece_type += base.pow((7 - i) as u32);
+            }
         }
-        let mut res = Self {
-            
+        Self {
+            owner: owner,
+            piece_type: PieceType::from_usize(piece_type as usize),
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn from_char(character: char) -> Self {
+        let mut res = Self::new();
+        res.convert_from_string(character);
+        return res
+    }
+
+    #[allow(dead_code)]
+    pub fn from_string(string: String) -> Self {
+        let string_vec = string.chars().collect::<Vec<char>>();
+        let mut promote: u8 = 0;
+        let piece_str: char;
+        if string_vec[0] == '+' {
+            promote = PROMOTE_CHANGE;
+            piece_str = string_vec[1];
+        } else {
+            piece_str = string_vec[0];
+        }
+
+        let mut res = Self::new();
+        res.convert_from_string(piece_str);
+        res.piece_type = PieceType::from_usize(res.piece_type as usize + promote as usize);
+        return res
     }
 }
