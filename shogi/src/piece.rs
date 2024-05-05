@@ -1,7 +1,6 @@
 use crate::color::ColorType;
 use bitvec::prelude::*;
 
-use super::piece;
 use super::direction;
 
 // extern crate num;
