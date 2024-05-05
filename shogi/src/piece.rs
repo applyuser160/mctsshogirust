@@ -67,7 +67,7 @@ impl Piece {
     #[allow(dead_code)]
     fn convert_string(piece_type: PieceType, owner: ColorType) -> String {
         let mut result = String::with_capacity(3);
-        let mut piece_type_df: PieceType;
+        let piece_type_df: PieceType;
         if (piece_type as u8) > PROMOTE {
             result.push('+');
             piece_type_df = PieceType::from_usize(piece_type as usize - PROMOTE_CHANGE as usize)
