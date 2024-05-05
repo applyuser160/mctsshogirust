@@ -21,7 +21,7 @@ pub const PROMOTE_CHANGE: u8 = 6;
 pub enum PieceType {
     None = 0, King, Gold,
     Rook, Bichop, Silver, Knight, Lance, Pawn,
-    Dragon, Horse, ProSilver, PriKnight, ProLance, ProPawn,
+    Dragon, Horse, ProSilver, ProKnight, ProLance, ProPawn,
 }
 
 impl PieceType {
@@ -39,7 +39,7 @@ impl PieceType {
             9 => PieceType::Dragon,
             10 => PieceType::Horse,
             11 => PieceType::ProSilver,
-            12 => PieceType::PriKnight,
+            12 => PieceType::ProKnight,
             13 => PieceType::ProLance,
             14 => PieceType::ProPawn,
             _ => PieceType::None,
@@ -65,7 +65,7 @@ pub struct Piece {
 
 impl Piece {
     #[allow(dead_code)]
-    fn convert_string(piece_type: PieceType, owner: ColorType) -> String {
+    pub fn convert_string(piece_type: PieceType, owner: ColorType) -> String {
         let mut result = String::with_capacity(3);
         let piece_type_df: PieceType;
         if (piece_type as u8) > PROMOTE {
@@ -138,7 +138,7 @@ impl Piece {
     }
 
     #[allow(dead_code)]
-    pub fn from_integer(num: u8) -> Self {
+    pub fn from_u8(num: u8) -> Self {
         let mut bits = bitvec![u8, Msb0; 0; 8];
         bits.store_be::<u8>(num);
         let owner = ColorType::from_u8(bits[0] as u8);
@@ -180,4 +180,187 @@ impl Piece {
         res.piece_type = PieceType::from_usize(res.piece_type as usize + promote as usize);
         return res
     }
+
+    #[allow(dead_code)]
+    pub fn to_u8(&self) -> u8 {
+        let mut res = self.piece_type as u8;
+        res <<= 1;
+        res += self.owner as u8;
+        return res
+    }
+
+    #[allow(dead_code)]
+    pub fn to_string(&self) -> String {
+        return Self::convert_string(self.piece_type, self.owner)
+    }
+
+    #[allow(dead_code)]
+    pub fn get_movetype( piece_type: PieceType) -> [MoveType; direction::DirectionName::DirectionNameNumber as usize] {
+        match piece_type {
+            PieceType::None => [
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+            ],
+            PieceType::King => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+            ],
+            PieceType::Gold => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::Short,
+            ],
+            PieceType::Rook => [
+                MoveType::Long,
+                MoveType::None,
+                MoveType::Long,
+                MoveType::None,
+                MoveType::Long,
+                MoveType::None,
+                MoveType::Long,
+                MoveType::None,
+            ],
+            PieceType::Bichop => [
+                MoveType::None,
+                MoveType::Long,
+                MoveType::None,
+                MoveType::Long,
+                MoveType::None,
+                MoveType::Long,
+                MoveType::None,
+                MoveType::Long,
+            ],
+            PieceType::Silver => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+            ],
+            PieceType::Knight => [
+                MoveType::None,
+                MoveType::Hop,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::Hop,
+            ],
+            PieceType::Lance => [
+                MoveType::Long,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+            ],
+            PieceType::Pawn => [
+                MoveType::Short,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+                MoveType::None,
+            ],
+            PieceType::Dragon => [
+                MoveType::Long,
+                MoveType::Short,
+                MoveType::Long,
+                MoveType::Short,
+                MoveType::Long,
+                MoveType::Short,
+                MoveType::Long,
+                MoveType::Short,
+            ],
+            PieceType::Horse => [
+                MoveType::Short,
+                MoveType::Long,
+                MoveType::Short,
+                MoveType::Long,
+                MoveType::Short,
+                MoveType::Long,
+                MoveType::Short,
+                MoveType::Long,
+            ],
+            PieceType::ProSilver => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::Short,
+            ],
+            PieceType::ProKnight => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::Short,
+            ],
+            PieceType::ProLance => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::Short,
+            ],
+            PieceType::ProPawn => [
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::None,
+                MoveType::Short,
+                MoveType::Short,
+            ]
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn able_pro(piece_type: PieceType) -> bool {
+        match piece_type {
+            PieceType::Rook => true,
+            PieceType::Bichop => true,
+            PieceType::Silver => true,
+            PieceType::Knight => true,
+            PieceType::Lance => true,
+            PieceType::Pawn => true,
+            _ => false,
+        }
+    }
+
 }
