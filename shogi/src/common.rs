@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub fn alphabet_to_number(alphabet: char) -> char {
     return ((alphabet as u8) - 48) as char;
 }
