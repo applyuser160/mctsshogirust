@@ -4,6 +4,17 @@ pub enum ColorType {
     None = -1, Black = 0, White, ColorNumber = 2,
 }
 
+impl ColorType {
+    pub fn from_u8(n: u8) -> Self {
+        match n {
+            0 => Self::Black,
+            1 => Self::White,
+            2 => Self::ColorNumber,
+            _ => Self::None,
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub fn get_reverse_color(color_type: ColorType) -> ColorType {
     match color_type {
