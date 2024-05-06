@@ -57,6 +57,7 @@ pub enum MoveType {
 }
 
 #[allow(dead_code)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub struct Piece {
     pub owner: ColorType,
     pub piece_type: PieceType,
