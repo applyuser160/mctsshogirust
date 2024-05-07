@@ -1,5 +1,7 @@
+use std::io::copy;
 use std::ops::BitOr;
 
+use bitvec::field;
 use bitvec::prelude::*;
 
 use bitvec::prelude::BitVec;
@@ -90,4 +92,43 @@ impl Move {
         }
         return res
     }
+
+    #[allow(dead_code)]
+    pub fn get_is_drop(&self) -> bool {
+        return self.value[15]
+    }
+
+    #[allow(dead_code)]
+    pub fn get_is_promote(&self) -> bool {
+        return self.value[14]
+    }
+
+    #[allow(dead_code)]
+    pub fn get_base(&self, left: usize, right: usize) -> u8 {
+        let mut copy = self.value.clone();
+        copy.shift_left(left);
+        copy.shift_right(right);
+        let r: std::ops::Range<usize> = 0..16;
+        let f = copy.get(r).unwrap();
+        return f.load::<u8>();
+    }
+
+    #[allow(dead_code)]
+    pub fn get_from(&self) -> address::Address {
+        let v = self.get_base(9, 9);
+        return address::Address::from_number(v)
+    }
+
+    #[allow(dead_code)]
+    pub fn get_to(&self) -> address::Address {
+        let v = self.get_base(2, 9);
+        return address::Address::from_number(v)
+    }
+
+    #[allow(dead_code)]
+    pub fn get_piece(&self) -> piece::Piece {
+        let v = self.get_base(9, 9);
+        return piece::Piece::from_u8(v)
+    }
+
 }
