@@ -7,7 +7,7 @@ pub struct Address {
 }
 
 impl Address {
-    pub fn new_from_number(index: u8) -> Self {
+    pub fn from_number(index: u8) -> Self {
         Self {
             column: index % 11,
             row: index / 11,
@@ -15,7 +15,7 @@ impl Address {
     }
 
     #[allow(dead_code)]
-    pub fn new_from_string(string: &str) -> Self {
+    pub fn from_string(string: &str) -> Self {
         Self {
             column: string.as_bytes()[0] - 48,
             row: string.as_bytes()[1] - 96,
@@ -42,7 +42,7 @@ impl Address {
 
 #[allow(dead_code)]
 pub fn index_to_address(index: u8) -> Address {
-    return self::Address::new_from_number(index)
+    return self::Address::from_number(index)
 }
 
 #[allow(dead_code)]
