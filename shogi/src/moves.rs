@@ -131,4 +131,25 @@ impl Move {
         return piece::Piece::from_u8(v)
     }
 
+    #[allow(dead_code)]
+    pub fn to_string(&self) -> String {
+        let mut first = String::with_capacity(2);
+        if self.get_is_drop() {
+            let piece = self.get_piece();
+            first.push_str(&piece.to_string());
+            first.push('*');
+        } else {
+            let from = self.get_from();
+            first.push_str(&from.to_string());
+        }
+        let to = self.get_to();
+        let is_pro = self.get_is_promote();
+        let mut res = String::with_capacity(5);
+        res.push_str(&first);
+        res.push_str(&to.to_string());
+        if is_pro {
+            res.push('+');
+        }
+        return res
+    }
 }
