@@ -1,15 +1,9 @@
-use std::io::copy;
-use std::ops::BitOr;
-
-use bitvec::field;
 use bitvec::prelude::*;
 
 use bitvec::prelude::BitVec;
-use bitvec::order::Lsb0;
 
 use super::address;
 use super::piece;
-use super::color;
 
 #[allow(dead_code)]
 pub struct Move {
