@@ -1,11 +1,14 @@
-use super::moves;
+use bitvec::prelude::*;
+use crate::bitboard::{LENGTH_OF_EDGE, LENGTH_OF_FRAME};
 
 use super::bitboard::{BitBoard, BIT_OF_FRAME, BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE,
     BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE};
-use super::color::ColorType;
+use super::color::{ColorType, get_reverse_color};
 use super::hand::Hand;
-use super::piece::{PieceType, PIECE_TYPE_NUMBER};
-use crate::address::Address;
+use super::piece::{PieceType, PIECE_TYPE_NUMBER, MoveType};
+use super::address::Address;
+use super::piece::Piece;
+use super::direction::{DirectionName, Direction};
 
 #[allow(dead_code)]
 pub struct Board {
@@ -141,5 +144,83 @@ impl Board {
         } else {
             return ColorType::White
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn get_able_move_squares(&self, index: u8) -> BitBoard {
+        let piece_type = self.get_piece_type_from_index(index);
+        let color_type = self.get_color_type_from_index(index);
+
+        let move_types: [MoveType; DirectionName::DirectionNameNumber as usize] = Piece::get_movetype(piece_type);
+        let mut is_in_board = bitvec![1; DirectionName::DirectionNameNumber as usize];
+
+        let mut bit_board = BitBoard::new();
+        bit_board.board.set(index as usize, true);
+        let mut bit_movable = BitBoard::new();
+
+        for i in 1..LENGTH_OF_EDGE {
+            for j in 0..DirectionName::DirectionNameNumber as usize {
+                if move_types[j] == MoveType::None {
+                    continue;
+                }
+
+                if is_in_board[j] {
+                    let direction = Direction::new(DirectionName::from_usize(j));
+                    let up = Direction::new(DirectionName::Up);
+                    if color_type == ColorType::White {
+                        direction.reverse();
+                        up.reverse();
+                    }
+
+                    let mut v = direction.vertical_vector * i as i8;
+                    let h = direction.horizon_vector * i as i8;
+
+                    if move_types[j] == MoveType::Hop {
+                        v += up.vertical_vector;
+                    }
+
+                    let shift_number = LENGTH_OF_FRAME as i8 * v + h;
+
+                    let bn1 = if shift_number > 0 { bit_board.clone() << shift_number as usize} else {bit_board.clone() >> shift_number.abs() as usize};
+
+                    if (self.is_frame.clone() & bn1.clone()).board.any() {
+                        is_in_board.set(j, false);
+                    } else if (self.player_prossesion[get_reverse_color(color_type) as usize].clone() & bn1.clone()).board.any() {
+                        is_in_board.set(j, false);
+                        bit_movable = bit_movable.clone() | bn1.clone();
+                    } else if (self.player_prossesion[color_type as usize].clone() & bn1.clone()).board.any() {
+                        is_in_board.set(j, false);
+                    } else {
+                        bit_movable = bit_board.clone() | bn1.clone();
+                    }
+
+                    if move_types[j] != MoveType::Long {
+                        is_in_board.set(j, false);
+                    }
+                }
+            }
+        }
+        return bit_movable
+    }
+
+    #[allow(dead_code)]
+    pub fn get_able_pro_move_squares(&self, index: u8, bit_movable: BitBoard) -> BitBoard {
+        let result = BitBoard::new();
+        let piece_type = self.get_piece_type_from_index(index);
+        let color_type = self.get_color_type_from_index(index);
+        let mut bit_board = BitBoard::new();
+        bit_board.board.set(index as usize, true);
+        let is_able_pro = Piece::able_pro(piece_type);
+        if !is_able_pro {
+            return result
+        }
+
+        let pro_area = self.able_pro[color_type as usize].clone();
+
+        if (bit_board & pro_area.clone()).board.any() {
+            return bit_movable
+        }
+
+        return bit_movable & pro_area
     }
 }
