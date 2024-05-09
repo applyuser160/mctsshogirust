@@ -1,15 +1,14 @@
 use bitvec::prelude::*;
-use crate::bitboard::{LENGTH_OF_EDGE, LENGTH_OF_FRAME};
 
 use super::bitboard::{BitBoard, BIT_OF_FRAME, BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE,
     BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE,
-    generate_column};
+    generate_column, LENGTH_OF_EDGE, LENGTH_OF_FRAME};
 use super::color::{ColorType, get_reverse_color};
 use super::hand::Hand;
-use super::piece::{PieceType, PIECE_TYPE_NUMBER, MoveType};
+use super::piece::{Piece, PieceType, PIECE_TYPE_NUMBER, MoveType, PROMOTE};
 use super::address::Address;
-use super::piece::Piece;
 use super::direction::{DirectionName, Direction};
+use super::moves::Move;
 
 #[allow(dead_code)]
 pub struct Board {
@@ -41,9 +40,35 @@ impl Board {
         }
     }
 
-    // fn move_standard(&mut self, from_index: u8, to_index: u8) {
-    //     let piece_type = 
-    // }
+    #[allow(dead_code)]
+    fn move_standard(&mut self, from_index: u8, to_index: u8) {
+        let piece_type = self.get_piece_type_from_index(from_index);
+        let color_type = self.get_color_type_from_index(from_index);
+        self.drop(from_index);
+        self.deploy(to_index, piece_type, color_type);
+    }
+
+    #[allow(dead_code)]
+    fn move_to_hand(&mut self, index: u8, is_color_reverse: bool) {
+        let mut piece_type = self.get_piece_type_from_index(index);
+        if piece_type as u8 > PROMOTE {
+            piece_type = PieceType::from_usize(piece_type as usize - PROMOTE as usize);
+        }
+
+        let mut color_type = self.get_color_type_from_index(index);
+        if is_color_reverse {
+            color_type = get_reverse_color(color_type);
+        }
+
+        self.drop(index);
+        self.hand.add_piece(color_type, piece_type);
+    }
+
+    #[allow(dead_code)]
+    fn move_from_hand(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
+        self.hand.decrease_piece(color, piece_type);
+        self.deploy(index, piece_type, color);
+    }
 
     pub fn new() -> Self {
         let mut has_specific_piece = BitBoard::from_u128(BIT_OF_FRAME);
@@ -258,6 +283,76 @@ impl Board {
                 return none & last_not_one & not_double_pawn
             },
             _ => BitBoard::new()
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn serch_moves(&self, color: ColorType) -> Vec<Move> {
+        let mut vector_move: Vec<Move> = Vec::new();
+
+        let player_board = if color.to_bool() 
+            { self.player_prossesion[ColorType::White as usize].clone() } 
+            else { self.player_prossesion[ColorType::Black as usize].clone() };
+        
+        let player_board_indexs = player_board.get_trues();
+
+        for i in 0..player_board_indexs.len() {
+
+            let move_board = self.get_able_move_squares(player_board_indexs[i]);
+            let move_indexs = move_board.get_trues();
+            for j in 0..move_indexs.len() {
+                let from = Address::from_number(player_board_indexs[i]);
+                let to = Address::from_number(move_indexs[j]);
+                let moves = Move::from_standart(from, to, false);
+                vector_move.push(moves);
+            }
+            drop(move_indexs);
+
+            let pro_board = self.get_able_pro_move_squares(player_board_indexs[i], move_board);
+            let move_indexs = pro_board.get_trues();
+            for j in 0..move_indexs.len() {
+                let from = Address::from_number(player_board_indexs[i]);
+                let to = Address::from_number(move_indexs[j]);
+                let moves = Move::from_standart(from, to, true);
+                vector_move.push(moves);
+            }
+        }
+
+        let player_hand_pieces = self.hand.get_player_pieces(color);
+        for i in 0..player_hand_pieces.len() {
+            let move_board = self.get_able_drop_squares(player_hand_pieces[i].owner, player_hand_pieces[i].piece_type);
+            let move_indexs = move_board.get_trues();
+            for j in 0..move_indexs.len() {
+                let to = Address::from_number(move_indexs[j]);
+                let moves = Move::from_drop(player_hand_pieces[i], to);
+                vector_move.push(moves);
+            }
+        }
+
+        return vector_move
+    }
+
+    #[allow(dead_code)]
+    pub fn execute_move(&mut self, moves: Move) {
+        let is_drop = moves.get_is_drop();
+        let to_index = moves.get_to().to_index();
+        let mut piece = Piece::new();
+        let mut from_index: u8 = 0;
+
+        if is_drop {
+            piece = moves.get_piece();
+        } else {
+            from_index = moves.get_from().to_index();
+        }
+
+        if self.has_piece.board[to_index as usize] {
+            self.move_to_hand(to_index, true);
+        }
+
+        if is_drop {
+            self.move_from_hand(to_index, piece.piece_type, piece.owner);
+        } else {
+            self.move_standard(from_index, to_index);
         }
     }
 }
