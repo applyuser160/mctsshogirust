@@ -5,6 +5,23 @@ pub enum DirectionName {
     DirectionNameNumber = 8
 }
 
+impl DirectionName {
+    pub fn from_usize(n: usize) -> Self {
+        match n {
+            0 => Self::Up,
+            1 => Self::UpLeft,
+            2 => Self::Left,
+            3 => Self::DownLeft,
+            4 => Self::Down,
+            5 => Self::DownRight,
+            6 => Self::Right,
+            7 => Self::UpRight,
+            8 => Self::DirectionNameNumber,
+            _ => Self::DirectionNameNumber,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Direction {
 
