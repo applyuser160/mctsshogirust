@@ -13,6 +13,10 @@ impl ColorType {
             _ => Self::None,
         }
     }
+
+    pub fn to_bool(&self) -> bool {
+        return self == &ColorType::White
+    }
 }
 
 #[allow(dead_code)]
