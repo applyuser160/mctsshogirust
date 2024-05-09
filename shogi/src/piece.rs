@@ -52,6 +52,7 @@ pub enum HandPiece {
 }
 
 #[allow(dead_code)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum MoveType {
     None, Short, Hop, Long
 }
