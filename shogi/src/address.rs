@@ -15,6 +15,14 @@ impl Address {
     }
 
     #[allow(dead_code)]
+    pub fn from_numbers(c: u8, r: u8) -> Self {
+        Self {
+            column: c,
+            row: r,
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn from_string(string: &str) -> Self {
         Self {
             column: string.as_bytes()[0] - 48,
