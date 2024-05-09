@@ -47,7 +47,7 @@ impl Board {
 
     pub fn new() -> Self {
         let mut has_specific_piece = BitBoard::from_u128(BIT_OF_FRAME);
-        has_specific_piece.board.iter_mut().for_each(|mut b| *b = !*b);
+        has_specific_piece.flip();
         Self {
             has_piece: BitBoard::new(),
             player_prossesion: [BitBoard::new(), BitBoard::new()],
