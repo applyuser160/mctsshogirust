@@ -198,6 +198,11 @@ impl BitBoard {
         return res
     }
 
+    #[allow(dead_code)]
+    pub fn flip(&mut self) {
+        self.board.iter_mut().for_each(|mut b| *b = !*b);
+    }
+
 }
 
 impl BitAnd for BitBoard {
