@@ -2,7 +2,8 @@ use bitvec::prelude::*;
 use crate::bitboard::{LENGTH_OF_EDGE, LENGTH_OF_FRAME};
 
 use super::bitboard::{BitBoard, BIT_OF_FRAME, BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE,
-    BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE};
+    BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE,
+    generate_column};
 use super::color::{ColorType, get_reverse_color};
 use super::hand::Hand;
 use super::piece::{PieceType, PIECE_TYPE_NUMBER, MoveType};
@@ -222,5 +223,41 @@ impl Board {
         }
 
         return bit_movable & pro_area
+    }
+
+    #[allow(dead_code)]
+    pub fn get_able_drop_squares(&self, color: ColorType, piece_type: PieceType) -> BitBoard {
+        let none = self.has_specific_piece[PieceType::None as usize].clone();
+        let last_two = self.last_two[color as usize].clone();
+        let last_one = self.last_one[color as usize].clone();
+
+        let mut last_not_two = last_two.clone();
+        let mut last_not_one = last_one.clone();
+        last_not_two.flip();
+        last_not_one.flip();
+
+        match piece_type {
+            PieceType::Gold => none,
+            PieceType::Rook => none,
+            PieceType::Bichop => none,
+            PieceType::Silver => none,
+            PieceType::Knight => none & last_not_two,
+            PieceType::Lance => none & last_not_one,
+            PieceType::Pawn => {
+                let pawn = self.has_specific_piece[PieceType::Pawn as usize].clone() & self.player_prossesion[color as usize].clone();
+                let pawn_indexs = pawn.get_trues();
+                let mut double_pawn = BitBoard::new();
+
+                for i in 0..pawn_indexs.len() {
+                    double_pawn = double_pawn.clone() | generate_column(Address::from_number(pawn_indexs[i]).column as usize);
+                }
+
+                let mut not_double_pawn = double_pawn;
+                not_double_pawn.flip();
+
+                return none & last_not_one & not_double_pawn
+            },
+            _ => BitBoard::new()
+        }
     }
 }
