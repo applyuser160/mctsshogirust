@@ -355,4 +355,21 @@ impl Board {
             self.move_standard(from_index, to_index);
         }
     }
+
+    #[allow(dead_code)]
+    pub fn is_finished(&self) -> (bool, ColorType) {
+        let winner;
+        let is_finish = self.has_specific_piece[PieceType::King as usize].board.count_ones() != ColorType::ColorNumber as usize;
+        if is_finish {
+            let is_black_win = (self.has_specific_piece[PieceType::King as usize].clone() & self.player_prossesion[ColorType::Black as usize].clone()).board.any();
+            if is_black_win {
+                winner = ColorType::Black;
+            } else {
+                winner = ColorType::White;
+            }
+        } else {
+            winner = ColorType::None;
+        }
+        return (is_finish, winner)
+    }
 }
