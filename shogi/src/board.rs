@@ -11,6 +11,7 @@ use super::direction::{DirectionName, Direction};
 use super::moves::Move;
 
 #[allow(dead_code)]
+#[derive(Clone)]
 pub struct Board {
     pub has_piece: BitBoard,
     pub player_prossesion: [BitBoard; ColorType::ColorNumber as usize],
@@ -333,7 +334,7 @@ impl Board {
     }
 
     #[allow(dead_code)]
-    pub fn execute_move(&mut self, moves: Move) {
+    pub fn execute_move(&mut self, moves: &Move) {
         let is_drop = moves.get_is_drop();
         let to_index = moves.get_to().to_index();
         let mut piece = Piece::new();

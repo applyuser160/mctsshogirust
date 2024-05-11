@@ -6,6 +6,7 @@ use super::address;
 use super::piece;
 
 #[allow(dead_code)]
+#[derive(Clone)]
 pub struct Move {
     pub value: BitVec<u16, Msb0>,
 }
