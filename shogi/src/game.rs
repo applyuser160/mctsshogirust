@@ -5,6 +5,7 @@ use super::moves::Move;
 use super::board::Board;
 use super::color::{ColorType, convert_from_string, get_reverse_color};
 use super::random::Random;
+use super::mctsresult::MctsResult;
 
 #[allow(dead_code)]
 #[derive(Clone)]
@@ -129,6 +130,33 @@ impl Game {
         return self.clone();
     }
 
-    // #[allow(dead_code)]
-    // pub fn random_move(&mut self, )
+    #[allow(dead_code)]
+    pub fn random_move(&mut self, result: &mut MctsResult, is_stop: &mut bool) {
+        let copied_game = self.clone();
+        while !*is_stop {
+            *self = copied_game.clone();
+            let mut next_random = Random::new(0, result.next_move_count as u16);
+            let random_one = next_random.generate_one() as usize;
+            let next_move = &result.next_moves[random_one];
+            self.execute_move(next_move);
+
+            while !self.is_finished().0 {
+                let moves = self.board.serch_moves(self.turn);
+                let move_count = moves.len();
+                let mut random = Random::new(0, (move_count - 1) as u16);
+                let mv = &moves[random.generate_one() as usize];
+                self.execute_move(mv);
+                let is_finish = self.is_finished();
+                if is_finish.0 {
+                    result.plus_result(self.winner, random_one);
+                    break;
+                }
+            }
+
+            if *is_stop {
+                break;
+            }
+        }
+    }
+
 }
