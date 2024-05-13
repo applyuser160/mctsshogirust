@@ -7,6 +7,7 @@ use super::piece;
 
 #[allow(dead_code)]
 #[derive(Clone)]
+#[derive(Debug)]
 pub struct Move {
     pub value: BitVec<u16, Msb0>,
 }
@@ -146,5 +147,11 @@ impl Move {
             res.push('+');
         }
         return res
+    }
+}
+
+impl std::fmt::Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }

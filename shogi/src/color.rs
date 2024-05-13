@@ -45,3 +45,9 @@ pub fn convert_from_string(character: char) -> ColorType {
         _ => ColorType::None,
     }
 }
+
+impl std::fmt::Display for ColorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", convert_string(*self))
+    }
+}

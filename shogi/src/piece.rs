@@ -44,6 +44,21 @@ impl PieceType {
             _ => PieceType::None,
         }
     }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            PieceType::None => String::from(' '),
+            PieceType::King => String::from('k'),
+            PieceType::Gold => String::from('g'),
+            PieceType::Rook => String::from('r'),
+            PieceType::Bichop => String::from('b'),
+            PieceType::Silver => String::from('s'),
+            PieceType::Knight => String::from('n'),
+            PieceType::Lance => String::from('l'),
+            PieceType::Pawn => String::from('p'),
+            _ => String::from(' '),
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -364,4 +379,10 @@ impl Piece {
         }
     }
 
+}
+
+impl std::fmt::Display for PieceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
 }

@@ -96,10 +96,10 @@ impl Board {
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         self.has_piece.board.set(index as usize, true);
         for i in 0..ColorType::ColorNumber as usize {
-            self.player_prossesion[i].board.set(i, color == ColorType::from_u8(i as u8));
+            self.player_prossesion[i].board.set(index as usize, color == ColorType::from_u8(i as u8));
         }
         for i in 0..PIECE_TYPE_NUMBER as usize {
-            self.has_specific_piece[i].board.set(i, piece_type == PieceType::from_usize(i));
+            self.has_specific_piece[i].board.set(index as usize, piece_type == PieceType::from_usize(i));
         }
     }
 
