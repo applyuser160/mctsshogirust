@@ -105,47 +105,47 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn startpos(&mut self) {
-        self.deploy(Address::from_numbers(1, 1).to_index(), PieceType::Lance, ColorType::White);
-        self.deploy(Address::from_numbers(2, 1).to_index(), PieceType::Knight, ColorType::White);
-        self.deploy(Address::from_numbers(3, 1).to_index(), PieceType::Silver, ColorType::White);
-        self.deploy(Address::from_numbers(4, 1).to_index(), PieceType::Gold, ColorType::White);
-        self.deploy(Address::from_numbers(5, 1).to_index(), PieceType::King, ColorType::White);
-        self.deploy(Address::from_numbers(6, 1).to_index(), PieceType::Gold, ColorType::White);
-        self.deploy(Address::from_numbers(7, 1).to_index(), PieceType::Silver, ColorType::White);
-        self.deploy(Address::from_numbers(8, 1).to_index(), PieceType::Knight, ColorType::White);
-        self.deploy(Address::from_numbers(9, 1).to_index(), PieceType::Lance, ColorType::White);
-        self.deploy(Address::from_numbers(2, 2).to_index(), PieceType::Bichop, ColorType::White);
-        self.deploy(Address::from_numbers(8, 2).to_index(), PieceType::Rook, ColorType::White);
-        self.deploy(Address::from_numbers(1, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(2, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(3, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(4, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(5, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(6, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(7, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(8, 3).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(9, 3).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(1, 1).to_index(), PieceType::Lance, ColorType::Black);
+        self.deploy(Address::from_numbers(2, 1).to_index(), PieceType::Knight, ColorType::Black);
+        self.deploy(Address::from_numbers(3, 1).to_index(), PieceType::Silver, ColorType::Black);
+        self.deploy(Address::from_numbers(4, 1).to_index(), PieceType::Gold, ColorType::Black);
+        self.deploy(Address::from_numbers(5, 1).to_index(), PieceType::King, ColorType::Black);
+        self.deploy(Address::from_numbers(6, 1).to_index(), PieceType::Gold, ColorType::Black);
+        self.deploy(Address::from_numbers(7, 1).to_index(), PieceType::Silver, ColorType::Black);
+        self.deploy(Address::from_numbers(8, 1).to_index(), PieceType::Knight, ColorType::Black);
+        self.deploy(Address::from_numbers(9, 1).to_index(), PieceType::Lance, ColorType::Black);
+        self.deploy(Address::from_numbers(2, 2).to_index(), PieceType::Bichop, ColorType::Black);
+        self.deploy(Address::from_numbers(8, 2).to_index(), PieceType::Rook, ColorType::Black);
+        self.deploy(Address::from_numbers(1, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(2, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(3, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(4, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(5, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(6, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(7, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(8, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(9, 3).to_index(), PieceType::Pawn, ColorType::Black);
 
-        self.deploy(Address::from_numbers(1, 9).to_index(), PieceType::Lance, ColorType::Black);
-        self.deploy(Address::from_numbers(2, 9).to_index(), PieceType::Knight, ColorType::Black);
-        self.deploy(Address::from_numbers(3, 9).to_index(), PieceType::Silver, ColorType::Black);
-        self.deploy(Address::from_numbers(4, 9).to_index(), PieceType::Gold, ColorType::Black);
-        self.deploy(Address::from_numbers(5, 9).to_index(), PieceType::King, ColorType::Black);
-        self.deploy(Address::from_numbers(6, 9).to_index(), PieceType::Gold, ColorType::Black);
-        self.deploy(Address::from_numbers(7, 9).to_index(), PieceType::Silver, ColorType::Black);
-        self.deploy(Address::from_numbers(8, 9).to_index(), PieceType::Knight, ColorType::Black);
-        self.deploy(Address::from_numbers(9, 9).to_index(), PieceType::Lance, ColorType::Black);
-        self.deploy(Address::from_numbers(8, 8).to_index(), PieceType::Bichop, ColorType::Black);
-        self.deploy(Address::from_numbers(2, 8).to_index(), PieceType::Rook, ColorType::Black);
-        self.deploy(Address::from_numbers(1, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(2, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(3, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(4, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(5, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(6, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(7, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(8, 7).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(9, 7).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(Address::from_numbers(1, 9).to_index(), PieceType::Lance, ColorType::White);
+        self.deploy(Address::from_numbers(2, 9).to_index(), PieceType::Knight, ColorType::White);
+        self.deploy(Address::from_numbers(3, 9).to_index(), PieceType::Silver, ColorType::White);
+        self.deploy(Address::from_numbers(4, 9).to_index(), PieceType::Gold, ColorType::White);
+        self.deploy(Address::from_numbers(5, 9).to_index(), PieceType::King, ColorType::White);
+        self.deploy(Address::from_numbers(6, 9).to_index(), PieceType::Gold, ColorType::White);
+        self.deploy(Address::from_numbers(7, 9).to_index(), PieceType::Silver, ColorType::White);
+        self.deploy(Address::from_numbers(8, 9).to_index(), PieceType::Knight, ColorType::White);
+        self.deploy(Address::from_numbers(9, 9).to_index(), PieceType::Lance, ColorType::White);
+        self.deploy(Address::from_numbers(8, 8).to_index(), PieceType::Bichop, ColorType::White);
+        self.deploy(Address::from_numbers(2, 8).to_index(), PieceType::Rook, ColorType::White);
+        self.deploy(Address::from_numbers(1, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(2, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(3, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(4, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(5, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(6, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(7, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(8, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(Address::from_numbers(9, 7).to_index(), PieceType::Pawn, ColorType::White);
 
         self.hand = Hand::new();
     }
@@ -192,8 +192,8 @@ impl Board {
                 }
 
                 if is_in_board[j] {
-                    let direction = Direction::new(DirectionName::from_usize(j));
-                    let up = Direction::new(DirectionName::Up);
+                    let mut direction = Direction::new(DirectionName::from_usize(j));
+                    let mut up = Direction::new(DirectionName::Up);
                     if color_type == ColorType::White {
                         direction.reverse();
                         up.reverse();
@@ -227,6 +227,7 @@ impl Board {
                 }
             }
         }
+        bit_movable.board.set(index as usize, false);
         return bit_movable
     }
 

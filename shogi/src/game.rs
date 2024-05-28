@@ -1,4 +1,3 @@
-
 use super::address::Address;
 use super::piece::{Piece, PROMOTE};
 use super::moves::Move;
@@ -131,14 +130,17 @@ impl Game {
     }
 
     #[allow(dead_code)]
-    pub fn random_move(&mut self, result: &mut MctsResult, is_stop: &mut bool) {
+    pub fn random_move(&mut self, num: usize) -> MctsResult {
+        let mut result = MctsResult::new();
+        result.next_moves = self.board.serch_moves(self.turn);
+        result.next_move_count = result.next_moves.len() as u64;
         let copied_game = self.clone();
-        while !*is_stop {
+        for _i in 0..num{
             *self = copied_game.clone();
             let mut next_random = Random::new(0, result.next_move_count as u16);
             let random_one = next_random.generate_one() as usize;
-            let next_move = &result.next_moves[random_one];
-            self.execute_move(next_move);
+            let next_move = result.next_moves[random_one].clone();
+            self.execute_move(&next_move);
 
             while !self.is_finished().0 {
                 let moves = self.board.serch_moves(self.turn);
@@ -152,11 +154,8 @@ impl Game {
                     break;
                 }
             }
-
-            if *is_stop {
-                break;
-            }
         }
+        return result
     }
 
 }

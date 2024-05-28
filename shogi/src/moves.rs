@@ -44,7 +44,7 @@ impl Move {
 
     #[allow(dead_code)]
     fn standart_constructor(&mut self, from: address::Address, to: address::Address, promote: bool) {
-        self.base_constructor(from.to_index() as u16, to.to_index() as u16, promote as u16, 1);
+        self.base_constructor(from.to_index() as u16, to.to_index() as u16, promote as u16, 0);
     }
 
     #[allow(dead_code)]
@@ -91,12 +91,12 @@ impl Move {
 
     #[allow(dead_code)]
     pub fn get_is_drop(&self) -> bool {
-        return self.value[15]
+        return self.value[0]
     }
 
     #[allow(dead_code)]
     pub fn get_is_promote(&self) -> bool {
-        return self.value[14]
+        return self.value[1]
     }
 
     #[allow(dead_code)]
@@ -104,7 +104,7 @@ impl Move {
         let mut copy = self.value.clone();
         copy.shift_left(left);
         copy.shift_right(right);
-        let r: std::ops::Range<usize> = 0..16;
+        let r: std::ops::Range<usize> = 8..16;
         let f = copy.get(r).unwrap();
         return f.load::<u8>();
     }

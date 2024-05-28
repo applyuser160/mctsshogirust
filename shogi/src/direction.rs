@@ -72,11 +72,9 @@ impl Direction {
         }
     }
 
-    pub fn reverse(&self) -> Self {
-        let mut copy = self.clone();
-        copy.vertical_vector *= -1;
-        copy.horizon_vector *= -1;
-        return copy
+    pub fn reverse(&mut self) {
+        self.vertical_vector *= -1;
+        self.horizon_vector *= -1;
     }
 
 }

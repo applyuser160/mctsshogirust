@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use super::moves::Move;
 use super::color::ColorType;
 
@@ -9,7 +7,6 @@ pub struct MctsResult {
     pub next_moves: Vec<Move>,
     pub next_move_count: u64,
     pub count: u64,
-    mtx_: Mutex<u32>,
 }
 
 impl MctsResult {
@@ -20,7 +17,6 @@ impl MctsResult {
             next_moves: Vec::new(),
             next_move_count: 0,
             count: 0,
-            mtx_: Mutex::new(0),
         }
     }
 
@@ -35,13 +31,11 @@ impl MctsResult {
             next_moves,
             next_move_count,
             count: 0,
-            mtx_: Mutex::new(0),
         }
     }
 
     #[allow(dead_code)]
     pub fn plus_result(&mut self, winner: ColorType, next_move_index: usize) {
-        let _guard = self.mtx_.lock().unwrap();
         if winner as i8 > -1 {
             self.result[next_move_index][winner as usize] += 1;
         }
