@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum DirectionName {
     Up, UpLeft, Left, DownLeft, Down, DownRight, Right, UpRight,
     DirectionNameNumber = 8
@@ -66,9 +66,9 @@ impl Direction {
             horizon_vector = -1;
         }
         Self {
-            name: name,
-            vertical_vector: vertical_vector,
-            horizon_vector: horizon_vector,
+            name,
+            vertical_vector,
+            horizon_vector,
         }
     }
 

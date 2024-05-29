@@ -20,8 +20,8 @@ impl Random {
     pub fn new(min: u16, max: u16) -> Self {
         Self {
             rng: thread_rng(),
-            min: min,
-            max: max,
+            min,
+            max,
         }
     }
 

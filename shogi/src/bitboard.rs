@@ -190,7 +190,7 @@ impl BitBoard {
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
         let mut res: Vec<u8> = Vec::new();
-        for i in 0..128 {
+        for i in 0..121 {
             if self.board[i] {
                 res.push(i as u8);
             }
@@ -210,7 +210,7 @@ impl BitAnd for BitBoard {
 
     fn bitand(self, rhs: Self) -> Self::Output {
         let mut res = Self::new();
-        for i in 0..128 {
+        for i in 0..121 {
             res.board.set(i, self.board[i] & rhs.board[i]);
         }
         return res
@@ -222,7 +222,7 @@ impl BitOr for BitBoard {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         let mut res = Self::new();
-        for i in 0..128 {
+        for i in 0..121 {
             res.board.set(i, self.board[i] | rhs.board[i]);
         }
         return res
@@ -256,6 +256,7 @@ pub fn generate_columns(column_no: Vec<usize>, column_count: usize) -> BitBoard 
         for j in 0..column_count {
             bitboard.board.set(column_no[j], true);
         }
+        bitboard.board.shift_right(11);
     }
     return bitboard
 }
@@ -265,7 +266,14 @@ pub fn generate_column(column_no: usize) -> BitBoard {
     let mut bitboard = BitBoard::new();
     for _i in 0..LENGTH_OF_EDGE {
         bitboard.board.set(column_no, true);
-        bitboard.board.shift_left(11);
+        bitboard.board.shift_right(11);
     }
     return bitboard
 }
+
+// impl std::fmt::Display for BitBoard {
+//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+
+//         write!(f, "{}", convert_string(*self))
+//     }
+// }
