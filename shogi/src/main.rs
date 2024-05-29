@@ -14,6 +14,10 @@ mod test_address;
 mod test_bitboard;
 mod test_board;
 mod test_common;
+mod test_direction;
+mod test_random;
+mod test_color;
+mod test_piece;
 
 use std::time::Instant;
 
