@@ -18,6 +18,7 @@ mod test_direction;
 mod test_random;
 mod test_color;
 mod test_piece;
+mod test_hand;
 
 use std::time::Instant;
 

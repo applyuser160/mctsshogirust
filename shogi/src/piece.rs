@@ -68,6 +68,7 @@ pub enum HandPiece {
 
 #[allow(dead_code)]
 #[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug)]
 pub enum MoveType {
     None, Short, Hop, Long
 }
@@ -110,7 +111,6 @@ impl Piece {
         }
         
         result.push(piece);
-        result.push('\0');
         return result
     }
 
@@ -158,16 +158,15 @@ impl Piece {
         let mut bits = bitvec![u8, Msb0; 0; 8];
         bits.store_be::<u8>(num);
         let owner = ColorType::from_u8(bits[0] as u8);
-        bits.shift_right(1);
         let mut piece_type: u8 = 0;
         let base: u8 = 2;
-        for i in 0..8 {
+        for i in 1..8 {
             if bits[i] {
                 piece_type += base.pow((7 - i) as u32);
             }
         }
         Self {
-            owner: owner,
+            owner,
             piece_type: PieceType::from_usize(piece_type as usize),
         }
     }
@@ -200,7 +199,6 @@ impl Piece {
     #[allow(dead_code)]
     pub fn to_u8(&self) -> u8 {
         let mut res = self.piece_type as u8;
-        res <<= 1;
         res += self.owner as u8;
         return res
     }
@@ -211,7 +209,7 @@ impl Piece {
     }
 
     #[allow(dead_code)]
-    pub fn get_movetype( piece_type: PieceType) -> [MoveType; direction::DirectionName::DirectionNameNumber as usize] {
+    pub fn get_movetype(piece_type: PieceType) -> [MoveType; direction::DirectionName::DirectionNameNumber as usize] {
         match piece_type {
             PieceType::None => [
                 MoveType::None,
