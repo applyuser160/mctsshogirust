@@ -21,7 +21,7 @@ impl Hand {
             counts: [0; (piece::NOT_PRO_PIECE_TYPE_NUMBER * color::ColorType::ColorNumber as u8) as usize],
         };
         for j in color::ColorType::Black as usize..color::ColorType::ColorNumber as usize {
-            for i in piece::PieceType::King as usize..piece::NOT_PRO_PIECE_TYPE_NUMBER as usize {
+            for i in piece::PieceType::King as usize..=piece::NOT_PRO_PIECE_TYPE_NUMBER as usize {
                 let index = j * piece::NOT_PRO_PIECE_TYPE_NUMBER as usize + i - 1;
                 res.pieces[index] = piece::Piece::from(
                     color::ColorType::from_u8(j as u8), piece::PieceType::from_usize(i));
@@ -64,7 +64,7 @@ impl Hand {
     #[allow(dead_code)]
     pub fn get_player_pieces(&self, color_type: color::ColorType) -> Vec<piece::Piece> {
         let mut res: Vec<piece::Piece> = Vec::new();
-        for i in piece::PieceType::King as usize..piece::NOT_PRO_PIECE_TYPE_NUMBER as usize {
+        for i in piece::PieceType::King as usize..=piece::NOT_PRO_PIECE_TYPE_NUMBER as usize {
             let index = Self::calc_index(color_type, piece::PieceType::from_usize(i));
             if self.counts[index as usize] > 0{
                 res.push(self.pieces[index as usize]);
