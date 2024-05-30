@@ -149,7 +149,7 @@ impl Piece {
     pub fn from(color_type: ColorType, piece_type: PieceType) -> Self {
         Self {
             owner: color_type,
-            piece_type: piece_type,
+            piece_type,
         }
     }
 
