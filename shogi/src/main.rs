@@ -20,6 +20,7 @@ mod test_color;
 mod test_piece;
 mod test_hand;
 mod test_moves;
+mod test_game;
 
 use std::time::Instant;
 

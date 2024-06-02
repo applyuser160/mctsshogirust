@@ -12,6 +12,8 @@ use super::moves::Move;
 
 #[allow(dead_code)]
 #[derive(Clone)]
+#[derive(PartialEq)]
+#[derive(Debug)]
 pub struct Board {
     pub has_piece: BitBoard,
     pub player_prossesion: [BitBoard; ColorType::ColorNumber as usize],
