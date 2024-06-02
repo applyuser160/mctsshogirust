@@ -46,8 +46,8 @@ impl Game {
 
         let mut current_sfen = sfen.chars();
         let mut consecutive = 0;
-        for row in 1..9 {
-            for column in (1..9).rev() {
+        for row in 1..=9 {
+            for column in (1..=9).rev() {
                 if let Some(ch) = current_sfen.next() {
                     if ch.is_digit(10) {
                         consecutive = ch.to_digit(10).unwrap() as i32;
