@@ -1,6 +1,8 @@
 use super::common;
 
 #[derive(Default)]
+#[derive(PartialEq)]
+#[derive(Debug)]
 pub struct Address {
     pub column: u8,
     pub row: u8,

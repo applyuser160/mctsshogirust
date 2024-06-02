@@ -21,8 +21,12 @@ impl Move {
 
     #[allow(dead_code)]
     fn is_promote(csa: String) -> bool {
-        let csa_vec = csa.chars().collect::<Vec<char>>();
-        return csa_vec[4] == '+'
+        if csa.len() > 4 {
+            let csa_vec = csa.chars().collect::<Vec<char>>();
+            return csa_vec[4] == '+'
+        } else {
+            return false
+        }
     }
 
     fn base_constructor(&mut self, from: u16, to: u16, pro: u16, drop: u16) {

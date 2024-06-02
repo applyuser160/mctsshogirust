@@ -158,10 +158,10 @@ impl Piece {
     pub fn from_u8(num: u8) -> Self {
         let mut bits = bitvec![u8, Msb0; 0; 8];
         bits.store_be::<u8>(num);
-        let owner = ColorType::from_u8(bits[0] as u8);
+        let owner = ColorType::from_u8(bits[1] as u8);
         let mut piece_type: u8 = 0;
         let base: u8 = 2;
-        for i in 1..8 {
+        for i in 2..8 {
             if bits[i] {
                 piece_type += base.pow((7 - i) as u32);
             }
@@ -200,7 +200,7 @@ impl Piece {
     #[allow(dead_code)]
     pub fn to_u8(&self) -> u8 {
         let mut res = self.piece_type as u8;
-        res += self.owner as u8;
+        res += (self.owner as u8) << 6;
         return res
     }
 
