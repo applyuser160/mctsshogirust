@@ -133,6 +133,8 @@ pub const STRING_OF_LAST2_ZONE_WHITE: &str = "\
 
 #[allow(dead_code)]
 #[derive(Clone)]
+#[derive(PartialEq)]
+#[derive(Debug)]
 pub struct BitBoard {
     pub board: BitVec<u64, Msb0>,
 }

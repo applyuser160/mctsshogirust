@@ -72,12 +72,13 @@ impl Board {
     }
 
     pub fn new() -> Self {
+        let is_frame = BitBoard::from_u128(BIT_OF_FRAME);
         let mut has_specific_piece = BitBoard::from_u128(BIT_OF_FRAME);
         has_specific_piece.flip();
         Self {
             has_piece: BitBoard::new(),
             player_prossesion: [BitBoard::new(), BitBoard::new()],
-            is_frame: BitBoard::new(),
+            is_frame,
             able_pro: [BitBoard::from_u128(BIT_OF_PRO_ZONE_BLACK),
                 BitBoard::from_u128(BIT_OF_PRO_ZONE_WHITE),],
             last_one: [BitBoard::from_u128(BIT_OF_LAST1_ZONE_BLACK),
@@ -218,7 +219,7 @@ impl Board {
                     } else if (self.player_prossesion[color_type as usize].clone() & bn1.clone()).board.any() {
                         is_in_board.set(j, false);
                     } else {
-                        bit_movable = bit_board.clone() | bn1.clone();
+                        bit_movable = bit_movable | bit_board.clone() | bn1.clone();
                     }
 
                     if move_types[j] != MoveType::Long {
