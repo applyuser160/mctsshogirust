@@ -19,6 +19,7 @@ mod test_random;
 mod test_color;
 mod test_piece;
 mod test_hand;
+mod test_moves;
 
 use std::time::Instant;
 

@@ -32,8 +32,8 @@ mod tests {
 
     #[test]
     fn case05() {
-        /* 0d142 = 0b10001110 */ 
-        let piece = Piece::from_u8(142);
+        /* 0d142 = 0b01001110 */ 
+        let piece = Piece::from_u8(78);
         assert_eq!(piece.owner, ColorType::White);
         assert_eq!(piece.piece_type, PieceType::ProPawn);
     }
@@ -54,6 +54,13 @@ mod tests {
     }
 
     #[test]
+    fn case07d() {
+        let piece = Piece::from_char('p');
+        assert_eq!(piece.owner, ColorType::White);
+        assert_eq!(piece.piece_type, PieceType::Pawn);
+    }
+
+    #[test]
     fn case08() {
         let piece = Piece::from_string(String::from("+p"));
         assert_eq!(piece.owner, ColorType::White);
@@ -69,9 +76,9 @@ mod tests {
 
     #[test]
     fn case10() {
-        let piece = Piece::from(ColorType::Black, PieceType::Dragon);
-        assert_eq!(piece.to_u8(), 9);
-        assert_eq!(piece.to_string(), String::from("+R"));
+        let piece = Piece::from(ColorType::White, PieceType::Dragon);
+        assert_eq!(piece.to_u8(), 73);
+        assert_eq!(piece.to_string(), String::from("+r"));
     }
 
     #[test]
