@@ -191,7 +191,7 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
-        let mut res: Vec<u8> = Vec::new();
+        let mut res: Vec<u8> = Vec::with_capacity(121);
         for i in 0..121 {
             if self.board[i] {
                 res.push(i as u8);
@@ -210,44 +210,38 @@ impl BitBoard {
 impl BitAnd for BitBoard {
     type Output = Self;
 
-    fn bitand(self, rhs: Self) -> Self::Output {
-        let mut res = Self::new();
-        for i in 0..121 {
-            res.board.set(i, self.board[i] & rhs.board[i]);
-        }
-        return res
+    #[inline]
+    fn bitand(mut self, rhs: Self) -> Self::Output {
+        self.board &= rhs.board;
+        self
     }
 }
 
 impl BitOr for BitBoard {
     type Output = Self;
 
-    fn bitor(self, rhs: Self) -> Self::Output {
-        let mut res = Self::new();
-        for i in 0..121 {
-            res.board.set(i, self.board[i] | rhs.board[i]);
-        }
-        return res
+    #[inline]
+    fn bitor(mut self, rhs: Self) -> Self::Output {
+        self.board |= rhs.board;
+        self
     }
 }
 
 impl Shr<usize> for BitBoard {
     type Output = Self;
 
-    fn shr(self, rhs: usize) -> Self::Output {
-        let mut res = self.clone();
-        res.board.shift_right(rhs);
-        return res
+    fn shr(mut self, rhs: usize) -> Self::Output {
+        self.board.shift_right(rhs);
+        self
     }
 }
 
 impl Shl<usize> for BitBoard {
     type Output = Self;
 
-    fn shl(self, rhs: usize) -> Self::Output {
-        let mut res = self.clone();
-        res.board.shift_left(rhs);
-        return res
+    fn shl(mut self, rhs: usize) -> Self::Output {
+        self.board.shift_left(rhs);
+        self
     }
 }
 
