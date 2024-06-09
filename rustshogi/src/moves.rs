@@ -1,20 +1,17 @@
 use bitvec::prelude::*;
 
 use bitvec::prelude::BitVec;
-use pyo3::pyclass;
 
 use super::address;
 use super::piece;
-
 #[allow(dead_code)]
-#[pyclass]
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Move {
     pub value: BitVec<u16, Msb0>,
 }
 
 impl Move {
+
     #[allow(dead_code)]
     fn is_drop(csa: String) -> bool {
         let csa_vec = csa.chars().collect::<Vec<char>>();

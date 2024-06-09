@@ -43,28 +43,22 @@ impl Game {
             self.board.startpos();
             return;
         }
-
-        let mut current_sfen = sfen.chars();
-        let mut consecutive = 0;
-        for row in 1..=9 {
-            for column in (1..=9).rev() {
-                if let Some(ch) = current_sfen.next() {
-                    if ch.is_digit(10) {
-                        consecutive = ch.to_digit(10).unwrap() as i32;
-                    }
-                    if consecutive > 0 {
-                        consecutive -= 1;
-                        continue;
-                    }
-                    if ch == '/' {
-                        continue;
-                    }
-                    let index = Address::from_numbers(column as u8, row as u8).to_index();
-                    let piece = Piece::from_string(ch.to_string());
-                    self.board.deploy(index, piece.piece_type, piece.owner);
-                    if piece.piece_type as i32 > PROMOTE as i32 {
-                        current_sfen.next();
-                    }
+    
+        let parts: Vec<&str> = sfen.split('/').collect();
+        for (row, part) in parts.iter().enumerate().rev() {
+            let mut column = 0;
+            let mut chars = part.chars();
+            while let Some(ch) = chars.next() {
+                if ch.is_digit(10) {
+                    let empty_spaces = ch.to_digit(10).unwrap() as usize;
+                    column += empty_spaces;
+                } else {
+                    let piece = Piece::from_char(ch);
+                    let piece_type = piece.piece_type;
+                    let owner = piece.owner;
+                    let index = Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
+                    self.board.deploy(index, piece_type, owner);
+                    column += 1;
                 }
             }
         }
@@ -136,18 +130,26 @@ impl Game {
         let copied_game = self.clone();
         for _i in 0..num{
             *self = copied_game.clone();
-            let mut next_random = Random::new(0, result.next_move_count as u16);
+            let mut next_move_count = result.next_move_count;
+            if next_move_count > 0 {
+                next_move_count -= 1;
+            }
+            let mut next_random = Random::new(0, next_move_count as u16);
             let random_one = next_random.generate_one() as usize;
             let next_move = result.next_moves[random_one].clone();
             self.execute_move(&next_move);
 
             while !self.is_finished().0 {
                 let moves = self.board.serch_moves(self.turn);
-                let move_count = moves.len();
-                let mut random = Random::new(0, (move_count - 1) as u16);
+                let mut move_count = moves.len();
+                if move_count > 0 {
+                    move_count -= 1;
+                }
+                let mut random = Random::new(0, move_count as u16);
                 let mv = &moves[random.generate_one() as usize];
                 self.execute_move(mv);
                 let is_finish = self.is_finished();
+                self.winner = is_finish.1;
                 if is_finish.0 {
                     result.plus_result(self.winner, random_one);
                     break;

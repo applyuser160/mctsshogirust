@@ -177,6 +177,43 @@ impl Board {
     }
 
     #[allow(dead_code)]
+    pub fn get_piece(&self, index: u8) -> Piece {
+        let piece_type = self.get_piece_type_from_index(index);
+        let color_type = self.get_color_type_from_index(index);
+        let piece = Piece::from(color_type, piece_type);
+        return piece
+    }
+
+    #[allow(dead_code)]
+    pub fn to_string(&self) -> String {
+        let mut result = String::new();
+        for row in (1..=9).rev() {
+            if row < 9 {
+                result.push('/');
+            }
+            let mut empty_count = 0;
+            for col in 1..=9 {
+                let index = Address::from_numbers(col, row).to_index();
+                let piece = self.get_piece(index);
+                if piece.piece_type != PieceType::None {
+                    if empty_count > 0 {
+                        result.push_str(&empty_count.to_string());
+                        empty_count = 0;
+                    }
+                    let piece_char = piece.to_string();
+                    result.push_str(&piece_char);
+                } else {
+                    empty_count += 1;
+                }
+            }
+            if empty_count > 0 {
+                result.push_str(&empty_count.to_string());
+            }
+        }
+        result
+    }
+
+    #[allow(dead_code)]
     pub fn get_able_move_squares(&self, index: u8) -> BitBoard {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
@@ -365,6 +402,7 @@ impl Board {
     pub fn is_finished(&self) -> (bool, ColorType) {
         let winner;
         let is_finish = self.has_specific_piece[PieceType::King as usize].board.count_ones() != ColorType::ColorNumber as usize;
+        // println!("is_finish:{}", is_finish);
         if is_finish {
             let is_black_win = (self.has_specific_piece[PieceType::King as usize].clone() & self.player_prossesion[ColorType::Black as usize].clone()).board.any();
             if is_black_win {
@@ -376,5 +414,12 @@ impl Board {
             winner = ColorType::None;
         }
         return (is_finish, winner)
+    }
+}
+
+
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }

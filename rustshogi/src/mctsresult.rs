@@ -5,10 +5,26 @@ use super::color::ColorType;
 #[pyclass]
 #[allow(dead_code)]
 pub struct MctsResult {
+    #[pyo3(get)]
     pub result: Vec<[u64; ColorType::ColorNumber as usize + 1]>,
     pub next_moves: Vec<Move>,
+    #[pyo3(get)]
     pub next_move_count: u64,
+    #[pyo3(get)]
     pub count: u64,
+}
+
+#[pymethods]
+impl MctsResult {
+    #[new]
+    fn py_new() -> Self {
+        Self::new()
+    }
+
+    #[getter]
+    pub fn get_next_moves(&self) -> Vec<String> {
+        self.next_moves.clone().iter().map(|m| m.to_string()).collect()
+    }
 }
 
 impl MctsResult {

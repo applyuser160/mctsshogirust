@@ -1,5 +1,5 @@
 use super::address::Address;
-use super::piece::{Piece, PROMOTE};
+use super::piece::Piece;
 use super::moves::Move;
 use super::board::Board;
 use super::color::{ColorType, convert_from_string, get_reverse_color};
@@ -43,28 +43,22 @@ impl Game {
             self.board.startpos();
             return;
         }
-
-        let mut current_sfen = sfen.chars();
-        let mut consecutive = 0;
-        for row in 1..=9 {
-            for column in (1..=9).rev() {
-                if let Some(ch) = current_sfen.next() {
-                    if ch.is_digit(10) {
-                        consecutive = ch.to_digit(10).unwrap() as i32;
-                    }
-                    if consecutive > 0 {
-                        consecutive -= 1;
-                        continue;
-                    }
-                    if ch == '/' {
-                        continue;
-                    }
-                    let index = Address::from_numbers(column as u8, row as u8).to_index();
-                    let piece = Piece::from_string(ch.to_string());
-                    self.board.deploy(index, piece.piece_type, piece.owner);
-                    if piece.piece_type as i32 > PROMOTE as i32 {
-                        current_sfen.next();
-                    }
+    
+        let parts: Vec<&str> = sfen.split('/').collect();
+        for (row, part) in parts.iter().enumerate().rev() {
+            let mut column = 0;
+            let mut chars = part.chars();
+            while let Some(ch) = chars.next() {
+                if ch.is_digit(10) {
+                    let empty_spaces = ch.to_digit(10).unwrap() as usize;
+                    column += empty_spaces;
+                } else {
+                    let piece = Piece::from_char(ch);
+                    let piece_type = piece.piece_type;
+                    let owner = piece.owner;
+                    let index = Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
+                    self.board.deploy(index, piece_type, owner);
+                    column += 1;
                 }
             }
         }
