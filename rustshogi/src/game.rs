@@ -1,5 +1,5 @@
 use super::address::Address;
-use super::piece::{Piece, PROMOTE};
+use super::piece::Piece;
 use super::moves::Move;
 use super::board::Board;
 use super::color::{ColorType, convert_from_string, get_reverse_color};
