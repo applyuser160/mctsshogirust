@@ -22,7 +22,7 @@ fn goresult(board: String, turn: String, hand: String, move_number: String, num:
     game.input_hand(hand);
     game.input_move_number(move_number);
 
-    let result = game.random_move(num);
+    let result = game.random_move_parallel(num, 12);
     Ok(result)
 }
 

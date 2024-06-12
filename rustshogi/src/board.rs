@@ -227,43 +227,45 @@ impl Board {
 
         for i in 1..LENGTH_OF_EDGE {
             for j in 0..DirectionName::DirectionNameNumber as usize {
-                if move_types[j] == MoveType::None {
+                if move_types[j] == MoveType::None || !is_in_board[j] {
                     continue;
                 }
 
-                if is_in_board[j] {
-                    let mut direction = Direction::new(DirectionName::from_usize(j));
-                    let mut up = Direction::new(DirectionName::Up);
-                    if color_type == ColorType::White {
-                        direction.reverse();
-                        up.reverse();
-                    }
+                let mut direction = Direction::new(DirectionName::from_usize(j));
+                let mut up = Direction::new(DirectionName::Up);
+                if color_type == ColorType::White {
+                    direction.reverse();
+                    up.reverse();
+                }
 
-                    let mut v = direction.vertical_vector * i as i8;
-                    let h = direction.horizon_vector * i as i8;
+                let mut v = direction.vertical_vector * i as i8;
+                let h = direction.horizon_vector * i as i8;
 
-                    if move_types[j] == MoveType::Hop {
-                        v += up.vertical_vector;
-                    }
+                if move_types[j] == MoveType::Hop {
+                    v += up.vertical_vector;
+                }
 
-                    let shift_number = LENGTH_OF_FRAME as i8 * v + h;
+                let shift_number = LENGTH_OF_FRAME as i8 * v + h;
 
-                    let bn1 = if shift_number > 0 { bit_board.clone() << shift_number as usize} else {bit_board.clone() >> shift_number.abs() as usize};
+                let bn1 = if shift_number > 0 { 
+                    bit_board.clone() << shift_number as usize
+                } else {
+                    bit_board.clone() >> shift_number.abs() as usize
+                };
 
-                    if (self.is_frame.clone() & bn1.clone()).board.any() {
-                        is_in_board.set(j, false);
-                    } else if (self.player_prossesion[get_reverse_color(color_type) as usize].clone() & bn1.clone()).board.any() {
-                        is_in_board.set(j, false);
-                        bit_movable = bit_movable.clone() | bn1.clone();
-                    } else if (self.player_prossesion[color_type as usize].clone() & bn1.clone()).board.any() {
-                        is_in_board.set(j, false);
-                    } else {
-                        bit_movable = bit_movable | bit_board.clone() | bn1.clone();
-                    }
+                if (self.is_frame.clone() & bn1.clone()).board.any() {
+                    is_in_board.set(j, false);
+                } else if (self.player_prossesion[get_reverse_color(color_type) as usize].clone() & bn1.clone()).board.any() {
+                    is_in_board.set(j, false);
+                    bit_movable = bit_movable.clone() | bn1.clone();
+                } else if (self.player_prossesion[color_type as usize].clone() & bn1.clone()).board.any() {
+                    is_in_board.set(j, false);
+                } else {
+                    bit_movable = bit_movable | bit_board.clone() | bn1.clone();
+                }
 
-                    if move_types[j] != MoveType::Long {
-                        is_in_board.set(j, false);
-                    }
+                if move_types[j] != MoveType::Long {
+                    is_in_board.set(j, false);
                 }
             }
         }
@@ -298,8 +300,8 @@ impl Board {
         let last_two = self.last_two[color as usize].clone();
         let last_one = self.last_one[color as usize].clone();
 
-        let mut last_not_two = last_two.clone();
-        let mut last_not_one = last_one.clone();
+        let mut last_not_two = last_two;
+        let mut last_not_one = last_one;
         last_not_two.flip();
         last_not_one.flip();
 
@@ -316,7 +318,7 @@ impl Board {
                 let mut double_pawn = BitBoard::new();
 
                 for i in 0..pawn_indexs.len() {
-                    double_pawn = double_pawn.clone() | generate_column(Address::from_number(pawn_indexs[i]).column as usize);
+                    double_pawn = double_pawn | generate_column(Address::from_number(pawn_indexs[i]).column as usize);
                 }
 
                 let mut not_double_pawn = double_pawn;

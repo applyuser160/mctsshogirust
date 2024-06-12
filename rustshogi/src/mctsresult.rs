@@ -53,6 +53,15 @@ impl MctsResult {
     }
 
     #[allow(dead_code)]
+    pub fn merge(&mut self, result: MctsResult) {
+        for i in 0..self.next_moves.len() {
+            for j in 0..=ColorType::ColorNumber as usize {
+                self.result[i][j] += result.result[i][j];
+            }
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn plus_result(&mut self, winner: ColorType, next_move_index: usize) {
         if winner as i8 > -1 {
             self.result[next_move_index][winner as usize] += 1;

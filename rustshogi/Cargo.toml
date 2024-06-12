@@ -12,3 +12,4 @@ crate-type = ["cdylib"]
 rand = "0.8.5"
 bitvec = "1.0.1"
 pyo3 = { version = "0.21.2", features = ["extension-module"] }
+rayon = "1.10.0"

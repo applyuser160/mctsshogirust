@@ -5,6 +5,7 @@ use super::board::Board;
 use super::color::{ColorType, convert_from_string, get_reverse_color};
 use super::random::Random;
 use super::mctsresult::MctsResult;
+use rayon::prelude::*;
 
 #[allow(dead_code)]
 #[derive(Clone)]
@@ -126,37 +127,52 @@ impl Game {
     #[allow(dead_code)]
     pub fn random_move(&mut self, num: usize) -> MctsResult {
         let next_moves = self.board.serch_moves(self.turn);
-        let mut result = MctsResult::from(next_moves.len() as u64, next_moves);
-        let copied_game = self.clone();
-        for _i in 0..num{
-            *self = copied_game.clone();
-            let mut next_move_count = result.next_move_count;
-            if next_move_count > 0 {
-                next_move_count -= 1;
-            }
-            let mut next_random = Random::new(0, next_move_count as u16);
+        let mut result = MctsResult::from(next_moves.len() as u64, next_moves.clone());
+        let mut games: Vec<Game> = (0..next_moves.len()).map(|_| self.clone()).collect();
+        let mut next_random = Random::new(0, (next_moves.len() - 1) as u16);
+        for i in 0..next_moves.len() {
+            games[i].execute_move(&next_moves[i]);
+        }
+        for _i in 0..num {
             let random_one = next_random.generate_one() as usize;
-            let next_move = result.next_moves[random_one].clone();
-            self.execute_move(&next_move);
+            let mut copied_game = games[random_one].clone();
+            let next_move = &result.next_moves[random_one];
+            copied_game.execute_move(next_move);
 
-            while !self.is_finished().0 {
-                let moves = self.board.serch_moves(self.turn);
+            while !copied_game.is_finished().0 {
+                let moves = copied_game.board.serch_moves(copied_game.turn);
                 let mut move_count = moves.len();
                 if move_count > 0 {
                     move_count -= 1;
                 }
                 let mut random = Random::new(0, move_count as u16);
                 let mv = &moves[random.generate_one() as usize];
-                self.execute_move(mv);
-                let is_finish = self.is_finished();
-                self.winner = is_finish.1;
+                copied_game.execute_move(mv);
+                let is_finish = copied_game.is_finished();
+                copied_game.winner = is_finish.1;
                 if is_finish.0 {
-                    result.plus_result(self.winner, random_one);
+                    result.plus_result(copied_game.winner, random_one);
                     break;
                 }
             }
         }
         return result
+    }
+
+    #[allow(dead_code)]
+    pub fn random_move_parallel(&mut self, num: usize, thread: usize) -> MctsResult {
+        let games: Vec<Game> = (0..thread).map(|_| self.clone()).collect();
+        let results: Vec<MctsResult> = games.into_par_iter().map(|mut game| {
+            game.random_move(num)
+        }).collect();
+
+        let next_moves = self.board.serch_moves(self.turn);
+        let mut final_result = MctsResult::from(next_moves.len() as u64, next_moves);
+        for result in results {
+            final_result.merge(result);
+        }
+
+        final_result
     }
 
 }
