@@ -1,10 +1,10 @@
 use super::address::Address;
-use super::piece::Piece;
-use super::moves::Move;
 use super::board::Board;
-use super::color::{ColorType, convert_from_string, get_reverse_color};
-use super::random::Random;
+use super::color::{convert_from_string, get_reverse_color, ColorType};
 use super::mctsresult::MctsResult;
+use super::moves::Move;
+use super::piece::Piece;
+use super::random::Random;
 
 #[allow(dead_code)]
 #[derive(Clone)]
@@ -27,12 +27,17 @@ impl Game {
     }
 
     #[allow(dead_code)]
-    pub fn from(board: Board, move_number: u16, turn: ColorType, winner: ColorType) -> Self {
+    pub fn from(
+        board: Board,
+        move_number: u16,
+        turn: ColorType,
+        winner: ColorType,
+    ) -> Self {
         Self {
             board,
             move_number,
             turn,
-            winner
+            winner,
         }
     }
 
@@ -43,7 +48,7 @@ impl Game {
             self.board.startpos();
             return;
         }
-    
+
         let parts: Vec<&str> = sfen.split('/').collect();
         for (row, part) in parts.iter().enumerate().rev() {
             let mut column = 0;
@@ -56,7 +61,9 @@ impl Game {
                     let piece = Piece::from_char(ch);
                     let piece_type = piece.piece_type;
                     let owner = piece.owner;
-                    let index = Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
+                    let index =
+                        Address::from_numbers((1 + column) as u8, (9 - row) as u8)
+                            .to_index();
                     self.board.deploy(index, piece_type, owner);
                     column += 1;
                 }
@@ -73,8 +80,12 @@ impl Game {
         while let Some(ch) = current_sfen.next() {
             if ch.is_digit(10) {
                 let consecutive = ch.to_digit(10).unwrap() as u8;
-                let piece = Piece::from_string(current_sfen.next().unwrap_or_default().to_string());
-                self.board.hand.add_pieces(piece.owner, piece.piece_type, consecutive);
+                let piece = Piece::from_string(
+                    current_sfen.next().unwrap_or_default().to_string(),
+                );
+                self.board
+                    .hand
+                    .add_pieces(piece.owner, piece.piece_type, consecutive);
             } else {
                 let piece = Piece::from_string(ch.to_string());
                 self.board.hand.add_piece(piece.owner, piece.piece_type);
@@ -95,9 +106,9 @@ impl Game {
     #[allow(dead_code)]
     pub fn is_finished(&self) -> (bool, ColorType) {
         if self.move_number >= 500 {
-            return (true, ColorType::None)
+            return (true, ColorType::None);
         } else {
-            return self.board.is_finished()
+            return self.board.is_finished();
         }
     }
 
@@ -109,14 +120,31 @@ impl Game {
     }
 
     #[allow(dead_code)]
+    pub fn one_play(&mut self) -> Self {
+        // used for benchmark only
+        while !self.is_finished().0 {
+            let moves = self.board.search_moves(self.turn);
+            let amove = &moves[0];
+            self.execute_move(amove);
+            let is_finish = self.is_finished();
+            if is_finish.0 {
+                self.winner = is_finish.1;
+                break;
+            }
+        }
+        return self.clone();
+    }
+
+    #[allow(dead_code)]
     pub fn random_play(&mut self) -> Self {
         while !self.is_finished().0 {
-            let moves = self.board.serch_moves(self.turn);
+            let moves = self.board.search_moves(self.turn);
             let mut random = Random::init();
             let amove = &moves[random.generate_one() as usize];
             self.execute_move(amove);
             let is_finish = self.is_finished();
             if is_finish.0 {
+                self.winner = is_finish.1;
                 break;
             }
         }
@@ -126,10 +154,10 @@ impl Game {
     #[allow(dead_code)]
     pub fn random_move(&mut self, num: usize) -> MctsResult {
         let mut result = MctsResult::new();
-        result.next_moves = self.board.serch_moves(self.turn);
+        result.next_moves = self.board.search_moves(self.turn);
         result.next_move_count = result.next_moves.len() as u64;
         let copied_game = self.clone();
-        for _i in 0..num{
+        for _i in 0..num {
             *self = copied_game.clone();
             let mut next_random = Random::new(0, result.next_move_count as u16);
             let random_one = next_random.generate_one() as usize;
@@ -137,7 +165,7 @@ impl Game {
             self.execute_move(&next_move);
 
             while !self.is_finished().0 {
-                let moves = self.board.serch_moves(self.turn);
+                let moves = self.board.search_moves(self.turn);
                 let move_count = moves.len();
                 let mut random = Random::new(0, (move_count - 1) as u16);
                 let mv = &moves[random.generate_one() as usize];
@@ -149,7 +177,6 @@ impl Game {
                 }
             }
         }
-        return result
+        return result;
     }
-
 }

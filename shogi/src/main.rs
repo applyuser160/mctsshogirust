@@ -1,26 +1,26 @@
-mod common;
 mod address;
-mod direction;
-mod random;
 mod bitboard;
-mod color;
-mod piece;
-mod hand;
-mod moves;
 mod board;
+mod color;
+mod common;
+mod direction;
 mod game;
+mod hand;
 mod mctsresult;
+mod moves;
+mod piece;
+mod random;
 mod test_address;
 mod test_bitboard;
 mod test_board;
+mod test_color;
 mod test_common;
 mod test_direction;
-mod test_random;
-mod test_color;
-mod test_piece;
+mod test_game;
 mod test_hand;
 mod test_moves;
-mod test_game;
+mod test_piece;
+mod test_random;
 
 use std::time::Instant;
 
@@ -29,7 +29,7 @@ fn main() {
 
     // let bites = bitboard::BIT_OF_FRAME.to_be_bytes();
     // println!("{:?}", bites);
-    
+
     // let mut s = String::with_capacity(3);
     // println!("{}", s);
     // s.push('a');
@@ -37,7 +37,7 @@ fn main() {
     // s.push('c');
     // s.push('d');
     // println!("{}", s);
-    
+
     // let n: usize = 1;
     // let w = piece::PieceType::from_usize(n);
     // println!("{}", w as u8);
@@ -83,14 +83,14 @@ fn main() {
     // }
 
     // for handle in handles {
-	// // join()でスレッドが終わるのを待つ
+    // // join()でスレッドが終わるのを待つ
     //     handle.join().unwrap();
     // }
 
     // println!("Result: {}", *counter.lock().unwrap());
     /* */
 
-/* main */
+    /* main */
     // let mut game = game::Game::new();
     // let mut result = mctsresult::MctsResult::new();
 
@@ -98,11 +98,11 @@ fn main() {
     // game.input_turn(String::from("b"));
     // game.input_hand(String::from("-"));
     // game.input_move_number(String::from("1"));
-    // result.next_moves = game.board.serch_moves(game.turn);
+    // result.next_moves = game.board.search_moves(game.turn);
     // result.next_move_count = result.next_moves.len() as u64;
 
     // result = game.random_move(10);
-    
+
     // let from = Address::from_number(92);
     // println!("{}", from.to_string());
     // let to = Address::from_number(73);
@@ -113,15 +113,14 @@ fn main() {
     let mut board = board::Board::new();
     board.deploy(78, piece::PieceType::Gold, color::ColorType::White);
 
-    let next_moves = board.serch_moves(color::ColorType::White);
+    let next_moves = board.search_moves(color::ColorType::White);
     println!("next moves:");
     for i in next_moves {
         println!("{}", i);
     }
 
-/* main */
+    /* main */
 
     let end = start.elapsed();
     println!("{}.{:06}秒", end.as_secs(), end.as_micros());
-
 }

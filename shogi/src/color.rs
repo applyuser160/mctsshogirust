@@ -1,8 +1,10 @@
 #[allow(dead_code)]
-#[derive(PartialEq, Eq, Clone, Copy)]
-#[derive(Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum ColorType {
-    None = -1, Black = 0, White, ColorNumber = 2,
+    None = -1,
+    Black = 0,
+    White,
+    ColorNumber = 2,
 }
 
 impl ColorType {
@@ -16,7 +18,7 @@ impl ColorType {
     }
 
     pub fn to_bool(&self) -> bool {
-        return self == &ColorType::White
+        return self == &ColorType::White;
     }
 }
 

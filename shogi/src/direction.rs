@@ -1,8 +1,15 @@
 #[allow(dead_code)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum DirectionName {
-    Up, UpLeft, Left, DownLeft, Down, DownRight, Right, UpRight,
-    DirectionNameNumber = 8
+    Up,
+    UpLeft,
+    Left,
+    DownLeft,
+    Down,
+    DownRight,
+    Right,
+    UpRight,
+    DirectionNameNumber = 8,
 }
 
 impl DirectionName {
@@ -24,7 +31,6 @@ impl DirectionName {
 
 #[derive(Clone)]
 pub struct Direction {
-
     #[allow(dead_code)]
     pub name: DirectionName,
 
@@ -76,5 +82,4 @@ impl Direction {
         self.vertical_vector *= -1;
         self.horizon_vector *= -1;
     }
-
 }

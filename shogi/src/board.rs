@@ -1,19 +1,19 @@
 use bitvec::prelude::*;
 
-use super::bitboard::{BitBoard, BIT_OF_FRAME, BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE,
-    BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE,
-    generate_column, LENGTH_OF_EDGE, LENGTH_OF_FRAME};
-use super::color::{ColorType, get_reverse_color};
-use super::hand::Hand;
-use super::piece::{Piece, PieceType, PIECE_TYPE_NUMBER, MoveType, PROMOTE};
 use super::address::Address;
-use super::direction::{DirectionName, Direction};
+use super::bitboard::{
+    generate_column, BitBoard, BIT_OF_FRAME, BIT_OF_LAST1_ZONE_BLACK,
+    BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE,
+    BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE, LENGTH_OF_EDGE, LENGTH_OF_FRAME,
+};
+use super::color::{get_reverse_color, ColorType};
+use super::direction::{Direction, DirectionName};
+use super::hand::Hand;
 use super::moves::Move;
+use super::piece::{MoveType, Piece, PieceType, PIECE_TYPE_NUMBER, PROMOTE};
 
 #[allow(dead_code)]
-#[derive(Clone)]
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Board {
     pub has_piece: BitBoard,
     pub player_prossesion: [BitBoard; ColorType::ColorNumber as usize],
@@ -28,7 +28,7 @@ pub struct Board {
 impl Board {
     #[allow(dead_code)]
     fn is_a_has_specific_piece(&self, index: u8, piece_type: PieceType) -> bool {
-        return self.has_specific_piece[piece_type as usize].board[index as usize]
+        return self.has_specific_piece[piece_type as usize].board[index as usize];
     }
 
     #[allow(dead_code)]
@@ -37,7 +37,9 @@ impl Board {
         for i in 0..ColorType::ColorNumber as usize {
             self.player_prossesion[i].board.set(index as usize, false);
         }
-        self.has_specific_piece[PieceType::None as usize].board.set(index as usize, true);
+        self.has_specific_piece[PieceType::None as usize]
+            .board
+            .set(index as usize, true);
         for i in 1..PIECE_TYPE_NUMBER as usize {
             self.has_specific_piece[i].board.set(index as usize, false);
         }
@@ -81,16 +83,35 @@ impl Board {
             has_piece: BitBoard::new(),
             player_prossesion: [BitBoard::new(), BitBoard::new()],
             is_frame,
-            able_pro: [BitBoard::from_u128(BIT_OF_PRO_ZONE_BLACK),
-                BitBoard::from_u128(BIT_OF_PRO_ZONE_WHITE),],
-            last_one: [BitBoard::from_u128(BIT_OF_LAST1_ZONE_BLACK),
-                BitBoard::from_u128(BIT_OF_LAST1_ZONE_WHITE),],
-            last_two: [BitBoard::from_u128(BIT_OF_LAST2_ZONE_BLACK),
-                BitBoard::from_u128(BIT_OF_LAST2_ZONE_WHITE),],
-            has_specific_piece: [has_specific_piece, BitBoard::new(), BitBoard::new(),
-                BitBoard::new(), BitBoard::new(), BitBoard::new(), BitBoard::new(),
-                BitBoard::new(), BitBoard::new(), BitBoard::new(), BitBoard::new(),
-                BitBoard::new(), BitBoard::new(), BitBoard::new(), BitBoard::new(),],
+            able_pro: [
+                BitBoard::from_u128(BIT_OF_PRO_ZONE_BLACK),
+                BitBoard::from_u128(BIT_OF_PRO_ZONE_WHITE),
+            ],
+            last_one: [
+                BitBoard::from_u128(BIT_OF_LAST1_ZONE_BLACK),
+                BitBoard::from_u128(BIT_OF_LAST1_ZONE_WHITE),
+            ],
+            last_two: [
+                BitBoard::from_u128(BIT_OF_LAST2_ZONE_BLACK),
+                BitBoard::from_u128(BIT_OF_LAST2_ZONE_WHITE),
+            ],
+            has_specific_piece: [
+                has_specific_piece,
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+                BitBoard::new(),
+            ],
             hand: Hand::new(),
         }
     }
@@ -99,56 +120,220 @@ impl Board {
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         self.has_piece.board.set(index as usize, true);
         for i in 0..ColorType::ColorNumber as usize {
-            self.player_prossesion[i].board.set(index as usize, color == ColorType::from_u8(i as u8));
+            self.player_prossesion[i]
+                .board
+                .set(index as usize, color == ColorType::from_u8(i as u8));
         }
         for i in 0..PIECE_TYPE_NUMBER as usize {
-            self.has_specific_piece[i].board.set(index as usize, piece_type == PieceType::from_usize(i));
+            self.has_specific_piece[i]
+                .board
+                .set(index as usize, piece_type == PieceType::from_usize(i));
         }
     }
 
     #[allow(dead_code)]
     pub fn startpos(&mut self) {
-        self.deploy(Address::from_numbers(1, 1).to_index(), PieceType::Lance, ColorType::Black);
-        self.deploy(Address::from_numbers(2, 1).to_index(), PieceType::Knight, ColorType::Black);
-        self.deploy(Address::from_numbers(3, 1).to_index(), PieceType::Silver, ColorType::Black);
-        self.deploy(Address::from_numbers(4, 1).to_index(), PieceType::Gold, ColorType::Black);
-        self.deploy(Address::from_numbers(5, 1).to_index(), PieceType::King, ColorType::Black);
-        self.deploy(Address::from_numbers(6, 1).to_index(), PieceType::Gold, ColorType::Black);
-        self.deploy(Address::from_numbers(7, 1).to_index(), PieceType::Silver, ColorType::Black);
-        self.deploy(Address::from_numbers(8, 1).to_index(), PieceType::Knight, ColorType::Black);
-        self.deploy(Address::from_numbers(9, 1).to_index(), PieceType::Lance, ColorType::Black);
-        self.deploy(Address::from_numbers(2, 2).to_index(), PieceType::Bichop, ColorType::Black);
-        self.deploy(Address::from_numbers(8, 2).to_index(), PieceType::Rook, ColorType::Black);
-        self.deploy(Address::from_numbers(1, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(2, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(3, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(4, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(5, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(6, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(7, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(8, 3).to_index(), PieceType::Pawn, ColorType::Black);
-        self.deploy(Address::from_numbers(9, 3).to_index(), PieceType::Pawn, ColorType::Black);
+        self.deploy(
+            Address::from_numbers(1, 1).to_index(),
+            PieceType::Lance,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(2, 1).to_index(),
+            PieceType::Knight,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(3, 1).to_index(),
+            PieceType::Silver,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(4, 1).to_index(),
+            PieceType::Gold,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(5, 1).to_index(),
+            PieceType::King,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(6, 1).to_index(),
+            PieceType::Gold,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(7, 1).to_index(),
+            PieceType::Silver,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(8, 1).to_index(),
+            PieceType::Knight,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(9, 1).to_index(),
+            PieceType::Lance,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(2, 2).to_index(),
+            PieceType::Bichop,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(8, 2).to_index(),
+            PieceType::Rook,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(1, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(2, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(3, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(4, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(5, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(6, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(7, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(8, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
+        self.deploy(
+            Address::from_numbers(9, 3).to_index(),
+            PieceType::Pawn,
+            ColorType::Black,
+        );
 
-        self.deploy(Address::from_numbers(1, 9).to_index(), PieceType::Lance, ColorType::White);
-        self.deploy(Address::from_numbers(2, 9).to_index(), PieceType::Knight, ColorType::White);
-        self.deploy(Address::from_numbers(3, 9).to_index(), PieceType::Silver, ColorType::White);
-        self.deploy(Address::from_numbers(4, 9).to_index(), PieceType::Gold, ColorType::White);
-        self.deploy(Address::from_numbers(5, 9).to_index(), PieceType::King, ColorType::White);
-        self.deploy(Address::from_numbers(6, 9).to_index(), PieceType::Gold, ColorType::White);
-        self.deploy(Address::from_numbers(7, 9).to_index(), PieceType::Silver, ColorType::White);
-        self.deploy(Address::from_numbers(8, 9).to_index(), PieceType::Knight, ColorType::White);
-        self.deploy(Address::from_numbers(9, 9).to_index(), PieceType::Lance, ColorType::White);
-        self.deploy(Address::from_numbers(8, 8).to_index(), PieceType::Bichop, ColorType::White);
-        self.deploy(Address::from_numbers(2, 8).to_index(), PieceType::Rook, ColorType::White);
-        self.deploy(Address::from_numbers(1, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(2, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(3, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(4, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(5, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(6, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(7, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(8, 7).to_index(), PieceType::Pawn, ColorType::White);
-        self.deploy(Address::from_numbers(9, 7).to_index(), PieceType::Pawn, ColorType::White);
+        self.deploy(
+            Address::from_numbers(1, 9).to_index(),
+            PieceType::Lance,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(2, 9).to_index(),
+            PieceType::Knight,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(3, 9).to_index(),
+            PieceType::Silver,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(4, 9).to_index(),
+            PieceType::Gold,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(5, 9).to_index(),
+            PieceType::King,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(6, 9).to_index(),
+            PieceType::Gold,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(7, 9).to_index(),
+            PieceType::Silver,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(8, 9).to_index(),
+            PieceType::Knight,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(9, 9).to_index(),
+            PieceType::Lance,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(8, 8).to_index(),
+            PieceType::Bichop,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(2, 8).to_index(),
+            PieceType::Rook,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(1, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(2, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(3, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(4, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(5, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(6, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(7, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(8, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
+        self.deploy(
+            Address::from_numbers(9, 7).to_index(),
+            PieceType::Pawn,
+            ColorType::White,
+        );
 
         self.hand = Hand::new();
     }
@@ -157,22 +342,23 @@ impl Board {
     pub fn get_piece_type_from_index(&self, index: u8) -> PieceType {
         for i in 0..PIECE_TYPE_NUMBER as usize {
             if self.is_a_has_specific_piece(index, PieceType::from_usize(i)) {
-                return PieceType::from_usize(i)
+                return PieceType::from_usize(i);
             }
         }
-        return PieceType::None
+        return PieceType::None;
     }
 
     #[allow(dead_code)]
     pub fn get_color_type_from_index(&self, index: u8) -> ColorType {
         let has_a_piece = self.has_piece.board[index as usize];
-        let is_black = self.player_prossesion[ColorType::Black as usize].board[index as usize];
+        let is_black =
+            self.player_prossesion[ColorType::Black as usize].board[index as usize];
         if !has_a_piece {
-            return ColorType::None
+            return ColorType::None;
         } else if is_black {
-            return ColorType::Black
+            return ColorType::Black;
         } else {
-            return ColorType::White
+            return ColorType::White;
         }
     }
 
@@ -181,7 +367,7 @@ impl Board {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
         let piece = Piece::from(color_type, piece_type);
-        return piece
+        return piece;
     }
 
     #[allow(dead_code)]
@@ -218,7 +404,8 @@ impl Board {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
 
-        let move_types: [MoveType; DirectionName::DirectionNameNumber as usize] = Piece::get_movetype(piece_type);
+        let move_types: [MoveType; DirectionName::DirectionNameNumber as usize] =
+            Piece::get_movetype(piece_type);
         let mut is_in_board = bitvec![1; DirectionName::DirectionNameNumber as usize];
 
         let mut bit_board = BitBoard::new();
@@ -248,17 +435,29 @@ impl Board {
 
                     let shift_number = LENGTH_OF_FRAME as i8 * v + h;
 
-                    let bn1 = if shift_number > 0 { bit_board.clone() << shift_number as usize} else {bit_board.clone() >> shift_number.abs() as usize};
+                    let bn1 = if shift_number > 0 {
+                        bit_board.clone() << shift_number as usize
+                    } else {
+                        bit_board.clone() >> shift_number.abs() as usize
+                    };
 
-                    if (self.is_frame.clone() & bn1.clone()).board.any() {
+                    if (&self.is_frame & &bn1).board.any() {
                         is_in_board.set(j, false);
-                    } else if (self.player_prossesion[get_reverse_color(color_type) as usize].clone() & bn1.clone()).board.any() {
+                    } else if (&self.player_prossesion
+                        [get_reverse_color(color_type) as usize]
+                        & &bn1)
+                        .board
+                        .any()
+                    {
                         is_in_board.set(j, false);
-                        bit_movable = bit_movable.clone() | bn1.clone();
-                    } else if (self.player_prossesion[color_type as usize].clone() & bn1.clone()).board.any() {
+                        bit_movable = &bit_movable | &bn1;
+                    } else if (&self.player_prossesion[color_type as usize] & &bn1)
+                        .board
+                        .any()
+                    {
                         is_in_board.set(j, false);
                     } else {
-                        bit_movable = bit_movable | bit_board.clone() | bn1.clone();
+                        bit_movable |= &bit_board | &bn1;
                     }
 
                     if move_types[j] != MoveType::Long {
@@ -268,11 +467,15 @@ impl Board {
             }
         }
         bit_movable.board.set(index as usize, false);
-        return bit_movable
+        return bit_movable;
     }
 
     #[allow(dead_code)]
-    pub fn get_able_pro_move_squares(&self, index: u8, bit_movable: BitBoard) -> BitBoard {
+    pub fn get_able_pro_move_squares(
+        &self,
+        index: u8,
+        bit_movable: BitBoard,
+    ) -> BitBoard {
         let result = BitBoard::new();
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
@@ -280,26 +483,27 @@ impl Board {
         bit_board.board.set(index as usize, true);
         let is_able_pro = Piece::able_pro(piece_type);
         if !is_able_pro {
-            return result
+            return result;
         }
 
-        let pro_area = self.able_pro[color_type as usize].clone();
+        let pro_area = &self.able_pro[color_type as usize];
 
-        if (bit_board & pro_area.clone()).board.any() {
-            return bit_movable
+        if (&bit_board & pro_area).board.any() {
+            return bit_movable;
         }
 
-        return bit_movable & pro_area
+        return &bit_movable & pro_area;
     }
 
     #[allow(dead_code)]
-    pub fn get_able_drop_squares(&self, color: ColorType, piece_type: PieceType) -> BitBoard {
+    pub fn get_able_drop_squares(
+        &self,
+        color: ColorType,
+        piece_type: PieceType,
+    ) -> BitBoard {
         let none = self.has_specific_piece[PieceType::None as usize].clone();
-        let last_two = self.last_two[color as usize].clone();
-        let last_one = self.last_one[color as usize].clone();
-
-        let mut last_not_two = last_two.clone();
-        let mut last_not_one = last_one.clone();
+        let mut last_not_two = self.last_two[color as usize].clone();
+        let mut last_not_one = self.last_one[color as usize].clone();
         last_not_two.flip();
         last_not_one.flip();
 
@@ -308,38 +512,41 @@ impl Board {
             PieceType::Rook => none,
             PieceType::Bichop => none,
             PieceType::Silver => none,
-            PieceType::Knight => none & last_not_two,
-            PieceType::Lance => none & last_not_one,
+            PieceType::Knight => &none & &last_not_two,
+            PieceType::Lance => &none & &last_not_one,
             PieceType::Pawn => {
-                let pawn = self.has_specific_piece[PieceType::Pawn as usize].clone() & self.player_prossesion[color as usize].clone();
+                let pawn = &self.has_specific_piece[PieceType::Pawn as usize]
+                    & &self.player_prossesion[color as usize];
                 let pawn_indexs = pawn.get_trues();
                 let mut double_pawn = BitBoard::new();
 
-                for i in 0..pawn_indexs.len() {
-                    double_pawn = double_pawn.clone() | generate_column(Address::from_number(pawn_indexs[i]).column as usize);
+                for index in pawn_indexs {
+                    double_pawn = &double_pawn
+                        | &generate_column(Address::from_number(index).column as usize);
                 }
 
                 let mut not_double_pawn = double_pawn;
                 not_double_pawn.flip();
 
-                return none & last_not_one & not_double_pawn
-            },
-            _ => BitBoard::new()
+                return &none & &(&last_not_one & &not_double_pawn);
+            }
+            _ => BitBoard::new(),
         }
     }
 
     #[allow(dead_code)]
-    pub fn serch_moves(&self, color: ColorType) -> Vec<Move> {
+    pub fn search_moves(&self, color: ColorType) -> Vec<Move> {
         let mut vector_move: Vec<Move> = Vec::new();
 
-        let player_board = if color.to_bool() 
-            { self.player_prossesion[ColorType::White as usize].clone() } 
-            else { self.player_prossesion[ColorType::Black as usize].clone() };
-        
+        let player_board = if color.to_bool() {
+            &self.player_prossesion[ColorType::White as usize]
+        } else {
+            &self.player_prossesion[ColorType::Black as usize]
+        };
+
         let player_board_indexs = player_board.get_trues();
 
         for i in 0..player_board_indexs.len() {
-
             let move_board = self.get_able_move_squares(player_board_indexs[i]);
             let move_indexs = move_board.get_trues();
             for j in 0..move_indexs.len() {
@@ -350,7 +557,8 @@ impl Board {
             }
             drop(move_indexs);
 
-            let pro_board = self.get_able_pro_move_squares(player_board_indexs[i], move_board);
+            let pro_board =
+                self.get_able_pro_move_squares(player_board_indexs[i], move_board);
             let move_indexs = pro_board.get_trues();
             for j in 0..move_indexs.len() {
                 let from = Address::from_number(player_board_indexs[i]);
@@ -362,7 +570,10 @@ impl Board {
 
         let player_hand_pieces = self.hand.get_player_pieces(color);
         for i in 0..player_hand_pieces.len() {
-            let move_board = self.get_able_drop_squares(player_hand_pieces[i].owner, player_hand_pieces[i].piece_type);
+            let move_board = self.get_able_drop_squares(
+                player_hand_pieces[i].owner,
+                player_hand_pieces[i].piece_type,
+            );
             let move_indexs = move_board.get_trues();
             for j in 0..move_indexs.len() {
                 let to = Address::from_number(move_indexs[j]);
@@ -371,7 +582,7 @@ impl Board {
             }
         }
 
-        return vector_move
+        return vector_move;
     }
 
     #[allow(dead_code)]
@@ -401,9 +612,15 @@ impl Board {
     #[allow(dead_code)]
     pub fn is_finished(&self) -> (bool, ColorType) {
         let winner;
-        let is_finish = self.has_specific_piece[PieceType::King as usize].board.count_ones() != ColorType::ColorNumber as usize;
+        let is_finish = self.has_specific_piece[PieceType::King as usize]
+            .board
+            .count_ones()
+            != ColorType::ColorNumber as usize;
         if is_finish {
-            let is_black_win = (self.has_specific_piece[PieceType::King as usize].clone() & self.player_prossesion[ColorType::Black as usize].clone()).board.any();
+            let is_black_win = (&self.has_specific_piece[PieceType::King as usize]
+                & &self.player_prossesion[ColorType::Black as usize])
+                .board
+                .any();
             if is_black_win {
                 winner = ColorType::Black;
             } else {
@@ -412,10 +629,9 @@ impl Board {
         } else {
             winner = ColorType::None;
         }
-        return (is_finish, winner)
+        return (is_finish, winner);
     }
 }
-
 
 impl std::fmt::Display for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
