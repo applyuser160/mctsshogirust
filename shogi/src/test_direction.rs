@@ -3,7 +3,6 @@
 mod tests {
     use crate::direction::{Direction, DirectionName};
 
-
     #[test]
     fn case01() {
         let dn = DirectionName::from_usize(3);
@@ -26,5 +25,4 @@ mod tests {
         assert_eq!(direction.vertical_vector, 1);
         assert_eq!(direction.horizon_vector, -1);
     }
-
 }

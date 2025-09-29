@@ -1,10 +1,10 @@
 use super::address::Address;
-use super::piece::Piece;
-use super::moves::Move;
 use super::board::Board;
-use super::color::{ColorType, convert_from_string, get_reverse_color};
-use super::random::Random;
+use super::color::{convert_from_string, get_reverse_color, ColorType};
 use super::mctsresult::MctsResult;
+use super::moves::Move;
+use super::piece::Piece;
+use super::random::Random;
 
 #[allow(dead_code)]
 #[derive(Clone)]
@@ -32,7 +32,7 @@ impl Game {
             board,
             move_number,
             turn,
-            winner
+            winner,
         }
     }
 
@@ -43,7 +43,7 @@ impl Game {
             self.board.startpos();
             return;
         }
-    
+
         let parts: Vec<&str> = sfen.split('/').collect();
         for (row, part) in parts.iter().enumerate().rev() {
             let mut column = 0;
@@ -56,7 +56,8 @@ impl Game {
                     let piece = Piece::from_char(ch);
                     let piece_type = piece.piece_type;
                     let owner = piece.owner;
-                    let index = Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
+                    let index =
+                        Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
                     self.board.deploy(index, piece_type, owner);
                     column += 1;
                 }
@@ -74,7 +75,9 @@ impl Game {
             if ch.is_digit(10) {
                 let consecutive = ch.to_digit(10).unwrap() as u8;
                 let piece = Piece::from_string(current_sfen.next().unwrap_or_default().to_string());
-                self.board.hand.add_pieces(piece.owner, piece.piece_type, consecutive);
+                self.board
+                    .hand
+                    .add_pieces(piece.owner, piece.piece_type, consecutive);
             } else {
                 let piece = Piece::from_string(ch.to_string());
                 self.board.hand.add_piece(piece.owner, piece.piece_type);
@@ -95,9 +98,9 @@ impl Game {
     #[allow(dead_code)]
     pub fn is_finished(&self) -> (bool, ColorType) {
         if self.move_number >= 500 {
-            return (true, ColorType::None)
+            return (true, ColorType::None);
         } else {
-            return self.board.is_finished()
+            return self.board.is_finished();
         }
     }
 
@@ -129,7 +132,7 @@ impl Game {
         result.next_moves = self.board.serch_moves(self.turn);
         result.next_move_count = result.next_moves.len() as u64;
         let copied_game = self.clone();
-        for _i in 0..num{
+        for _i in 0..num {
             *self = copied_game.clone();
             let mut next_random = Random::new(0, result.next_move_count as u16);
             let random_one = next_random.generate_one() as usize;
@@ -149,7 +152,6 @@ impl Game {
                 }
             }
         }
-        return result
+        return result;
     }
-
 }

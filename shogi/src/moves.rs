@@ -6,8 +6,7 @@ use super::address;
 use super::piece;
 
 #[allow(dead_code)]
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Move {
     pub value: BitVec<u16, Msb0>,
 }
@@ -16,16 +15,16 @@ impl Move {
     #[allow(dead_code)]
     fn is_drop(csa: String) -> bool {
         let csa_vec = csa.chars().collect::<Vec<char>>();
-        return csa_vec[1] == '*'
+        return csa_vec[1] == '*';
     }
 
     #[allow(dead_code)]
     fn is_promote(csa: String) -> bool {
         if csa.len() > 4 {
             let csa_vec = csa.chars().collect::<Vec<char>>();
-            return csa_vec[4] == '+'
+            return csa_vec[4] == '+';
         } else {
-            return false
+            return false;
         }
     }
 
@@ -47,8 +46,18 @@ impl Move {
     }
 
     #[allow(dead_code)]
-    fn standart_constructor(&mut self, from: address::Address, to: address::Address, promote: bool) {
-        self.base_constructor(from.to_index() as u16, to.to_index() as u16, promote as u16, 0);
+    fn standart_constructor(
+        &mut self,
+        from: address::Address,
+        to: address::Address,
+        promote: bool,
+    ) {
+        self.base_constructor(
+            from.to_index() as u16,
+            to.to_index() as u16,
+            promote as u16,
+            0,
+        );
     }
 
     #[allow(dead_code)]
@@ -67,14 +76,14 @@ impl Move {
     pub fn from_standart(from: address::Address, to: address::Address, promote: bool) -> Self {
         let mut res = Self::new();
         res.standart_constructor(from, to, promote);
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
     pub fn from_drop(piece: piece::Piece, to: address::Address) -> Self {
         let mut res = Self::new();
         res.drop_constructor(piece, to);
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
@@ -90,17 +99,17 @@ impl Move {
             let from = address::Address::from_string(&clone_csa);
             res.standart_constructor(from, to, Self::is_promote(clone_csa));
         }
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
     pub fn get_is_drop(&self) -> bool {
-        return self.value[0]
+        return self.value[0];
     }
 
     #[allow(dead_code)]
     pub fn get_is_promote(&self) -> bool {
-        return self.value[1]
+        return self.value[1];
     }
 
     #[allow(dead_code)]
@@ -116,19 +125,19 @@ impl Move {
     #[allow(dead_code)]
     pub fn get_from(&self) -> address::Address {
         let v = self.get_base(9, 9);
-        return address::Address::from_number(v)
+        return address::Address::from_number(v);
     }
 
     #[allow(dead_code)]
     pub fn get_to(&self) -> address::Address {
         let v = self.get_base(2, 9);
-        return address::Address::from_number(v)
+        return address::Address::from_number(v);
     }
 
     #[allow(dead_code)]
     pub fn get_piece(&self) -> piece::Piece {
         let v = self.get_base(9, 9);
-        return piece::Piece::from_u8(v)
+        return piece::Piece::from_u8(v);
     }
 
     #[allow(dead_code)]
@@ -150,7 +159,7 @@ impl Move {
         if is_pro {
             res.push('+');
         }
-        return res
+        return res;
     }
 }
 

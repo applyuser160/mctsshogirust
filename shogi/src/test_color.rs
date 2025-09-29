@@ -3,7 +3,6 @@
 mod tests {
     use crate::color::{convert_from_string, convert_string, get_reverse_color, ColorType};
 
-
     #[test]
     fn case01() {
         let color = ColorType::from_u8(0);
@@ -33,5 +32,4 @@ mod tests {
         let color = convert_from_string('b');
         assert_eq!(color as u8, ColorType::Black as u8);
     }
-    
 }

@@ -1,14 +1,23 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::{address::Address, bitboard::{BitBoard, BIT_OF_FRAME, BIT_OF_PRO_ZONE_BLACK}, board::Board, color::ColorType, moves::Move, piece::PieceType};
-
+    use crate::{
+        address::Address,
+        bitboard::{BitBoard, BIT_OF_FRAME, BIT_OF_PRO_ZONE_BLACK},
+        board::Board,
+        color::ColorType,
+        moves::Move,
+        piece::PieceType,
+    };
 
     #[test]
     fn case01() {
         let board = Board::new();
         assert_eq!(board.is_frame, BitBoard::from_u128(BIT_OF_FRAME));
-        assert_eq!(board.able_pro[0], BitBoard::from_u128(BIT_OF_PRO_ZONE_BLACK));
+        assert_eq!(
+            board.able_pro[0],
+            BitBoard::from_u128(BIT_OF_PRO_ZONE_BLACK)
+        );
     }
 
     #[test]
@@ -81,5 +90,4 @@ mod tests {
         assert_eq!(result.0, true);
         assert_eq!(result.1, ColorType::White);
     }
-    
 }

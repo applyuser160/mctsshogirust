@@ -1,7 +1,9 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::address::{address_to_index, index_to_address, index_to_column, index_to_row, Address};
+    use crate::address::{
+        address_to_index, index_to_address, index_to_column, index_to_row, Address,
+    };
 
     #[test]
     fn case01() {
@@ -63,5 +65,4 @@ mod tests {
         let row = index_to_column(100);
         assert_eq!(row, 1);
     }
-
 }

@@ -1,8 +1,11 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::{color::ColorType, hand::Hand, piece::{Piece, PieceType}};
-
+    use crate::{
+        color::ColorType,
+        hand::Hand,
+        piece::{Piece, PieceType},
+    };
 
     #[test]
     fn case01() {
@@ -60,5 +63,4 @@ mod tests {
         assert_eq!(whites[0].piece_type, PieceType::Gold);
         assert_eq!(whites[0].owner, ColorType::White);
     }
-    
 }

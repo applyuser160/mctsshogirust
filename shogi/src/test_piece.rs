@@ -1,8 +1,10 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::{color::ColorType, piece::{MoveType, Piece, PieceType}};
-
+    use crate::{
+        color::ColorType,
+        piece::{MoveType, Piece, PieceType},
+    };
 
     #[test]
     fn case01() {
@@ -32,7 +34,7 @@ mod tests {
 
     #[test]
     fn case05() {
-        /* 0d142 = 0b01001110 */ 
+        /* 0d142 = 0b01001110 */
         let piece = Piece::from_u8(78);
         assert_eq!(piece.owner, ColorType::White);
         assert_eq!(piece.piece_type, PieceType::ProPawn);
@@ -40,7 +42,7 @@ mod tests {
 
     #[test]
     fn case06() {
-        /* 0d142 = 0b11111111 */ 
+        /* 0d142 = 0b11111111 */
         let piece = Piece::from_u8(255);
         assert_eq!(piece.owner, ColorType::White);
         assert_eq!(piece.piece_type, PieceType::None);
@@ -118,5 +120,4 @@ mod tests {
         let result = Piece::able_pro(PieceType::Bichop);
         assert_eq!(result, true);
     }
-    
 }

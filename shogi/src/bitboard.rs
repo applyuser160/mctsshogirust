@@ -1,4 +1,4 @@
-use std::ops::{BitAnd, BitOr, Shl, Shr};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Shl, ShlAssign, Shr, ShrAssign};
 
 use bitvec::prelude::*;
 
@@ -130,11 +130,8 @@ pub const STRING_OF_LAST2_ZONE_WHITE: &str = "\
 00000000000\
 00000000000";
 
-
 #[allow(dead_code)]
-#[derive(Clone)]
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct BitBoard {
     pub board: BitVec<u64, Msb0>,
 }
@@ -150,22 +147,20 @@ impl BitBoard {
     #[allow(dead_code)]
     pub fn from_bitboard(bitboard: Self) -> Self {
         Self {
-            board: bitboard.board
+            board: bitboard.board,
         }
     }
 
     #[allow(dead_code)]
     pub fn from_bitvec(bitvec: BitVec<u64, Msb0>) -> Self {
-        Self {
-            board: bitvec
-        }
+        Self { board: bitvec }
     }
 
     #[allow(dead_code)]
     pub fn from_u128(integer: u128) -> Self {
         let mut res = BitBoard::new();
         res.board.store_be::<u128>(integer);
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
@@ -174,7 +169,7 @@ impl BitBoard {
         for (i, c) in string.chars().enumerate() {
             res.board.set(i, c == '1');
         }
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
@@ -186,7 +181,7 @@ impl BitBoard {
                 res += base.pow((127 - i) as u32);
             }
         }
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
@@ -197,14 +192,13 @@ impl BitBoard {
                 res.push(i as u8);
             }
         }
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
     pub fn flip(&mut self) {
         self.board.iter_mut().for_each(|mut b| *b = !*b);
     }
-
 }
 
 impl BitAnd for BitBoard {
@@ -215,7 +209,16 @@ impl BitAnd for BitBoard {
         for i in 0..121 {
             res.board.set(i, self.board[i] & rhs.board[i]);
         }
-        return res
+        return res;
+    }
+}
+
+impl BitAndAssign for BitBoard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        for i in 0..121 {
+            let v = self.board[i];
+            (*self).board.set(i, v & rhs.board[i]);
+        }
     }
 }
 
@@ -227,7 +230,16 @@ impl BitOr for BitBoard {
         for i in 0..121 {
             res.board.set(i, self.board[i] | rhs.board[i]);
         }
-        return res
+        return res;
+    }
+}
+
+impl BitOrAssign for BitBoard {
+    fn bitor_assign(&mut self, rhs: Self) {
+        for i in 0..121 {
+            let v = self.board[i];
+            (*self).board.set(i, v | rhs.board[i]);
+        }
     }
 }
 
@@ -237,7 +249,13 @@ impl Shr<usize> for BitBoard {
     fn shr(self, rhs: usize) -> Self::Output {
         let mut res = self.clone();
         res.board.shift_right(rhs);
-        return res
+        return res;
+    }
+}
+
+impl ShrAssign<usize> for BitBoard {
+    fn shr_assign(&mut self, rhs: usize) {
+        
     }
 }
 
@@ -247,7 +265,13 @@ impl Shl<usize> for BitBoard {
     fn shl(self, rhs: usize) -> Self::Output {
         let mut res = self.clone();
         res.board.shift_left(rhs);
-        return res
+        return res;
+    }
+}
+
+impl ShlAssign<usize> for BitBoard {
+    fn shl_assign(&mut self, rhs: usize) {
+        
     }
 }
 
@@ -260,7 +284,7 @@ pub fn generate_columns(column_no: Vec<usize>, column_count: usize) -> BitBoard 
         }
         bitboard.board.shift_right(11);
     }
-    return bitboard
+    return bitboard;
 }
 
 #[allow(dead_code)]
@@ -270,7 +294,7 @@ pub fn generate_column(column_no: usize) -> BitBoard {
         bitboard.board.set(column_no, true);
         bitboard.board.shift_right(11);
     }
-    return bitboard
+    return bitboard;
 }
 
 // impl std::fmt::Display for BitBoard {

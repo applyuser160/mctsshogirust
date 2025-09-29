@@ -3,7 +3,6 @@
 mod tests {
     use crate::common::{alphabet_to_number, char_to_integer, integer_to_char, number_to_alphabet};
 
-
     #[test]
     fn case01() {
         let num = alphabet_to_number('a');
@@ -27,5 +26,4 @@ mod tests {
         let ch = integer_to_char(8);
         assert_eq!(ch, '8');
     }
-
 }

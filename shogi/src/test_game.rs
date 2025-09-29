@@ -3,7 +3,6 @@
 mod tests {
     use crate::{board::Board, color::ColorType, game::Game};
 
-
     #[test]
     fn case01() {
         let sfen = String::from("startpos");
@@ -29,5 +28,4 @@ mod tests {
         assert_eq!(game1.board.to_string(), game2.board.to_string());
         assert_eq!(sfen_str, game1.board.to_string());
     }
-    
 }

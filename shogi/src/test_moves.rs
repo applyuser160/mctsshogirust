@@ -1,9 +1,13 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::{address::Address, color::ColorType, moves::Move, piece::{Piece, PieceType}};
+    use crate::{
+        address::Address,
+        color::ColorType,
+        moves::Move,
+        piece::{Piece, PieceType},
+    };
     use bitvec::prelude::*;
-
 
     #[test]
     fn case01() {
@@ -97,5 +101,4 @@ mod tests {
         let str = mv.to_string();
         assert_eq!(str, csa);
     }
-    
 }

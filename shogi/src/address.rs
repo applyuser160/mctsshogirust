@@ -1,8 +1,6 @@
 use super::common;
 
-#[derive(Default)]
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(Default, PartialEq, Debug)]
 pub struct Address {
     pub column: u8,
     pub row: u8,
@@ -18,10 +16,7 @@ impl Address {
 
     #[allow(dead_code)]
     pub fn from_numbers(c: u8, r: u8) -> Self {
-        Self {
-            column: c,
-            row: r,
-        }
+        Self { column: c, row: r }
     }
 
     #[allow(dead_code)]
@@ -45,27 +40,26 @@ impl Address {
         row = common::number_to_alphabet(row);
         string.push(column);
         string.push(row);
-        return string
+        return string;
     }
-
 }
 
 #[allow(dead_code)]
 pub fn index_to_address(index: u8) -> Address {
-    return self::Address::from_number(index)
+    return self::Address::from_number(index);
 }
 
 #[allow(dead_code)]
 pub fn address_to_index(address: Address) -> u8 {
-    return address.to_index()
+    return address.to_index();
 }
 
 #[allow(dead_code)]
 pub fn index_to_row(index: u8) -> u8 {
-    return index / 11
+    return index / 11;
 }
 
 #[allow(dead_code)]
 pub fn index_to_column(index: u8) -> u8 {
-    return index % 11
+    return index % 11;
 }

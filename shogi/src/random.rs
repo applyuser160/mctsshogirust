@@ -1,4 +1,4 @@
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 
 pub struct Random {
     pub rng: rand::prelude::ThreadRng,
@@ -27,7 +27,7 @@ impl Random {
 
     #[allow(dead_code)]
     pub fn generate_one(&mut self) -> u16 {
-        return self.rng.gen_range(self.min..=self.max)
+        return self.rng.gen_range(self.min..=self.max);
     }
 
     #[allow(dead_code)]
@@ -37,6 +37,6 @@ impl Random {
             let r = self.rng.gen_range(self.min..=self.max);
             result.push(r);
         }
-        return result
+        return result;
     }
 }

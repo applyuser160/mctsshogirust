@@ -1,5 +1,5 @@
-use super::moves::Move;
 use super::color::ColorType;
+use super::moves::Move;
 
 #[allow(dead_code)]
 pub struct MctsResult {

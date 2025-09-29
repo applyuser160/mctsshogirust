@@ -18,9 +18,21 @@ pub const PROMOTE_CHANGE: u8 = 6;
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 #[repr(usize)]
 pub enum PieceType {
-    None = 0, King, Gold,
-    Rook, Bichop, Silver, Knight, Lance, Pawn,
-    Dragon, Horse, ProSilver, ProKnight, ProLance, ProPawn,
+    None = 0,
+    King,
+    Gold,
+    Rook,
+    Bichop,
+    Silver,
+    Knight,
+    Lance,
+    Pawn,
+    Dragon,
+    Horse,
+    ProSilver,
+    ProKnight,
+    ProLance,
+    ProPawn,
 }
 
 impl PieceType {
@@ -63,19 +75,27 @@ impl PieceType {
 
 #[allow(dead_code)]
 pub enum HandPiece {
-    HPawn, HLance, HKnight, HSilver, HGold, HBishop, HRook, HandPieceNum
+    HPawn,
+    HLance,
+    HKnight,
+    HSilver,
+    HGold,
+    HBishop,
+    HRook,
+    HandPieceNum,
 }
 
 #[allow(dead_code)]
-#[derive(PartialEq, Eq, Clone, Copy)]
-#[derive(Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum MoveType {
-    None, Short, Hop, Long
+    None,
+    Short,
+    Hop,
+    Long,
 }
 
 #[allow(dead_code)]
-#[derive(PartialEq, Eq, Clone, Copy)]
-#[derive(Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Piece {
     pub owner: ColorType,
     pub piece_type: PieceType,
@@ -92,7 +112,7 @@ impl Piece {
         } else {
             piece_type_df = piece_type;
         }
-        
+
         let mut piece: char;
         match piece_type_df {
             PieceType::None => piece = ' ',
@@ -110,9 +130,9 @@ impl Piece {
         if owner == ColorType::Black {
             piece = (piece as u8 - 32) as char;
         }
-        
+
         result.push(piece);
-        return result
+        return result;
     }
 
     #[allow(dead_code)]
@@ -134,7 +154,7 @@ impl Piece {
             'N' => self.piece_type = PieceType::Knight,
             'L' => self.piece_type = PieceType::Lance,
             'P' => self.piece_type = PieceType::Pawn,
-            _ => self.piece_type = PieceType::None
+            _ => self.piece_type = PieceType::None,
         }
     }
 
@@ -176,7 +196,7 @@ impl Piece {
     pub fn from_char(character: char) -> Self {
         let mut res = Self::new();
         res.convert_from_string(character);
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
@@ -194,23 +214,25 @@ impl Piece {
         let mut res = Self::new();
         res.convert_from_string(piece_str);
         res.piece_type = PieceType::from_usize(res.piece_type as usize + promote as usize);
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
     pub fn to_u8(&self) -> u8 {
         let mut res = self.piece_type as u8;
         res += (self.owner as u8) << 6;
-        return res
+        return res;
     }
 
     #[allow(dead_code)]
     pub fn to_string(&self) -> String {
-        return Self::convert_string(self.piece_type, self.owner)
+        return Self::convert_string(self.piece_type, self.owner);
     }
 
     #[allow(dead_code)]
-    pub fn get_movetype(piece_type: PieceType) -> [MoveType; direction::DirectionName::DirectionNameNumber as usize] {
+    pub fn get_movetype(
+        piece_type: PieceType,
+    ) -> [MoveType; direction::DirectionName::DirectionNameNumber as usize] {
         match piece_type {
             PieceType::None => [
                 MoveType::None,
@@ -361,7 +383,7 @@ impl Piece {
                 MoveType::None,
                 MoveType::Short,
                 MoveType::Short,
-            ]
+            ],
         }
     }
 
@@ -377,7 +399,6 @@ impl Piece {
             _ => false,
         }
     }
-
 }
 
 impl std::fmt::Display for PieceType {

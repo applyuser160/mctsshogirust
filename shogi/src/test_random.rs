@@ -3,7 +3,6 @@
 mod tests {
     use crate::random::Random;
 
-
     #[test]
     fn case01() {
         let mut rand = Random::init();
@@ -18,5 +17,4 @@ mod tests {
         assert!(n1 >= 5);
         assert!(n1 <= 16);
     }
-    
 }

@@ -3,7 +3,6 @@
 mod tests {
     use crate::bitboard::{generate_column, generate_columns, BitBoard};
 
-
     #[test]
     fn case01() {
         let bitboard = BitBoard::new();
@@ -72,11 +71,27 @@ mod tests {
     }
 
     #[test]
+    fn test_bitbord_bitand_assign() {
+        let bb1 = BitBoard::from_u128(1124249833570304);
+        let mut bb2 = BitBoard::from_u128(548949983232);
+        bb2 &= bb1;
+        assert_eq!(bb2.to_u128(), 548949983232);
+    }
+
+    #[test]
     fn case08() {
         let bb1 = BitBoard::from_u128(1124249833570304);
         let bb2 = BitBoard::from_u128(548949983232);
         let bb3 = bb1.clone() | bb2;
         assert_eq!(bb1.get_trues(), bb3.get_trues());
+    }
+
+    #[test]
+    fn test_bitbord_bitor_assign() {
+        let bb1 = BitBoard::from_u128(1124249833570304);
+        let mut bb2 = BitBoard::from_u128(548949983232);
+        bb2 |= bb1;
+        assert_eq!(bb2.to_u128(), 1124249833570304);
     }
 
     #[test]
@@ -111,5 +126,4 @@ mod tests {
         assert_eq!(bb.board[86], true);
         assert_eq!(bb.get_trues().len(), 9);
     }
-    
 }
