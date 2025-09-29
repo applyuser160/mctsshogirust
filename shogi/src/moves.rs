@@ -13,13 +13,13 @@ pub struct Move {
 
 impl Move {
     #[allow(dead_code)]
-    fn is_drop(csa: String) -> bool {
+    fn is_drop(csa: &String) -> bool {
         let csa_vec = csa.chars().collect::<Vec<char>>();
         return csa_vec[1] == '*';
     }
 
     #[allow(dead_code)]
-    fn is_promote(csa: String) -> bool {
+    fn is_promote(csa: &String) -> bool {
         if csa.len() > 4 {
             let csa_vec = csa.chars().collect::<Vec<char>>();
             return csa_vec[4] == '+';
@@ -90,14 +90,13 @@ impl Move {
     pub fn from_csa(csa: String) -> Self {
         let csa_vec = csa.chars().collect::<Vec<char>>();
         let mut res = Self::new();
-        let clone_csa = csa.clone();
         let to = address::Address::from_string(&csa[2..]);
-        if Self::is_drop(csa) {
+        if Self::is_drop(&csa) {
             let piece = piece::Piece::from_char(csa_vec[0]);
             res.drop_constructor(piece, to);
         } else {
-            let from = address::Address::from_string(&clone_csa);
-            res.standart_constructor(from, to, Self::is_promote(clone_csa));
+            let from = address::Address::from_string(&csa);
+            res.standart_constructor(from, to, Self::is_promote(&csa));
         }
         return res;
     }
