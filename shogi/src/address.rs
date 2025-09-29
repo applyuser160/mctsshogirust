@@ -45,16 +45,6 @@ impl Address {
 }
 
 #[allow(dead_code)]
-pub fn index_to_address(index: u8) -> Address {
-    return self::Address::from_number(index);
-}
-
-#[allow(dead_code)]
-pub fn address_to_index(address: Address) -> u8 {
-    return address.to_index();
-}
-
-#[allow(dead_code)]
 pub fn index_to_row(index: u8) -> u8 {
     return index / 11;
 }
