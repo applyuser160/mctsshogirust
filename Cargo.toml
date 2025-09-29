@@ -10,7 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 rand = "0.8.5"
-bitvec = "1.0.1"
+bitvec = { version = "1.0.1", default-features = false, features = ["atomic", "alloc", "serde"] }
 pyo3 = { version = "0.25.0", features = ["extension-module"] }
 
 [dev-dependencies]
