@@ -27,7 +27,12 @@ impl Game {
     }
 
     #[allow(dead_code)]
-    pub fn from(board: Board, move_number: u16, turn: ColorType, winner: ColorType) -> Self {
+    pub fn from(
+        board: Board,
+        move_number: u16,
+        turn: ColorType,
+        winner: ColorType,
+    ) -> Self {
         Self {
             board,
             move_number,
@@ -57,7 +62,8 @@ impl Game {
                     let piece_type = piece.piece_type;
                     let owner = piece.owner;
                     let index =
-                        Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
+                        Address::from_numbers((1 + column) as u8, (9 - row) as u8)
+                            .to_index();
                     self.board.deploy(index, piece_type, owner);
                     column += 1;
                 }
@@ -74,7 +80,9 @@ impl Game {
         while let Some(ch) = current_sfen.next() {
             if ch.is_digit(10) {
                 let consecutive = ch.to_digit(10).unwrap() as u8;
-                let piece = Piece::from_string(current_sfen.next().unwrap_or_default().to_string());
+                let piece = Piece::from_string(
+                    current_sfen.next().unwrap_or_default().to_string(),
+                );
                 self.board
                     .hand
                     .add_pieces(piece.owner, piece.piece_type, consecutive);

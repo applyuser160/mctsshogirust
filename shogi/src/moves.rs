@@ -73,7 +73,11 @@ impl Move {
     }
 
     #[allow(dead_code)]
-    pub fn from_standart(from: address::Address, to: address::Address, promote: bool) -> Self {
+    pub fn from_standart(
+        from: address::Address,
+        to: address::Address,
+        promote: bool,
+    ) -> Self {
         let mut res = Self::new();
         res.standart_constructor(from, to, promote);
         return res;

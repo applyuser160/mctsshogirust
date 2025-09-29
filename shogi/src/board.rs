@@ -2,9 +2,9 @@ use bitvec::prelude::*;
 
 use super::address::Address;
 use super::bitboard::{
-    generate_column, BitBoard, BIT_OF_FRAME, BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE,
-    BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE, BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE,
-    LENGTH_OF_EDGE, LENGTH_OF_FRAME,
+    generate_column, BitBoard, BIT_OF_FRAME, BIT_OF_LAST1_ZONE_BLACK,
+    BIT_OF_LAST1_ZONE_WHITE, BIT_OF_LAST2_ZONE_BLACK, BIT_OF_LAST2_ZONE_WHITE,
+    BIT_OF_PRO_ZONE_BLACK, BIT_OF_PRO_ZONE_WHITE, LENGTH_OF_EDGE, LENGTH_OF_FRAME,
 };
 use super::color::{get_reverse_color, ColorType};
 use super::direction::{Direction, DirectionName};
@@ -351,7 +351,8 @@ impl Board {
     #[allow(dead_code)]
     pub fn get_color_type_from_index(&self, index: u8) -> ColorType {
         let has_a_piece = self.has_piece.board[index as usize];
-        let is_black = self.player_prossesion[ColorType::Black as usize].board[index as usize];
+        let is_black =
+            self.player_prossesion[ColorType::Black as usize].board[index as usize];
         if !has_a_piece {
             return ColorType::None;
         } else if is_black {
@@ -440,23 +441,23 @@ impl Board {
                         bit_board.clone() >> shift_number.abs() as usize
                     };
 
-                    if (self.is_frame.clone() & bn1.clone()).board.any() {
+                    if (&self.is_frame & &bn1).board.any() {
                         is_in_board.set(j, false);
-                    } else if (self.player_prossesion[get_reverse_color(color_type) as usize]
-                        .clone()
-                        & bn1.clone())
-                    .board
-                    .any()
+                    } else if (&self.player_prossesion
+                        [get_reverse_color(color_type) as usize]
+                        & &bn1)
+                        .board
+                        .any()
                     {
                         is_in_board.set(j, false);
-                        bit_movable = bit_movable.clone() | bn1.clone();
-                    } else if (self.player_prossesion[color_type as usize].clone() & bn1.clone())
+                        bit_movable = &bit_movable | &bn1;
+                    } else if (&self.player_prossesion[color_type as usize] & &bn1)
                         .board
                         .any()
                     {
                         is_in_board.set(j, false);
                     } else {
-                        bit_movable = bit_movable | bit_board.clone() | bn1.clone();
+                        bit_movable |= &bit_board | &bn1;
                     }
 
                     if move_types[j] != MoveType::Long {
@@ -470,7 +471,11 @@ impl Board {
     }
 
     #[allow(dead_code)]
-    pub fn get_able_pro_move_squares(&self, index: u8, bit_movable: BitBoard) -> BitBoard {
+    pub fn get_able_pro_move_squares(
+        &self,
+        index: u8,
+        bit_movable: BitBoard,
+    ) -> BitBoard {
         let result = BitBoard::new();
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
@@ -481,23 +486,24 @@ impl Board {
             return result;
         }
 
-        let pro_area = self.able_pro[color_type as usize].clone();
+        let pro_area = &self.able_pro[color_type as usize];
 
-        if (bit_board & pro_area.clone()).board.any() {
+        if (&bit_board & pro_area).board.any() {
             return bit_movable;
         }
 
-        return bit_movable & pro_area;
+        return &bit_movable & pro_area;
     }
 
     #[allow(dead_code)]
-    pub fn get_able_drop_squares(&self, color: ColorType, piece_type: PieceType) -> BitBoard {
+    pub fn get_able_drop_squares(
+        &self,
+        color: ColorType,
+        piece_type: PieceType,
+    ) -> BitBoard {
         let none = self.has_specific_piece[PieceType::None as usize].clone();
-        let last_two = self.last_two[color as usize].clone();
-        let last_one = self.last_one[color as usize].clone();
-
-        let mut last_not_two = last_two.clone();
-        let mut last_not_one = last_one.clone();
+        let mut last_not_two = self.last_two[color as usize].clone();
+        let mut last_not_one = self.last_one[color as usize].clone();
         last_not_two.flip();
         last_not_one.flip();
 
@@ -506,23 +512,23 @@ impl Board {
             PieceType::Rook => none,
             PieceType::Bichop => none,
             PieceType::Silver => none,
-            PieceType::Knight => none & last_not_two,
-            PieceType::Lance => none & last_not_one,
+            PieceType::Knight => &none & &last_not_two,
+            PieceType::Lance => &none & &last_not_one,
             PieceType::Pawn => {
-                let pawn = self.has_specific_piece[PieceType::Pawn as usize].clone()
-                    & self.player_prossesion[color as usize].clone();
+                let pawn = &self.has_specific_piece[PieceType::Pawn as usize]
+                    & &self.player_prossesion[color as usize];
                 let pawn_indexs = pawn.get_trues();
                 let mut double_pawn = BitBoard::new();
 
-                for i in 0..pawn_indexs.len() {
-                    double_pawn = double_pawn.clone()
-                        | generate_column(Address::from_number(pawn_indexs[i]).column as usize);
+                for index in pawn_indexs {
+                    double_pawn = &double_pawn
+                        | &generate_column(Address::from_number(index).column as usize);
                 }
 
                 let mut not_double_pawn = double_pawn;
                 not_double_pawn.flip();
 
-                return none & last_not_one & not_double_pawn;
+                return &none & &(&last_not_one & &not_double_pawn);
             }
             _ => BitBoard::new(),
         }
@@ -533,9 +539,9 @@ impl Board {
         let mut vector_move: Vec<Move> = Vec::new();
 
         let player_board = if color.to_bool() {
-            self.player_prossesion[ColorType::White as usize].clone()
+            &self.player_prossesion[ColorType::White as usize]
         } else {
-            self.player_prossesion[ColorType::Black as usize].clone()
+            &self.player_prossesion[ColorType::Black as usize]
         };
 
         let player_board_indexs = player_board.get_trues();
@@ -551,7 +557,8 @@ impl Board {
             }
             drop(move_indexs);
 
-            let pro_board = self.get_able_pro_move_squares(player_board_indexs[i], move_board);
+            let pro_board =
+                self.get_able_pro_move_squares(player_board_indexs[i], move_board);
             let move_indexs = pro_board.get_trues();
             for j in 0..move_indexs.len() {
                 let from = Address::from_number(player_board_indexs[i]);
@@ -610,10 +617,10 @@ impl Board {
             .count_ones()
             != ColorType::ColorNumber as usize;
         if is_finish {
-            let is_black_win = (self.has_specific_piece[PieceType::King as usize].clone()
-                & self.player_prossesion[ColorType::Black as usize].clone())
-            .board
-            .any();
+            let is_black_win = (&self.has_specific_piece[PieceType::King as usize]
+                & &self.player_prossesion[ColorType::Black as usize])
+                .board
+                .any();
             if is_black_win {
                 winner = ColorType::Black;
             } else {

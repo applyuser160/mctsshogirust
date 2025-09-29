@@ -1,7 +1,9 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::color::{convert_from_string, convert_string, get_reverse_color, ColorType};
+    use crate::color::{
+        convert_from_string, convert_string, get_reverse_color, ColorType,
+    };
 
     #[test]
     fn case01() {

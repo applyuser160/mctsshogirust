@@ -108,7 +108,8 @@ impl Piece {
         let piece_type_df: PieceType;
         if (piece_type as u8) > PROMOTE {
             result.push('+');
-            piece_type_df = PieceType::from_usize(piece_type as usize - PROMOTE_CHANGE as usize)
+            piece_type_df =
+                PieceType::from_usize(piece_type as usize - PROMOTE_CHANGE as usize)
         } else {
             piece_type_df = piece_type;
         }
@@ -213,7 +214,8 @@ impl Piece {
 
         let mut res = Self::new();
         res.convert_from_string(piece_str);
-        res.piece_type = PieceType::from_usize(res.piece_type as usize + promote as usize);
+        res.piece_type =
+            PieceType::from_usize(res.piece_type as usize + promote as usize);
         return res;
     }
 

@@ -1,7 +1,9 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::common::{alphabet_to_number, char_to_integer, integer_to_char, number_to_alphabet};
+    use crate::common::{
+        alphabet_to_number, char_to_integer, integer_to_char, number_to_alphabet,
+    };
 
     #[test]
     fn case01() {
