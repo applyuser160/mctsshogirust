@@ -213,11 +213,32 @@ impl BitAnd for BitBoard {
     }
 }
 
+impl BitAnd<&BitBoard> for &BitBoard {
+    type Output = BitBoard;
+
+    fn bitand(self, rhs: &BitBoard) -> Self::Output {
+        let mut res = BitBoard::new();
+        for i in 0..121 {
+            res.board.set(i, self.board[i] & rhs.board[i]);
+        }
+        res
+    }
+}
+
 impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
         for i in 0..121 {
-            let v = self.board[i];
-            (*self).board.set(i, v & rhs.board[i]);
+            let v = self.board[i] & rhs.board[i];
+            (*self).board.set(i, v);
+        }
+    }
+}
+
+impl BitAndAssign<&BitBoard> for BitBoard {
+    fn bitand_assign(&mut self, rhs: &BitBoard) {
+        for i in 0..121 {
+            let v = self.board[i] & rhs.board[i];
+            (*self).board.set(i, v);
         }
     }
 }
@@ -234,11 +255,32 @@ impl BitOr for BitBoard {
     }
 }
 
+impl BitOr<&BitBoard> for &BitBoard {
+    type Output = BitBoard;
+
+    fn bitor(self, rhs: &BitBoard) -> Self::Output {
+        let mut res = BitBoard::new();
+        for i in 0..121 {
+            res.board.set(i, self.board[i] | rhs.board[i]);
+        }
+        res
+    }
+}
+
 impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
         for i in 0..121 {
-            let v = self.board[i];
-            (*self).board.set(i, v | rhs.board[i]);
+            let v = self.board[i] | rhs.board[i];
+            (*self).board.set(i, v);
+        }
+    }
+}
+
+impl BitOrAssign<&BitBoard> for BitBoard {
+    fn bitor_assign(&mut self, rhs: &BitBoard) {
+        for i in 0..121 {
+            let v = self.board[i] | rhs.board[i];
+            (*self).board.set(i, v);
         }
     }
 }
@@ -255,7 +297,7 @@ impl Shr<usize> for BitBoard {
 
 impl ShrAssign<usize> for BitBoard {
     fn shr_assign(&mut self, rhs: usize) {
-        
+        (*self).board.shift_right(rhs);
     }
 }
 
@@ -271,7 +313,7 @@ impl Shl<usize> for BitBoard {
 
 impl ShlAssign<usize> for BitBoard {
     fn shl_assign(&mut self, rhs: usize) {
-        
+        (*self).board.shift_left(rhs);
     }
 }
 
