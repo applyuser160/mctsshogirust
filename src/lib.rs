@@ -60,6 +60,13 @@ pub mod test_random;
 use pyo3::prelude::*;
 
 #[pymodule]
-fn rustshogi(_py: Python, _m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn rustshogi(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<address::Address>()?;
+    m.add_class::<color::ColorType>()?;
+    m.add_class::<piece::PieceType>()?;
+    m.add_class::<piece::Piece>()?;
+    m.add_class::<moves::Move>()?;
+    m.add_class::<hand::Hand>()?;
+    m.add_class::<board::Board>()?;
     Ok(())
 }
