@@ -120,6 +120,22 @@ impl Game {
     }
 
     #[allow(dead_code)]
+    pub fn one_play(&mut self) -> Self {
+        // used for benchmark only
+        while !self.is_finished().0 {
+            let moves = self.board.search_moves(self.turn);
+            let amove = &moves[0];
+            self.execute_move(amove);
+            let is_finish = self.is_finished();
+            if is_finish.0 {
+                self.winner = is_finish.1;
+                break;
+            }
+        }
+        return self.clone();
+    }
+
+    #[allow(dead_code)]
     pub fn random_play(&mut self) -> Self {
         while !self.is_finished().0 {
             let moves = self.board.search_moves(self.turn);
@@ -128,6 +144,7 @@ impl Game {
             self.execute_move(amove);
             let is_finish = self.is_finished();
             if is_finish.0 {
+                self.winner = is_finish.1;
                 break;
             }
         }

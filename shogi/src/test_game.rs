@@ -34,8 +34,8 @@ mod tests {
         let mut game = Game::new();
         game.input_board("startpos".to_string());
         let result_game = game.random_play();
-        println!("WINNER: {}", &result_game.winner);
         assert!(vec![ColorType::Black, ColorType::White, ColorType::None]
-            .contains(&result_game.winner))
+            .contains(&result_game.winner));
+        assert!(result_game.move_number <= 500);
     }
 }

@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-fn bitboard_benchmark(c: &mut Criterion) {
+fn benchmark_bitboard(c: &mut Criterion) {
     use shogi::bitboard::BitBoard;
     c.bench_function("bitbord", |b| {
         b.iter(|| {
@@ -14,5 +14,16 @@ fn bitboard_benchmark(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bitboard_benchmark);
+fn benchmark_game_random_game(c: &mut Criterion) {
+    use shogi::game::Game;
+    c.bench_function("random_game", |b| {
+        b.iter(|| {
+            let mut game = Game::new();
+            game.input_board("startpos".to_string());
+            let result_game = game.one_play();
+        });
+    });
+}
+
+criterion_group!(benches, benchmark_bitboard, benchmark_game_random_game);
 criterion_main!(benches);
