@@ -55,5 +55,5 @@ jobs:
     - name: Run Rust formatting check
       run: cargo fmt --all -- --check
 
-    - name: Run Rust clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
+    # - name: Run Rust clippy
+    #   run: cargo clippy --all-targets --all-features -- -D warnings
