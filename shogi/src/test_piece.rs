@@ -78,9 +78,9 @@ mod tests {
 
     #[test]
     fn case10() {
-        let piece = Piece::from(ColorType::White, PieceType::Dragon);
-        assert_eq!(piece.to_u8(), 73);
-        assert_eq!(piece.to_string(), String::from("+r"));
+        let piece = Piece::from(ColorType::Black, PieceType::Dragon);
+        assert_eq!(piece.to_u8(), 9);
+        assert_eq!(piece.to_string(), String::from("+R"));
     }
 
     #[test]

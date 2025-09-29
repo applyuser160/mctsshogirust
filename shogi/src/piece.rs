@@ -129,7 +129,7 @@ impl Piece {
         }
 
         if owner == ColorType::Black {
-            piece = (piece as u8 - 32) as char;
+            piece = piece.to_ascii_uppercase();
         }
 
         result.push(piece);
