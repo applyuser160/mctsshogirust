@@ -529,7 +529,7 @@ impl Board {
     }
 
     #[allow(dead_code)]
-    pub fn serch_moves(&self, color: ColorType) -> Vec<Move> {
+    pub fn search_moves(&self, color: ColorType) -> Vec<Move> {
         let mut vector_move: Vec<Move> = Vec::new();
 
         let player_board = if color.to_bool() {

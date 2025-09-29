@@ -114,7 +114,7 @@ impl Game {
     #[allow(dead_code)]
     pub fn random_play(&mut self) -> Self {
         while !self.is_finished().0 {
-            let moves = self.board.serch_moves(self.turn);
+            let moves = self.board.search_moves(self.turn);
             let mut random = Random::init();
             let amove = &moves[random.generate_one() as usize];
             self.execute_move(amove);
@@ -129,7 +129,7 @@ impl Game {
     #[allow(dead_code)]
     pub fn random_move(&mut self, num: usize) -> MctsResult {
         let mut result = MctsResult::new();
-        result.next_moves = self.board.serch_moves(self.turn);
+        result.next_moves = self.board.search_moves(self.turn);
         result.next_move_count = result.next_moves.len() as u64;
         let copied_game = self.clone();
         for _i in 0..num {
@@ -140,7 +140,7 @@ impl Game {
             self.execute_move(&next_move);
 
             while !self.is_finished().0 {
-                let moves = self.board.serch_moves(self.turn);
+                let moves = self.board.search_moves(self.turn);
                 let move_count = moves.len();
                 let mut random = Random::new(0, (move_count - 1) as u16);
                 let mv = &moves[random.generate_one() as usize];

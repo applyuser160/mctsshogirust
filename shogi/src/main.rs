@@ -98,7 +98,7 @@ fn main() {
     // game.input_turn(String::from("b"));
     // game.input_hand(String::from("-"));
     // game.input_move_number(String::from("1"));
-    // result.next_moves = game.board.serch_moves(game.turn);
+    // result.next_moves = game.board.search_moves(game.turn);
     // result.next_move_count = result.next_moves.len() as u64;
 
     // result = game.random_move(10);
@@ -113,7 +113,7 @@ fn main() {
     let mut board = board::Board::new();
     board.deploy(78, piece::PieceType::Gold, color::ColorType::White);
 
-    let next_moves = board.serch_moves(color::ColorType::White);
+    let next_moves = board.search_moves(color::ColorType::White);
     println!("next moves:");
     for i in next_moves {
         println!("{}", i);
