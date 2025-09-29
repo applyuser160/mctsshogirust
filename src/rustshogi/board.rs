@@ -42,15 +42,19 @@ impl Board {
 
     #[allow(dead_code)]
     fn drop(&mut self, index: u8) {
-        self.has_piece.board.set(index as usize, false);
+        self.has_piece.board.replace(index as usize, false);
         for i in 0..ColorType::ColorNumber as usize {
-            self.player_prossesion[i].board.set(index as usize, false);
+            self.player_prossesion[i]
+                .board
+                .replace(index as usize, false);
         }
         self.has_specific_piece[PieceType::None as usize]
             .board
-            .set(index as usize, true);
+            .replace(index as usize, true);
         for i in 1..PIECE_TYPE_NUMBER as usize {
-            self.has_specific_piece[i].board.set(index as usize, false);
+            self.has_specific_piece[i]
+                .board
+                .replace(index as usize, false);
         }
     }
 
@@ -127,16 +131,16 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
-        self.has_piece.board.set(index as usize, true);
+        self.has_piece.board.replace(index as usize, true);
         for i in 0..ColorType::ColorNumber as usize {
             self.player_prossesion[i]
                 .board
-                .set(index as usize, color == ColorType::from_u8(i as u8));
+                .replace(index as usize, color == ColorType::from_u8(i as u8));
         }
         for i in 0..PIECE_TYPE_NUMBER as usize {
             self.has_specific_piece[i]
                 .board
-                .set(index as usize, piece_type == PieceType::from_usize(i));
+                .replace(index as usize, piece_type == PieceType::from_usize(i));
         }
     }
 
@@ -417,7 +421,7 @@ impl Board {
         let mut is_in_board = bitvec![1; DirectionName::DirectionNameNumber as usize];
 
         let mut bit_board = BitBoard::new();
-        bit_board.board.set(index as usize, true);
+        bit_board.board.replace(index as usize, true);
         let mut bit_movable = BitBoard::new();
 
         for i in 1..LENGTH_OF_EDGE {
@@ -449,31 +453,33 @@ impl Board {
                         bit_board.clone() >> shift_number.unsigned_abs() as usize
                     };
 
-                    if (&self.is_frame & &bn1).board.any() {
-                        is_in_board.set(j, false);
+                    if (&self.is_frame & &bn1).board.iter().any(|b| *b) {
+                        is_in_board.replace(j, false);
                     } else if (&self.player_prossesion[get_reverse_color(color_type) as usize]
                         & &bn1)
                         .board
-                        .any()
+                        .iter()
+                        .any(|b| *b)
                     {
-                        is_in_board.set(j, false);
+                        is_in_board.replace(j, false);
                         bit_movable = &bit_movable | &bn1;
                     } else if (&self.player_prossesion[color_type as usize] & &bn1)
                         .board
-                        .any()
+                        .iter()
+                        .any(|b| *b)
                     {
-                        is_in_board.set(j, false);
+                        is_in_board.replace(j, false);
                     } else {
                         bit_movable |= &bit_board | &bn1;
                     }
 
                     if move_types[j] != MoveType::Long {
-                        is_in_board.set(j, false);
+                        is_in_board.replace(j, false);
                     }
                 }
             }
         }
-        bit_movable.board.set(index as usize, false);
+        bit_movable.board.replace(index as usize, false);
         bit_movable
     }
 
@@ -483,7 +489,7 @@ impl Board {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
         let mut bit_board = BitBoard::new();
-        bit_board.board.set(index as usize, true);
+        bit_board.board.replace(index as usize, true);
         let is_able_pro = Piece::able_pro(piece_type);
         if !is_able_pro {
             return result;
@@ -491,7 +497,7 @@ impl Board {
 
         let pro_area = &self.able_pro[color_type as usize];
 
-        if (&bit_board & pro_area).board.any() {
+        if (&bit_board & pro_area).board.iter().any(|b| *b) {
             return bit_movable;
         }
 
@@ -612,7 +618,9 @@ impl Board {
         let winner;
         let is_finish = self.has_specific_piece[PieceType::King as usize]
             .board
-            .count_ones()
+            .iter()
+            .filter(|b| **b)
+            .count()
             != ColorType::ColorNumber as usize;
         if is_finish {
             let is_black_win = (&self.has_specific_piece[PieceType::King as usize]
