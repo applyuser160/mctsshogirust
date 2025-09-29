@@ -136,16 +136,16 @@ impl Piece {
     }
 
     #[allow(dead_code)]
-    fn convert_from_string(&mut self, string: char) {
-        let mut copied_string = string.clone();
-        if string as u8 > 83 {
+    fn convert_from_string(&mut self, character: char) {
+        let mut character = character;
+        if character as u8 > 83 {
             self.owner = ColorType::White;
-            copied_string = (copied_string as u8 - 32) as char;
+            character = character.to_ascii_uppercase();
         } else {
             self.owner = ColorType::Black;
         }
 
-        match copied_string {
+        match character {
             'K' => self.piece_type = PieceType::King,
             'G' => self.piece_type = PieceType::Gold,
             'R' => self.piece_type = PieceType::Rook,

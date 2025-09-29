@@ -7,26 +7,26 @@ mod tests {
     };
 
     #[test]
-    fn case01() {
+    fn test_piece_from_usize() {
         let piece_type = PieceType::from_usize(1);
         assert_eq!(piece_type as u8, 1);
     }
 
     #[test]
-    fn case02() {
+    fn test_piece_to_string() {
         let piece_type = PieceType::from_usize(1);
         assert_eq!(piece_type.to_string(), String::from('k'));
     }
 
     #[test]
-    fn case03() {
+    fn test_piece_new() {
         let piece = Piece::new();
         assert_eq!(piece.owner, ColorType::None);
         assert_eq!(piece.piece_type, PieceType::None);
     }
 
     #[test]
-    fn case04() {
+    fn test_piece_from() {
         let piece = Piece::from(ColorType::Black, PieceType::Dragon);
         assert_eq!(piece.owner, ColorType::Black);
         assert_eq!(piece.piece_type, PieceType::Dragon);
