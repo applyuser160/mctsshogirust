@@ -3,7 +3,7 @@ use super::color::ColorType;
 
 #[allow(dead_code)]
 pub struct MctsResult {
-    pub result: Vec<[u64; ColorType::ColorNumber as usize]>,
+    pub result: Vec<[u64; ColorType::ColorNumber as usize + 1]>,
     pub next_moves: Vec<Move>,
     pub next_move_count: u64,
     pub count: u64,
@@ -22,9 +22,9 @@ impl MctsResult {
 
     #[allow(dead_code)]
     pub fn from(next_move_count: u64, next_moves: Vec<Move>) -> Self {
-        let mut result: Vec<[u64; ColorType::ColorNumber as usize]> = Vec::new();
+        let mut result: Vec<[u64; ColorType::ColorNumber as usize + 1]> = Vec::new();
         for _i in 0..next_move_count {
-            result.push([0; ColorType::ColorNumber as usize]);
+            result.push([0; ColorType::ColorNumber as usize + 1]);
         }
         Self {
             result,
