@@ -8,21 +8,21 @@ mod tests {
     };
 
     #[test]
-    fn case01() {
+    fn test_hand_new() {
         let hand = Hand::new();
         assert_eq!(hand.pieces.len(), 16);
         assert_eq!(hand.counts.len(), 16);
     }
 
     #[test]
-    fn case02() {
+    fn test_hand_get_piece() {
         let hand = Hand::new();
         let piece = hand.get_piece(ColorType::Black, PieceType::Gold);
         assert_eq!(piece, Piece::from_char('G'));
     }
 
     #[test]
-    fn case03() {
+    fn test_hand_add_piece() {
         let mut hand = Hand::new();
         hand.add_piece(ColorType::Black, PieceType::Gold);
         let count = hand.get_count(ColorType::Black, PieceType::Gold);
@@ -30,7 +30,7 @@ mod tests {
     }
 
     #[test]
-    fn case04() {
+    fn test_hand_add_pieces() {
         let mut hand = Hand::new();
         hand.add_pieces(ColorType::White, PieceType::Pawn, 4);
         let count = hand.get_count(ColorType::White, PieceType::Pawn);
@@ -38,7 +38,7 @@ mod tests {
     }
 
     #[test]
-    fn case05() {
+    fn test_hand_decrease_piece() {
         let mut hand = Hand::new();
         hand.add_pieces(ColorType::Black, PieceType::Knight, 2);
         hand.decrease_piece(ColorType::Black, PieceType::Knight);
@@ -47,7 +47,7 @@ mod tests {
     }
 
     #[test]
-    fn case06() {
+    fn test_hand_get_player_pieces() {
         let mut hand = Hand::new();
         hand.add_pieces(ColorType::Black, PieceType::Knight, 2);
         hand.add_pieces(ColorType::Black, PieceType::Pawn, 9);

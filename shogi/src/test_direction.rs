@@ -4,13 +4,13 @@ mod tests {
     use crate::direction::{Direction, DirectionName};
 
     #[test]
-    fn case01() {
+    fn test_direction_from_usize() {
         let dn = DirectionName::from_usize(3);
         assert_eq!(dn, DirectionName::DownLeft);
     }
 
     #[test]
-    fn case02() {
+    fn test_direction_new() {
         let direction = Direction::new(DirectionName::DownRight);
         assert_eq!(direction.name, DirectionName::DownRight);
         assert_eq!(direction.vertical_vector, 1);
@@ -18,7 +18,7 @@ mod tests {
     }
 
     #[test]
-    fn case03() {
+    fn test_direction_reverse() {
         let mut direction = Direction::new(DirectionName::UpLeft);
         direction.reverse();
         assert_eq!(direction.name, DirectionName::UpLeft);

@@ -33,7 +33,7 @@ mod tests {
     }
 
     #[test]
-    fn case05() {
+    fn test_piece_from_u8_1() {
         /* 0d142 = 0b01001110 */
         let piece = Piece::from_u8(78);
         assert_eq!(piece.owner, ColorType::White);
@@ -41,7 +41,7 @@ mod tests {
     }
 
     #[test]
-    fn case06() {
+    fn test_piece_from_u8_2() {
         /* 0d142 = 0b11111111 */
         let piece = Piece::from_u8(255);
         assert_eq!(piece.owner, ColorType::White);
@@ -49,42 +49,42 @@ mod tests {
     }
 
     #[test]
-    fn case07() {
+    fn test_piece_from_char_1() {
         let piece = Piece::from_char('K');
         assert_eq!(piece.owner, ColorType::Black);
         assert_eq!(piece.piece_type, PieceType::King);
     }
 
     #[test]
-    fn case07d() {
+    fn test_piece_from_char_2() {
         let piece = Piece::from_char('p');
         assert_eq!(piece.owner, ColorType::White);
         assert_eq!(piece.piece_type, PieceType::Pawn);
     }
 
     #[test]
-    fn case08() {
+    fn test_piece_from_string_1() {
         let piece = Piece::from_string(String::from("+p"));
         assert_eq!(piece.owner, ColorType::White);
         assert_eq!(piece.piece_type, PieceType::ProPawn);
     }
 
     #[test]
-    fn case09() {
+    fn test_piece_from_string_2() {
         let piece = Piece::from_string(String::from("B"));
         assert_eq!(piece.owner, ColorType::Black);
         assert_eq!(piece.piece_type, PieceType::Bichop);
     }
 
     #[test]
-    fn case10() {
+    fn test_piece_to_u8_and_to_string() {
         let piece = Piece::from(ColorType::Black, PieceType::Dragon);
         assert_eq!(piece.to_u8(), 9);
         assert_eq!(piece.to_string(), String::from("+R"));
     }
 
     #[test]
-    fn case11() {
+    fn test_piece_get_movetype_1() {
         let result = Piece::get_movetype(PieceType::King);
         assert_eq!(result[0], MoveType::Short);
         assert_eq!(result[1], MoveType::Short);
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn case12() {
+    fn test_piece_get_movetype_2() {
         let result = Piece::get_movetype(PieceType::Bichop);
         assert_eq!(result[0], MoveType::None);
         assert_eq!(result[1], MoveType::Long);
@@ -110,13 +110,13 @@ mod tests {
     }
 
     #[test]
-    fn case13() {
+    fn test_piece_able_pro_1() {
         let result = Piece::able_pro(PieceType::Gold);
         assert_eq!(result, false);
     }
 
     #[test]
-    fn case14() {
+    fn test_piece_able_pro_2() {
         let result = Piece::able_pro(PieceType::Bichop);
         assert_eq!(result, true);
     }
