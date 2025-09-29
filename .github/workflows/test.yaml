@@ -1,0 +1,59 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master, feature/* ]
+  pull_request:
+    branches: [ master, feature/* ]
+
+jobs:
+  rust-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Run Rust tests
+      run: cargo test
+      env:
+        PYTHON_SYS_EXECUTABLE: python3
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Run Rust formatting check
+      run: cargo fmt --all -- --check
+
+    # - name: Run Rust clippy
+    #   run: cargo clippy --all-targets --all-features -- -D warnings
