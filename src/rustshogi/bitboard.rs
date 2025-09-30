@@ -295,7 +295,7 @@ impl BitOr<&BitBoard> for &BitBoard {
             .zip(rhs.board.iter())
             .take(LENGTH_OF_BOARD.into())
         {
-            *res_cell = res_cell.as_ref() & rhs_cell.as_ref();
+            *res_cell = res_cell.as_ref() | rhs_cell.as_ref();
         }
         res
     }
