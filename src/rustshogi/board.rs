@@ -545,22 +545,28 @@ impl Board {
         for player_board_index in player_board_indexs.iter() {
             let move_board = self.get_able_move_squares(*player_board_index);
             let move_indexs = move_board.get_trues();
-            for move_index in move_indexs.iter() {
-                let from = Address::from_number(*player_board_index);
-                let to = Address::from_number(*move_index);
-                let moves = Move::from_standart(from, to, false);
-                vector_move.push(moves);
-            }
+            vector_move.extend(
+                move_indexs.iter().map(|move_index| {
+                    Move::from_standart(
+                        Address::from_number(*player_board_index),
+                        Address::from_number(*move_index),
+                        false
+                    )
+                })
+            );
             drop(move_indexs);
 
             let pro_board = self.get_able_pro_move_squares(*player_board_index, move_board);
             let move_indexs = pro_board.get_trues();
-            for move_index in move_indexs.iter() {
-                let from = Address::from_number(*player_board_index);
-                let to = Address::from_number(*move_index);
-                let moves = Move::from_standart(from, to, true);
-                vector_move.push(moves);
-            }
+            vector_move.extend(
+                move_indexs.iter().map(|move_index| {
+                    Move::from_standart(
+                        Address::from_number(*player_board_index),
+                        Address::from_number(*move_index),
+                        true
+                    )
+                })
+            );
         }
 
         let player_hand_pieces = self.hand.get_player_pieces(color);
@@ -570,11 +576,14 @@ impl Board {
                 player_hand_piece.piece_type,
             );
             let move_indexs = move_board.get_trues();
-            for move_index in move_indexs.iter() {
-                let to = Address::from_number(*move_index);
-                let moves = Move::from_drop(*player_hand_piece, to);
-                vector_move.push(moves);
-            }
+            vector_move.extend(
+                move_indexs.iter().map(|move_index| {
+                    Move::from_drop(
+                        *player_hand_piece,
+                        Address::from_number(*move_index),
+                    )
+                })
+            );
         }
 
         vector_move
