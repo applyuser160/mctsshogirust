@@ -12,6 +12,8 @@ crate-type = ["cdylib", "rlib"]
 rand = "0.8.5"
 bitvec = { version = "1.0.1", default-features = false, features = ["atomic", "alloc", "serde"] }
 pyo3 = { version = "0.25.0", features = ["extension-module"] }
+strum = "0.27.2"
+strum_macros = "0.27.2"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

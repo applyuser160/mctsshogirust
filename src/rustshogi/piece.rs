@@ -3,6 +3,8 @@ use bitvec::prelude::*;
 
 use super::direction;
 
+use strum_macros::EnumIter;
+
 use pyo3::prelude::*;
 
 // extern crate num;
@@ -18,7 +20,7 @@ pub const PROMOTE_CHANGE: u8 = 6;
 
 #[allow(dead_code)]
 #[pyclass(eq, eq_int)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter)]
 #[repr(usize)]
 pub enum PieceType {
     None = 0,
