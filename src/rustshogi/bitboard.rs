@@ -181,10 +181,9 @@ impl BitBoard {
     #[allow(dead_code)]
     pub fn to_u128(&self) -> u128 {
         let mut res: u128 = 0;
-        let base: u128 = 2;
         for (i, cell) in self.board.iter().rev().enumerate() {
             if *cell {
-                res += base.pow(i as u32)
+                res |= 1 << i;
             }
         }
         res
