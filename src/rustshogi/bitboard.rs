@@ -180,27 +180,57 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn to_u128(&self) -> u128 {
-        let mut res: u128 = 0;
-        for (i, cell) in self.board.iter().rev().enumerate() {
-            if *cell {
-                res |= 1 << i;
-            }
+        let chunks = self.board.as_raw_slice();
+        let mut result: u128 = 0;
+
+        for (i, &chunk) in chunks.iter().enumerate().take(2) {
+            result |= (chunk as u128) << ((1 - i) * 64);
         }
-        res
+
+        result
     }
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
-        let res = self.board.iter_ones().map(|i| i as u8).collect();
-        res
+        let chunks = self.board.as_raw_slice();
+        let mut result = Vec::new();
+
+        for (chunk_idx, &chunk) in chunks.iter().enumerate().take(2) {
+            if chunk == 0 {
+                continue;
+            }
+
+            for bit_idx in 0..64 {
+                let global_bit_idx = chunk_idx * 64 + bit_idx;
+                if global_bit_idx >= LENGTH_OF_BOARD as usize {
+                    break;
+                }
+
+                if chunk & (1u64 << (63 - bit_idx)) != 0 {
+                    result.push(global_bit_idx as u8);
+                }
+            }
+        }
+
+        result
     }
 
     #[allow(dead_code)]
     pub fn flip(&mut self) {
-        self.board
-            .iter_mut()
-            .take(LENGTH_OF_BOARD.into())
-            .for_each(|mut b| *b = !*b);
+        let chunks = self.board.as_raw_mut_slice();
+
+        for (i, chunk) in chunks.iter_mut().enumerate().take(2) {
+            if i * 64 >= LENGTH_OF_BOARD as usize {
+                break;
+            }
+
+            if i == 1 {
+                let mask = (1u64 << 57) - 1;
+                *chunk = !(*chunk & mask) | (*chunk & !mask);
+            } else {
+                *chunk = !*chunk;
+            }
+        }
     }
 }
 
