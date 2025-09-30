@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn test_bitboard_generate_columns_1() {
         let column_nos = vec![1, 2, 3];
-        let bb = generate_columns(column_nos, 3);
+        let bb = generate_columns(column_nos);
         assert_eq!(bb.board[100], true);
         assert_eq!(bb.board[101], true);
         assert_eq!(bb.board[102], true);

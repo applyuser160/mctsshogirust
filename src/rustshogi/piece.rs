@@ -3,6 +3,8 @@ use bitvec::prelude::*;
 
 use super::direction;
 
+use strum_macros::EnumIter;
+
 use pyo3::prelude::*;
 
 // extern crate num;
@@ -18,7 +20,7 @@ pub const PROMOTE_CHANGE: u8 = 6;
 
 #[allow(dead_code)]
 #[pyclass(eq, eq_int)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter)]
 #[repr(usize)]
 pub enum PieceType {
     None = 0,
@@ -224,15 +226,14 @@ impl Piece {
     }
 
     #[allow(dead_code)]
-    pub fn from_string(string: String) -> Self {
-        let string_vec = string.chars().collect::<Vec<char>>();
+    pub fn from_string(str: &str) -> Self {
         let mut promote: u8 = 0;
         let piece_str: char;
-        if string_vec[0] == '+' {
+        if str.chars().nth(0) == Some('+') {
             promote = PROMOTE_CHANGE;
-            piece_str = string_vec[1];
+            piece_str = str.chars().nth(1).unwrap();
         } else {
-            piece_str = string_vec[0];
+            piece_str = str.chars().nth(0).unwrap();
         }
 
         let mut res = Self::new();

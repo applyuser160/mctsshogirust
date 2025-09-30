@@ -45,7 +45,7 @@ mod tests {
     fn test_moves_from_csa() {
         /* result 0b0000110000001100 */
         let csa = String::from("1a2b");
-        let mv = Move::from_csa(csa);
+        let mv = Move::from_csa(&csa);
         let mut bits = bitvec![u16, Msb0; 0; 16];
         bits.store_be(3084);
         assert_eq!(mv.value, bits);
@@ -55,7 +55,7 @@ mod tests {
     fn test_moves_get_is_drop() {
         /* result 0b0000110000001100 */
         let csa = String::from("1a2b");
-        let mv = Move::from_csa(csa);
+        let mv = Move::from_csa(&csa);
         assert_eq!(mv.get_is_drop(), false);
     }
 
@@ -63,7 +63,7 @@ mod tests {
     fn test_moves_get_is_promote() {
         /* result 0b0000110000001100 */
         let csa = String::from("1a2b");
-        let mv = Move::from_csa(csa);
+        let mv = Move::from_csa(&csa);
         assert_eq!(mv.get_is_promote(), false);
     }
 
@@ -71,7 +71,7 @@ mod tests {
     fn test_moves_get_from() {
         /* result 0b0000110000001100 */
         let csa = String::from("1a2b");
-        let mv = Move::from_csa(csa);
+        let mv = Move::from_csa(&csa);
         assert_eq!(mv.get_from(), Address::from_number(12));
     }
 
@@ -79,7 +79,7 @@ mod tests {
     fn test_moves_get_to() {
         /* result 0b0000110000001100 */
         let csa = String::from("1a2b");
-        let mv = Move::from_csa(csa);
+        let mv = Move::from_csa(&csa);
         assert_eq!(mv.get_to(), Address::from_number(24));
     }
 
@@ -87,7 +87,7 @@ mod tests {
     fn test_moves_value_and_get_piece() {
         /* result 0b1000110001001000 */
         let csa = String::from("p*2b");
-        let mv = Move::from_csa(csa);
+        let mv = Move::from_csa(&csa);
         let mut bits = bitvec![u16, Msb0; 0; 16];
         bits.store_be(-29624);
         assert_eq!(mv.value, bits);
@@ -97,7 +97,7 @@ mod tests {
     #[test]
     fn test_moves_to_string() {
         let csa = String::from("p*2b");
-        let mv = Move::from_csa(csa.clone());
+        let mv = Move::from_csa(&csa);
         let str = mv.to_string();
         assert_eq!(str, csa);
     }

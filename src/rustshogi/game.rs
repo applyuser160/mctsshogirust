@@ -80,12 +80,12 @@ impl Game {
         while let Some(ch) = current_sfen.next() {
             if ch.is_ascii_digit() {
                 let consecutive = ch.to_digit(10).unwrap() as u8;
-                let piece = Piece::from_string(current_sfen.next().unwrap_or_default().to_string());
+                let piece = Piece::from_char(current_sfen.next().unwrap());
                 self.board
                     .hand
                     .add_pieces(piece.owner, piece.piece_type, consecutive);
             } else {
-                let piece = Piece::from_string(ch.to_string());
+                let piece = Piece::from_char(ch);
                 self.board.hand.add_piece(piece.owner, piece.piece_type);
             }
         }

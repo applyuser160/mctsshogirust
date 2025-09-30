@@ -13,6 +13,7 @@ use super::moves::Move;
 use super::piece::{MoveType, Piece, PieceType, PIECE_TYPE_NUMBER, PROMOTE};
 
 use pyo3::prelude::*;
+use strum::IntoEnumIterator;
 
 #[allow(dead_code)]
 #[pyclass]
@@ -43,14 +44,14 @@ impl Board {
     #[allow(dead_code)]
     fn drop(&mut self, index: u8) {
         self.has_piece.board.set(index as usize, false);
-        for i in 0..ColorType::ColorNumber as usize {
-            self.player_prossesion[i].board.set(index as usize, false);
+        for player_prosession in self.player_prossesion.iter_mut() {
+            player_prosession.board.set(index as usize, false);
         }
         self.has_specific_piece[PieceType::None as usize]
             .board
             .set(index as usize, true);
-        for i in 1..PIECE_TYPE_NUMBER as usize {
-            self.has_specific_piece[i].board.set(index as usize, false);
+        for has_specific_piece in self.has_specific_piece.iter_mut().skip(1) {
+            has_specific_piece.board.set(index as usize, false);
         }
     }
 
@@ -128,13 +129,13 @@ impl Board {
     #[allow(dead_code)]
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         self.has_piece.board.set(index as usize, true);
-        for i in 0..ColorType::ColorNumber as usize {
-            self.player_prossesion[i]
+        for (i, player_prossesion) in self.player_prossesion.iter_mut().enumerate() {
+            player_prossesion
                 .board
                 .set(index as usize, color == ColorType::from_u8(i as u8));
         }
-        for i in 0..PIECE_TYPE_NUMBER as usize {
-            self.has_specific_piece[i]
+        for (i, has_specific_piece) in self.has_specific_piece.iter_mut().enumerate() {
+            has_specific_piece
                 .board
                 .set(index as usize, piece_type == PieceType::from_usize(i));
         }
@@ -349,9 +350,9 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn get_piece_type_from_index(&self, index: u8) -> PieceType {
-        for i in 0..PIECE_TYPE_NUMBER as usize {
-            if self.is_a_has_specific_piece(index, PieceType::from_usize(i)) {
-                return PieceType::from_usize(i);
+        for piece_type in PieceType::iter() {
+            if self.is_a_has_specific_piece(index, piece_type) {
+                return piece_type;
             }
         }
         PieceType::None
@@ -381,12 +382,12 @@ impl Board {
     #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         let mut result = String::new();
-        for row in (1..=9).rev() {
+        for row in (1..=LENGTH_OF_EDGE).rev() {
             if row < 9 {
                 result.push('/');
             }
             let mut empty_count = 0;
-            for col in 1..=9 {
+            for col in 1..=LENGTH_OF_EDGE {
                 let index = Address::from_numbers(col, row).to_index();
                 let piece = self.get_piece(index);
                 if piece.piece_type != PieceType::None {
@@ -421,8 +422,8 @@ impl Board {
         let mut bit_movable = BitBoard::new();
 
         for i in 1..LENGTH_OF_EDGE {
-            for j in 0..DirectionName::DirectionNameNumber as usize {
-                if move_types[j] == MoveType::None {
+            for (j, move_type) in move_types.iter().enumerate() {
+                if *move_type == MoveType::None {
                     continue;
                 }
 
@@ -437,7 +438,7 @@ impl Board {
                     let mut v = direction.vertical_vector * i as i8;
                     let h = direction.horizon_vector * i as i8;
 
-                    if move_types[j] == MoveType::Hop {
+                    if *move_type == MoveType::Hop {
                         v += up.vertical_vector;
                     }
 
@@ -467,7 +468,7 @@ impl Board {
                         bit_movable |= &bit_board | &bn1;
                     }
 
-                    if move_types[j] != MoveType::Long {
+                    if *move_type != MoveType::Long {
                         is_in_board.set(j, false);
                     }
                 }
@@ -545,39 +546,37 @@ impl Board {
 
         let player_board_indexs = player_board.get_trues();
 
-        for i in 0..player_board_indexs.len() {
-            let move_board = self.get_able_move_squares(player_board_indexs[i]);
+        for player_board_index in player_board_indexs.iter() {
+            let move_board = self.get_able_move_squares(*player_board_index);
             let move_indexs = move_board.get_trues();
-            for j in 0..move_indexs.len() {
-                let from = Address::from_number(player_board_indexs[i]);
-                let to = Address::from_number(move_indexs[j]);
-                let moves = Move::from_standart(from, to, false);
-                vector_move.push(moves);
-            }
+            vector_move.extend(move_indexs.iter().map(|move_index| {
+                Move::from_standart(
+                    Address::from_number(*player_board_index),
+                    Address::from_number(*move_index),
+                    false,
+                )
+            }));
             drop(move_indexs);
 
-            let pro_board = self.get_able_pro_move_squares(player_board_indexs[i], move_board);
+            let pro_board = self.get_able_pro_move_squares(*player_board_index, move_board);
             let move_indexs = pro_board.get_trues();
-            for j in 0..move_indexs.len() {
-                let from = Address::from_number(player_board_indexs[i]);
-                let to = Address::from_number(move_indexs[j]);
-                let moves = Move::from_standart(from, to, true);
-                vector_move.push(moves);
-            }
+            vector_move.extend(move_indexs.iter().map(|move_index| {
+                Move::from_standart(
+                    Address::from_number(*player_board_index),
+                    Address::from_number(*move_index),
+                    true,
+                )
+            }));
         }
 
         let player_hand_pieces = self.hand.get_player_pieces(color);
-        for i in 0..player_hand_pieces.len() {
-            let move_board = self.get_able_drop_squares(
-                player_hand_pieces[i].owner,
-                player_hand_pieces[i].piece_type,
-            );
+        for player_hand_piece in player_hand_pieces.iter() {
+            let move_board =
+                self.get_able_drop_squares(player_hand_piece.owner, player_hand_piece.piece_type);
             let move_indexs = move_board.get_trues();
-            for j in 0..move_indexs.len() {
-                let to = Address::from_number(move_indexs[j]);
-                let moves = Move::from_drop(player_hand_pieces[i], to);
-                vector_move.push(moves);
-            }
+            vector_move.extend(move_indexs.iter().map(|move_index| {
+                Move::from_drop(*player_hand_piece, Address::from_number(*move_index))
+            }));
         }
 
         vector_move
