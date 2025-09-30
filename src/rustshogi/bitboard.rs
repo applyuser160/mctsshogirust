@@ -208,16 +208,7 @@ impl BitAnd for BitBoard {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        let mut res = self.clone();
-        for (mut res_cell, rhs_cell) in res
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *res_cell = res_cell.as_ref() & rhs_cell.as_ref();
-        }
-        res
+        BitBoard::from_u128(self.to_u128() & rhs.to_u128())
     }
 }
 
@@ -225,16 +216,7 @@ impl BitAnd<&BitBoard> for &BitBoard {
     type Output = BitBoard;
 
     fn bitand(self, rhs: &BitBoard) -> Self::Output {
-        let mut res = self.clone();
-        for (mut res_cell, rhs_cell) in res
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *res_cell = res_cell.as_ref() & rhs_cell.as_ref();
-        }
-        res
+        BitBoard::from_u128(self.to_u128() & rhs.to_u128())
     }
 }
 
@@ -268,16 +250,7 @@ impl BitOr for BitBoard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        let mut res = self.clone();
-        for (mut res_cell, rhs_cell) in res
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *res_cell = res_cell.as_ref() | rhs_cell.as_ref();
-        }
-        res
+        BitBoard::from_u128(self.to_u128() | rhs.to_u128())
     }
 }
 
@@ -285,16 +258,7 @@ impl BitOr<&BitBoard> for &BitBoard {
     type Output = BitBoard;
 
     fn bitor(self, rhs: &BitBoard) -> Self::Output {
-        let mut res = self.clone();
-        for (mut res_cell, rhs_cell) in res
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *res_cell = res_cell.as_ref() | rhs_cell.as_ref();
-        }
-        res
+        BitBoard::from_u128(self.to_u128() | rhs.to_u128())
     }
 }
 
