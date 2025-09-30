@@ -193,7 +193,7 @@ impl BitBoard {
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
         let mut res: Vec<u8> = Vec::new();
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             if self.board[i] {
                 res.push(i as u8);
             }
@@ -212,7 +212,7 @@ impl BitAnd for BitBoard {
 
     fn bitand(self, rhs: Self) -> Self::Output {
         let mut res = Self::new();
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             res.board.set(i, self.board[i] & rhs.board[i]);
         }
         res
@@ -224,7 +224,7 @@ impl BitAnd<&BitBoard> for &BitBoard {
 
     fn bitand(self, rhs: &BitBoard) -> Self::Output {
         let mut res = BitBoard::new();
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             res.board.set(i, self.board[i] & rhs.board[i]);
         }
         res
@@ -233,7 +233,7 @@ impl BitAnd<&BitBoard> for &BitBoard {
 
 impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             let v = self.board[i] & rhs.board[i];
             self.board.set(i, v);
         }
@@ -242,7 +242,7 @@ impl BitAndAssign for BitBoard {
 
 impl BitAndAssign<&BitBoard> for BitBoard {
     fn bitand_assign(&mut self, rhs: &BitBoard) {
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             let v = self.board[i] & rhs.board[i];
             self.board.set(i, v);
         }
@@ -254,7 +254,7 @@ impl BitOr for BitBoard {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         let mut res = Self::new();
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             res.board.set(i, self.board[i] | rhs.board[i]);
         }
         res
@@ -266,7 +266,7 @@ impl BitOr<&BitBoard> for &BitBoard {
 
     fn bitor(self, rhs: &BitBoard) -> Self::Output {
         let mut res = BitBoard::new();
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             res.board.set(i, self.board[i] | rhs.board[i]);
         }
         res
@@ -275,7 +275,7 @@ impl BitOr<&BitBoard> for &BitBoard {
 
 impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             let v = self.board[i] | rhs.board[i];
             self.board.set(i, v);
         }
@@ -284,7 +284,7 @@ impl BitOrAssign for BitBoard {
 
 impl BitOrAssign<&BitBoard> for BitBoard {
     fn bitor_assign(&mut self, rhs: &BitBoard) {
-        for i in 0..121 {
+        for i in 0..LENGTH_OF_BOARD.into() {
             let v = self.board[i] | rhs.board[i];
             self.board.set(i, v);
         }
@@ -324,13 +324,13 @@ impl ShlAssign<usize> for BitBoard {
 }
 
 #[allow(dead_code)]
-pub fn generate_columns(column_no: Vec<usize>, column_count: usize) -> BitBoard {
+pub fn generate_columns(column_nos: Vec<usize>) -> BitBoard {
     let mut bitboard = BitBoard::new();
     for _i in 0..LENGTH_OF_EDGE {
-        for j in 0..column_count {
-            bitboard.board.set(column_no[j], true);
+        for column_no in column_nos.iter() {
+            bitboard.board.set(*column_no, true);
         }
-        bitboard.board.shift_right(11);
+        bitboard.board.shift_right(LENGTH_OF_FRAME.into());
     }
     bitboard
 }
@@ -340,7 +340,7 @@ pub fn generate_column(column_no: usize) -> BitBoard {
     let mut bitboard = BitBoard::new();
     for _i in 0..LENGTH_OF_EDGE {
         bitboard.board.set(column_no, true);
-        bitboard.board.shift_right(11);
+        bitboard.board.shift_right(LENGTH_OF_FRAME.into());
     }
     bitboard
 }

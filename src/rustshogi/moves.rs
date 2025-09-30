@@ -91,12 +91,12 @@ impl Move {
     pub fn from_csa(csa: &str) -> Self {
         let mut res = Self::new();
         let to = address::Address::from_string(&csa[2..]);
-        if Self::is_drop(&csa) {
+        if Self::is_drop(csa) {
             let piece = piece::Piece::from_char(csa.chars().nth(0).unwrap());
             res.drop_constructor(piece, to);
         } else {
-            let from = address::Address::from_string(&csa);
-            res.standart_constructor(from, to, Self::is_promote(&csa));
+            let from = address::Address::from_string(csa);
+            res.standart_constructor(from, to, Self::is_promote(csa));
         }
         res
     }
