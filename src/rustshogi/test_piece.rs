@@ -64,14 +64,14 @@ mod tests {
 
     #[test]
     fn test_piece_from_string_1() {
-        let piece = Piece::from_string(String::from("+p"));
+        let piece = Piece::from_string("+p");
         assert_eq!(piece.owner, ColorType::White);
         assert_eq!(piece.piece_type, PieceType::ProPawn);
     }
 
     #[test]
     fn test_piece_from_string_2() {
-        let piece = Piece::from_string(String::from("B"));
+        let piece = Piece::from_string("B");
         assert_eq!(piece.owner, ColorType::Black);
         assert_eq!(piece.piece_type, PieceType::Bichop);
     }
