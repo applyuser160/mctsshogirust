@@ -192,18 +192,16 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
-        let mut res: Vec<u8> = Vec::new();
-        for i in 0..LENGTH_OF_BOARD.into() {
-            if self.board[i] {
-                res.push(i as u8);
-            }
-        }
+        let res = self.board.iter_ones().map(|i| i as u8).collect();
         res
     }
 
     #[allow(dead_code)]
     pub fn flip(&mut self) {
-        self.board.iter_mut().for_each(|mut b| *b = !*b);
+        self.board
+            .iter_mut()
+            .take(LENGTH_OF_BOARD.into())
+            .for_each(|mut b| *b = !*b);
     }
 }
 
