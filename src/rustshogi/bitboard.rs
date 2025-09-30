@@ -208,7 +208,16 @@ impl BitAnd for BitBoard {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        BitBoard::from_u128(self.to_u128() & rhs.to_u128())
+        let mut result = self.clone();
+
+        let self_chunks = result.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk &= rhs_chunk;
+        }
+
+        result
     }
 }
 
@@ -216,32 +225,37 @@ impl BitAnd<&BitBoard> for &BitBoard {
     type Output = BitBoard;
 
     fn bitand(self, rhs: &BitBoard) -> Self::Output {
-        BitBoard::from_u128(self.to_u128() & rhs.to_u128())
+        let mut result = self.clone();
+
+        let self_chunks = result.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk &= rhs_chunk;
+        }
+
+        result
     }
 }
 
 impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
-        for (mut self_cell, rhs_cell) in self
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *self_cell = self_cell.as_ref() & rhs_cell.as_ref();
+        let self_chunks = self.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk &= rhs_chunk;
         }
     }
 }
 
 impl BitAndAssign<&BitBoard> for BitBoard {
     fn bitand_assign(&mut self, rhs: &BitBoard) {
-        for (mut self_cell, rhs_cell) in self
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *self_cell = self_cell.as_ref() & rhs_cell.as_ref();
+        let self_chunks = self.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk &= rhs_chunk;
         }
     }
 }
@@ -250,7 +264,16 @@ impl BitOr for BitBoard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        BitBoard::from_u128(self.to_u128() | rhs.to_u128())
+        let mut result = self.clone();
+
+        let self_chunks = result.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk |= rhs_chunk;
+        }
+
+        result
     }
 }
 
@@ -258,32 +281,36 @@ impl BitOr<&BitBoard> for &BitBoard {
     type Output = BitBoard;
 
     fn bitor(self, rhs: &BitBoard) -> Self::Output {
-        BitBoard::from_u128(self.to_u128() | rhs.to_u128())
+        let mut result = self.clone();
+
+        let self_chunks = result.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk |= rhs_chunk;
+        }
+        result
     }
 }
 
 impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
-        for (mut self_cell, rhs_cell) in self
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *self_cell = self_cell.as_ref() | rhs_cell.as_ref();
+        let self_chunks = self.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk |= rhs_chunk;
         }
     }
 }
 
 impl BitOrAssign<&BitBoard> for BitBoard {
     fn bitor_assign(&mut self, rhs: &BitBoard) {
-        for (mut self_cell, rhs_cell) in self
-            .board
-            .iter_mut()
-            .zip(rhs.board.iter())
-            .take(LENGTH_OF_BOARD.into())
-        {
-            *self_cell = self_cell.as_ref() | rhs_cell.as_ref();
+        let self_chunks = self.board.as_raw_mut_slice();
+        let rhs_chunks = rhs.board.as_raw_slice();
+
+        for (self_chunk, rhs_chunk) in self_chunks.iter_mut().zip(rhs_chunks.iter()) {
+            *self_chunk |= rhs_chunk;
         }
     }
 }
