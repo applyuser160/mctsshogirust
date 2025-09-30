@@ -182,9 +182,9 @@ impl BitBoard {
     pub fn to_u128(&self) -> u128 {
         let mut res: u128 = 0;
         let base: u128 = 2;
-        for i in 0..128 {
-            if self.board[i] {
-                res += base.pow((127 - i) as u32);
+        for (i, cell) in self.board.iter().rev().enumerate() {
+            if *cell {
+                res += base.pow(i as u32)
             }
         }
         res
@@ -211,9 +211,14 @@ impl BitAnd for BitBoard {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        let mut res = Self::new();
-        for i in 0..LENGTH_OF_BOARD.into() {
-            res.board.set(i, self.board[i] & rhs.board[i]);
+        let mut res = self.clone();
+        for (mut res_cell, rhs_cell) in res
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *res_cell = res_cell.as_ref() & rhs_cell.as_ref();
         }
         res
     }
@@ -223,9 +228,14 @@ impl BitAnd<&BitBoard> for &BitBoard {
     type Output = BitBoard;
 
     fn bitand(self, rhs: &BitBoard) -> Self::Output {
-        let mut res = BitBoard::new();
-        for i in 0..LENGTH_OF_BOARD.into() {
-            res.board.set(i, self.board[i] & rhs.board[i]);
+        let mut res = self.clone();
+        for (mut res_cell, rhs_cell) in res
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *res_cell = res_cell.as_ref() & rhs_cell.as_ref();
         }
         res
     }
@@ -233,18 +243,26 @@ impl BitAnd<&BitBoard> for &BitBoard {
 
 impl BitAndAssign for BitBoard {
     fn bitand_assign(&mut self, rhs: Self) {
-        for i in 0..LENGTH_OF_BOARD.into() {
-            let v = self.board[i] & rhs.board[i];
-            self.board.set(i, v);
+        for (mut self_cell, rhs_cell) in self
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *self_cell = self_cell.as_ref() & rhs_cell.as_ref();
         }
     }
 }
 
 impl BitAndAssign<&BitBoard> for BitBoard {
     fn bitand_assign(&mut self, rhs: &BitBoard) {
-        for i in 0..LENGTH_OF_BOARD.into() {
-            let v = self.board[i] & rhs.board[i];
-            self.board.set(i, v);
+        for (mut self_cell, rhs_cell) in self
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *self_cell = self_cell.as_ref() & rhs_cell.as_ref();
         }
     }
 }
@@ -253,9 +271,14 @@ impl BitOr for BitBoard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        let mut res = Self::new();
-        for i in 0..LENGTH_OF_BOARD.into() {
-            res.board.set(i, self.board[i] | rhs.board[i]);
+        let mut res = self.clone();
+        for (mut res_cell, rhs_cell) in res
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *res_cell = res_cell.as_ref() | rhs_cell.as_ref();
         }
         res
     }
@@ -265,9 +288,14 @@ impl BitOr<&BitBoard> for &BitBoard {
     type Output = BitBoard;
 
     fn bitor(self, rhs: &BitBoard) -> Self::Output {
-        let mut res = BitBoard::new();
-        for i in 0..LENGTH_OF_BOARD.into() {
-            res.board.set(i, self.board[i] | rhs.board[i]);
+        let mut res = self.clone();
+        for (mut res_cell, rhs_cell) in res
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *res_cell = res_cell.as_ref() & rhs_cell.as_ref();
         }
         res
     }
@@ -275,18 +303,26 @@ impl BitOr<&BitBoard> for &BitBoard {
 
 impl BitOrAssign for BitBoard {
     fn bitor_assign(&mut self, rhs: Self) {
-        for i in 0..LENGTH_OF_BOARD.into() {
-            let v = self.board[i] | rhs.board[i];
-            self.board.set(i, v);
+        for (mut self_cell, rhs_cell) in self
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *self_cell = self_cell.as_ref() | rhs_cell.as_ref();
         }
     }
 }
 
 impl BitOrAssign<&BitBoard> for BitBoard {
     fn bitor_assign(&mut self, rhs: &BitBoard) {
-        for i in 0..LENGTH_OF_BOARD.into() {
-            let v = self.board[i] | rhs.board[i];
-            self.board.set(i, v);
+        for (mut self_cell, rhs_cell) in self
+            .board
+            .iter_mut()
+            .zip(rhs.board.iter())
+            .take(LENGTH_OF_BOARD.into())
+        {
+            *self_cell = self_cell.as_ref() | rhs_cell.as_ref();
         }
     }
 }
