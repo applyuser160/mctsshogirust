@@ -39,9 +39,9 @@ mod tests {
 
     #[test]
     fn test_bitboard_to_u128() {
-        let bitboard = BitBoard::from_u128(548949983232);
+        let bitboard = BitBoard::from_u128(1124249833570304);
         let num = bitboard.to_u128();
-        assert_eq!(num, 548949983232);
+        assert_eq!(num, 1124249833570304);
     }
 
     #[test]
