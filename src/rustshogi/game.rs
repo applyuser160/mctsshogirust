@@ -6,12 +6,19 @@ use super::moves::Move;
 use super::piece::Piece;
 use super::random::Random;
 
+use pyo3::prelude::*;
+
 #[allow(dead_code)]
+#[pyclass]
 #[derive(Clone)]
 pub struct Game {
+    #[pyo3(get, set)]
     pub board: Board,
+    #[pyo3(get, set)]
     pub move_number: u16,
+    #[pyo3(get, set)]
     pub turn: ColorType,
+    #[pyo3(get, set)]
     pub winner: ColorType,
 }
 
@@ -176,5 +183,55 @@ impl Game {
             }
         }
         result
+    }
+}
+
+#[pymethods]
+impl Game {
+    #[new]
+    pub fn new_for_python() -> Self {
+        Self::new()
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "input_board")]
+    pub fn python_input_board(&mut self, sfen: String) {
+        self.input_board(sfen);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "input_hand")]
+    pub fn python_input_hand(&mut self, sfen: String) {
+        self.input_hand(sfen);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "input_move_number")]
+    pub fn python_input_move_number(&mut self, sfen: String) {
+        self.input_move_number(sfen);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "input_turn")]
+    pub fn python_input_turn(&mut self, sfen: String) {
+        self.input_turn(sfen);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "is_finished")]
+    pub fn python_is_finished(&self) -> (bool, ColorType) {
+        self.is_finished()
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "execute_move")]
+    pub fn python_execute_move(&mut self, moves: &Move) {
+        self.execute_move(moves);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "random_play")]
+    pub fn python_random_play(&mut self) -> Self {
+        self.random_play()
     }
 }

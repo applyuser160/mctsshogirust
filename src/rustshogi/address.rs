@@ -52,12 +52,18 @@ impl Address {
 #[pymethods]
 impl Address {
     #[new]
-    pub fn new(column: u8, row: u8) -> Self {
+    pub fn python_new(column: u8, row: u8) -> Self {
         Self { column, row }
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("rustshogi.Address({})", self.to_string())
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "to_int")]
+    pub fn python_to_int(&self) -> usize {
+        self.to_index() as usize
     }
 }
 

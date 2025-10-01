@@ -107,10 +107,43 @@ impl Hand {
         Self::new()
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "rustshogi.Hand(pieces={:?}, counts={:?})",
             self.pieces, self.counts
         )
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "add_piece")]
+    pub fn python_add_piece(&mut self, color_type: color::ColorType, piece_type: piece::PieceType) {
+        self.add_piece(color_type, piece_type);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "add_pieces")]
+    pub fn python_add_pieces(
+        &mut self,
+        color_type: color::ColorType,
+        piece_type: piece::PieceType,
+        count: u8,
+    ) {
+        self.add_pieces(color_type, piece_type, count);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "decrease_piece")]
+    pub fn python_decrease_piece(
+        &mut self,
+        color_type: color::ColorType,
+        piece_type: piece::PieceType,
+    ) {
+        self.decrease_piece(color_type, piece_type);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "get_player_pieces")]
+    pub fn python_get_player_pieces(&self, color_type: color::ColorType) -> Vec<piece::Piece> {
+        self.get_player_pieces(color_type)
     }
 }
