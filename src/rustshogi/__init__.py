@@ -6,6 +6,7 @@ from ._core import (
     Move,
     Hand,
     Board,
+    Game,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "Move",
     "Hand",
     "Board",
+    "Game",
 ]
