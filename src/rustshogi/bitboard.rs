@@ -225,7 +225,7 @@ impl BitBoard {
             }
 
             if i == 1 {
-                let mask = (1u64 << 57) - 1;
+                let mask = ((1u64 << 57) - 1) << 7;
                 *chunk = !(*chunk & mask) | (*chunk & !mask);
             } else {
                 *chunk = !*chunk;
