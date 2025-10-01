@@ -169,8 +169,38 @@ impl Move {
         Self::from_csa(csa.as_str())
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("rustshogi.Move({})", self.to_string())
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "is_drop")]
+    pub fn python_is_drop(&self) -> bool {
+        self.get_is_drop()
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "is_promote")]
+    pub fn python_is_promote(&self) -> bool {
+        self.get_is_promote()
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "get_from")]
+    pub fn python_get_from(&self) -> address::Address {
+        self.get_from()
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "get_to")]
+    pub fn python_get_to(&self) -> address::Address {
+        self.get_to()
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "get_piece")]
+    pub fn python_get_piece(&self) -> piece::Piece {
+        self.get_piece()
     }
 }
 

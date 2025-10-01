@@ -32,7 +32,7 @@ impl ColorType {
         Self::from_u8(value)
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("rustshogi.ColorType({})", *self as u8)
     }
 }

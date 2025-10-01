@@ -85,7 +85,7 @@ impl PieceType {
         Self::from_usize(value as usize)
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("rustshogi.PieceType({})", *self as u8)
     }
 }
@@ -433,7 +433,7 @@ impl Piece {
         Self { owner, piece_type }
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("rustshogi.Piece({})", self.to_string())
     }
 }

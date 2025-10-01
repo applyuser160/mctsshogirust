@@ -637,8 +637,44 @@ impl Board {
         Self::new()
     }
 
-    pub fn __ptr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("rustshogi.Board({})", self.to_string())
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "deploy")]
+    pub fn python_deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
+        self.deploy(index, piece_type, color);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "startpos")]
+    pub fn python_startpos(&mut self) {
+        self.startpos();
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "get_piece")]
+    pub fn python_get_piece(&self, address: &Address) -> Piece {
+        self.get_piece(address.to_index())
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "search_moves")]
+    pub fn python_search_moves(&self, color: ColorType) -> Vec<Move> {
+        self.search_moves(color)
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "execute_move")]
+    pub fn python_execute_move(&mut self, moves: &Move) {
+        self.execute_move(moves);
+    }
+
+    #[allow(dead_code)]
+    #[pyo3(name = "is_finished")]
+    pub fn python_is_finished(&self) -> (bool, ColorType) {
+        self.is_finished()
     }
 }
 
