@@ -189,8 +189,18 @@ impl Game {
 #[pymethods]
 impl Game {
     #[new]
-    pub fn new_for_python() -> Self {
-        Self::new()
+    pub fn new_for_python(
+        board: Board,
+        move_number: u16,
+        turn: ColorType,
+        winner: ColorType,
+    ) -> Self {
+        Self {
+            board,
+            move_number,
+            turn,
+            winner,
+        }
     }
 
     #[allow(dead_code)]

@@ -643,8 +643,8 @@ impl Board {
 
     #[allow(dead_code)]
     #[pyo3(name = "deploy")]
-    pub fn python_deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
-        self.deploy(index, piece_type, color);
+    pub fn python_deploy(&mut self, address: &Address, piece_type: PieceType, color: ColorType) {
+        self.deploy(address.to_index(), piece_type, color);
     }
 
     #[allow(dead_code)]
