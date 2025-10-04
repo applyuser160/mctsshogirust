@@ -23,6 +23,15 @@ impl ColorType {
     pub fn to_bool(&self) -> bool {
         self == &ColorType::White
     }
+
+    pub fn get_name(&self) -> &'static str {
+        match self {
+            ColorType::None => "None",
+            ColorType::Black => "Black",
+            ColorType::White => "White",
+            ColorType::ColorNumber => "ColorNumber",
+        }
+    }
 }
 
 #[pymethods]
@@ -33,7 +42,21 @@ impl ColorType {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("rustshogi.ColorType({})", *self as u8)
+        format!("<ColorType.{}: {}>", self.get_name(), *self as u8)
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("ColorType.{}", self.get_name())
+    }
+
+    #[getter]
+    pub fn name(&self) -> String {
+        self.get_name().to_string()
+    }
+
+    #[getter]
+    pub fn value(&self) -> u8 {
+        *self as u8
     }
 }
 

@@ -57,7 +57,19 @@ impl Address {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("rustshogi.Address({})", self.to_string())
+        format!("Address(column={}, row={})", self.column, self.row)
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("Address(column={}, row={})", self.column, self.row)
+    }
+
+    pub fn __eq__(&self, other: &Self) -> bool {
+        self.column == other.column && self.row == other.row
+    }
+
+    pub fn __ne__(&self, other: &Self) -> bool {
+        self.column != other.column || self.row != other.row
     }
 
     #[allow(dead_code)]
