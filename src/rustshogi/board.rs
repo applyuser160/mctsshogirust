@@ -349,6 +349,63 @@ impl Board {
     }
 
     #[allow(dead_code)]
+    pub fn input_board(&mut self, sfen: &str) {
+        let startpos = String::from("startpos");
+        if startpos == sfen {
+            self.startpos();
+            return;
+        }
+
+        let parts: Vec<&str> = sfen.split('/').collect();
+        for (row, part) in parts.iter().enumerate().rev() {
+            let mut column = 0;
+            let chars = part.chars();
+            for ch in chars {
+                if ch.is_ascii_digit() {
+                    let empty_spaces = ch.to_digit(10).unwrap() as usize;
+                    column += empty_spaces;
+                } else {
+                    let piece = Piece::from_char(ch);
+                    let piece_type = piece.piece_type;
+                    let owner = piece.owner;
+                    let index =
+                        Address::from_numbers((1 + column) as u8, (9 - row) as u8).to_index();
+                    self.deploy(index, piece_type, owner);
+                    column += 1;
+                }
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn input_hand(&mut self, sfen: &str) {
+        if sfen == "-" {
+            return;
+        }
+        let mut current_sfen = sfen.chars();
+        while let Some(ch) = current_sfen.next() {
+            if ch.is_ascii_digit() {
+                let consecutive = ch.to_digit(10).unwrap() as u8;
+                let piece = Piece::from_char(current_sfen.next().unwrap());
+                self.hand
+                    .add_pieces(piece.owner, piece.piece_type, consecutive);
+            } else {
+                let piece = Piece::from_char(ch);
+                self.hand.add_piece(piece.owner, piece.piece_type);
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn from_sfen(sfen: String) -> Self {
+        let mut board = Self::new();
+        let parts: Vec<&str> = sfen.split(" ").collect();
+        board.input_board(parts[0]);
+        board.input_hand(parts[1]);
+        board
+    }
+
+    #[allow(dead_code)]
     pub fn get_piece_type_from_index(&self, index: u8) -> PieceType {
         for piece_type in PieceType::iter() {
             if self.is_a_has_specific_piece(index, piece_type) {
@@ -633,12 +690,38 @@ impl Board {
 #[pymethods]
 impl Board {
     #[new]
-    pub fn new_for_python() -> Self {
-        Self::new()
+    pub fn new_for_python(sfen: String) -> Self {
+        Self::from_sfen(sfen)
     }
 
     pub fn __repr__(&self) -> String {
-        format!("rustshogi.Board({})", self.to_string())
+        format!("Board(sfen={})", self.to_string())
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("Board(sfen={})", self.to_string())
+    }
+
+    pub fn __eq__(&self, other: &Self) -> bool {
+        self.has_piece == other.has_piece
+            && self.player_prossesion == other.player_prossesion
+            && self.is_frame == other.is_frame
+            && self.able_pro == other.able_pro
+            && self.last_one == other.last_one
+            && self.last_two == other.last_two
+            && self.has_specific_piece == other.has_specific_piece
+            && self.hand == other.hand
+    }
+
+    pub fn __ne__(&self, other: &Self) -> bool {
+        self.has_piece != other.has_piece
+            || self.player_prossesion != other.player_prossesion
+            || self.is_frame != other.is_frame
+            || self.able_pro != other.able_pro
+            || self.last_one != other.last_one
+            || self.last_two != other.last_two
+            || self.has_specific_piece != other.has_specific_piece
+            || self.hand != other.hand
     }
 
     #[allow(dead_code)]

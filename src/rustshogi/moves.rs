@@ -170,7 +170,19 @@ impl Move {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("rustshogi.Move({})", self.to_string())
+        format!("Move(csa={})", self.to_string())
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("Move(csa={})", self.to_string())
+    }
+
+    pub fn __eq__(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+
+    pub fn __ne__(&self, other: &Self) -> bool {
+        self.value != other.value
     }
 
     #[allow(dead_code)]

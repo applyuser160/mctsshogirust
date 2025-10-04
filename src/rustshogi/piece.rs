@@ -76,6 +76,26 @@ impl PieceType {
             _ => String::from(' '),
         }
     }
+
+    pub fn get_name(&self) -> &'static str {
+        match self {
+            PieceType::None => "None",
+            PieceType::King => "King",
+            PieceType::Gold => "Gold",
+            PieceType::Rook => "Rook",
+            PieceType::Bichop => "Bichop",
+            PieceType::Silver => "Silver",
+            PieceType::Knight => "Knight",
+            PieceType::Lance => "Lance",
+            PieceType::Pawn => "Pawn",
+            PieceType::Dragon => "Dragon",
+            PieceType::Horse => "Horse",
+            PieceType::ProSilver => "ProSilver",
+            PieceType::ProKnight => "ProKnight",
+            PieceType::ProLance => "ProLance",
+            PieceType::ProPawn => "ProPawn",
+        }
+    }
 }
 
 #[pymethods]
@@ -86,7 +106,21 @@ impl PieceType {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("rustshogi.PieceType({})", *self as u8)
+        format!("<PieceType.{}: {}>", self.get_name(), *self as u8)
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("PieceType.{}", self.get_name())
+    }
+
+    #[getter]
+    pub fn name(&self) -> String {
+        self.get_name().to_string()
+    }
+
+    #[getter]
+    pub fn value(&self) -> u8 {
+        *self as u8
     }
 }
 
@@ -434,7 +468,27 @@ impl Piece {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("rustshogi.Piece({})", self.to_string())
+        format!(
+            "Piece(owner={}, piece_type={})",
+            self.owner.__repr__(),
+            self.piece_type.__repr__()
+        )
+    }
+
+    pub fn __str__(&self) -> String {
+        format!(
+            "Piece(owner={}, piece_type={})",
+            self.owner.__str__(),
+            self.piece_type.__str__()
+        )
+    }
+
+    pub fn __eq__(&self, other: &Self) -> bool {
+        self.owner == other.owner && self.piece_type == other.piece_type
+    }
+
+    pub fn __ne__(&self, other: &Self) -> bool {
+        self.owner != other.owner || self.piece_type != other.piece_type
     }
 }
 

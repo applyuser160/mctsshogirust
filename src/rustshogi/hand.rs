@@ -10,7 +10,7 @@ pub struct Hand {
     #[pyo3(get, set)]
     pub pieces: [piece::Piece;
         (piece::NOT_PRO_PIECE_TYPE_NUMBER * color::ColorType::ColorNumber as u8) as usize],
-    #[pyo3(get, set)]
+    #[pyo3(set)]
     pub counts:
         [u8; (piece::NOT_PRO_PIECE_TYPE_NUMBER * color::ColorType::ColorNumber as u8) as usize],
 }
@@ -108,10 +108,29 @@ impl Hand {
     }
 
     pub fn __repr__(&self) -> String {
-        format!(
-            "rustshogi.Hand(pieces={:?}, counts={:?})",
-            self.pieces, self.counts
-        )
+        format!("Hand(pieces={:?}, counts={:?})", self.pieces, self.counts)
+    }
+
+    pub fn __str__(&self) -> String {
+        format!("Hand(pieces={:?}, counts={:?})", self.pieces, self.counts)
+    }
+
+    pub fn __eq__(&self, other: &Self) -> bool {
+        self.pieces == other.pieces && self.counts == other.counts
+    }
+
+    pub fn __ne__(&self, other: &Self) -> bool {
+        self.pieces != other.pieces || self.counts != other.counts
+    }
+
+    #[getter]
+    pub fn pieces(&self) -> Vec<piece::Piece> {
+        self.pieces.to_vec()
+    }
+
+    #[getter]
+    pub fn counts(&self) -> Vec<usize> {
+        self.counts.to_vec().iter().map(|x| *x as usize).collect()
     }
 
     #[allow(dead_code)]
