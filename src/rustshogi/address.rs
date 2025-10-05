@@ -2,7 +2,7 @@ use super::common;
 
 use pyo3::prelude::*;
 
-#[derive(Default, PartialEq, Debug)]
+#[derive(Default, PartialEq, Debug, Clone)]
 #[pyclass]
 pub struct Address {
     #[pyo3(get, set)]
