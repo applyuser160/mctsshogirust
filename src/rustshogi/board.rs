@@ -690,6 +690,7 @@ impl Board {
 #[pymethods]
 impl Board {
     #[new]
+    #[pyo3(signature = (sfen = "startpos".to_string()))]
     pub fn new_for_python(sfen: String) -> Self {
         Self::from_sfen(sfen)
     }

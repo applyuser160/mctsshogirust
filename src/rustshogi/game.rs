@@ -189,6 +189,7 @@ impl Game {
 #[pymethods]
 impl Game {
     #[new]
+    #[pyo3(signature = (board = Board::new_for_python("startpos".to_string()), move_number = 1, turn = ColorType::Black, winner = ColorType::None))]
     pub fn new_for_python(
         board: Board,
         move_number: u16,
