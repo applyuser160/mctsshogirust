@@ -2,6 +2,9 @@ use bitvec::prelude::*;
 
 use bitvec::prelude::BitVec;
 
+use crate::address::Address;
+use crate::piece::Piece;
+
 use super::address;
 use super::piece;
 
@@ -165,8 +168,23 @@ impl Move {
 #[pymethods]
 impl Move {
     #[new]
-    pub fn new_for_python(csa: String) -> Self {
-        Self::from_csa(csa.as_str())
+    #[pyo3(signature = (csa = None, from_address = None, to_address = None, promote = false, piece = None))]
+    pub fn new_for_python(
+        csa: Option<String>,
+        from_address: Option<Address>,
+        to_address: Option<Address>,
+        promote: bool,
+        piece: Option<Piece>,
+    ) -> Self {
+        if let Some(csa) = csa {
+            Self::from_csa(csa.as_str())
+        } else if let Some(from) = from_address {
+            Self::from_standart(from, to_address.unwrap(), promote)
+        } else if let Some(piece) = piece {
+            Self::from_drop(piece, to_address.unwrap())
+        } else {
+            Self::new()
+        }
     }
 
     pub fn __repr__(&self) -> String {
