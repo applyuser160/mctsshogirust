@@ -168,20 +168,20 @@ impl Move {
 #[pymethods]
 impl Move {
     #[new]
-    #[pyo3(signature = (csa = None, from = None, to = None, promote = None, piece = None))]
+    #[pyo3(signature = (csa = None, from_address = None, to_address = None, promote = false, piece = None))]
     pub fn new_for_python(
         csa: Option<String>,
-        from: Option<Address>,
-        to: Option<Address>,
-        promote: Option<bool>,
+        from_address: Option<Address>,
+        to_address: Option<Address>,
+        promote: bool,
         piece: Option<Piece>,
     ) -> Self {
         if let Some(csa) = csa {
             Self::from_csa(csa.as_str())
-        } else if let Some(from) = from {
-            Self::from_standart(from, to.unwrap(), promote.unwrap())
+        } else if let Some(from) = from_address {
+            Self::from_standart(from, to_address.unwrap(), promote)
         } else if let Some(piece) = piece {
-            Self::from_drop(piece, to.unwrap())
+            Self::from_drop(piece, to_address.unwrap())
         } else {
             Self::new()
         }
