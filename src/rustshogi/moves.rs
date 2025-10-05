@@ -168,6 +168,7 @@ impl Move {
 #[pymethods]
 impl Move {
     #[new]
+    #[pyo3(signature = (csa = None, from = None, to = None, promote = None, piece = None))]
     pub fn new_for_python(
         csa: Option<String>,
         from: Option<Address>,
