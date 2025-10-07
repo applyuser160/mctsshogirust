@@ -8,157 +8,166 @@
 
 .. code-block:: python
 
-   import rustshogi
+   from rustshogi import Board, ColorType, Move, Address
    import random
 
    def random_game():
        """ランダムな対局を実行"""
-       board = rustshogi.Board()
+       board = Board("startpos")
 
-       while not board.is_game_over():
-           legal_moves = board.get_legal_moves()
+       while True:
+           is_finished, winner = board.is_finished()
+           if is_finished:
+               print(f"ゲーム終了: 勝者 {winner}")
+               break
+
+           # 現在の手番を決定
+           current_color = ColorType.Black if board.move_count % 2 == 0 else ColorType.White
+           legal_moves = board.search_moves(current_color)
+
            if not legal_moves:
+               print("合法手がありません")
                break
 
            # ランダムに手を選択
            move = random.choice(legal_moves)
-           board.make_move(move)
+           board.execute_move(move)
 
            print(f"手数 {board.move_count}: {move}")
            print(board)
            print("-" * 40)
 
-       print(f"ゲーム終了: {board.winner}")
        return board
 
-MCTSアルゴリズムの使用
-=====================
+駒の配置と移動
+=============
 
 .. code-block:: python
 
-   import rustshogi
+   from rustshogi import Board, Address, PieceType, ColorType
 
-   def mcts_example():
-       """MCTSアルゴリズムを使用した例"""
-       board = rustshogi.Board()
+   def piece_placement_example():
+       """駒の配置と移動の例"""
+       board = Board("startpos")
 
-       # MCTSで最適な手を探索
-       mcts_result = board.mcts_search(
-           iterations=1000,
-           exploration_constant=1.4
-       )
+       # 特定の位置に駒を配置
+       address = Address(5, 5)  # 5五の位置
+       board.deploy(address, PieceType.Pawn, ColorType.Black)
 
-       print(f"最適な手: {mcts_result.best_move}")
-       print(f"評価値: {mcts_result.evaluation}")
-       print(f"訪問回数: {mcts_result.visit_count}")
+       # 配置された駒を確認
+       piece = board.get_piece(address)
+       print(f"5五の駒: {piece}")
 
-       return mcts_result
+       # 駒の移動
+       legal_moves = board.search_moves(ColorType.Black)
+       if legal_moves:
+           move = legal_moves[0]
+           print(f"実行する手: {move}")
+           board.execute_move(move)
+
+       return board
 
 局面の解析
 ==========
 
 .. code-block:: python
 
-   import rustshogi
+   from rustshogi import Board, ColorType, Address
 
    def analyze_position():
        """局面の詳細な解析"""
-       board = rustshogi.Board()
+       board = Board("startpos")
 
        print("=== 局面解析 ===")
-       print(f"手番: {board.turn}")
-       print(f"手数: {board.move_count}")
-       print(f"局面評価: {board.evaluate()}")
+       print(f"盤面状態:")
+       print(board)
 
-       legal_moves = board.get_legal_moves()
-       print(f"合法手数: {len(legal_moves)}")
+       # 先手と後手の合法手を比較
+       black_moves = board.search_moves(ColorType.Black)
+       white_moves = board.search_moves(ColorType.White)
 
-       # 各合法手の評価
-       print("\n=== 合法手の評価 ===")
-       for i, move in enumerate(legal_moves[:5]):  # 最初の5手のみ
-           board.make_move(move)
-           evaluation = board.evaluate()
-           board.unmake_move()  # 手を戻す
+       print(f"先手の合法手数: {len(black_moves)}")
+       print(f"後手の合法手数: {len(white_moves)}")
 
-           print(f"{i+1}. {move}: {evaluation}")
+       # 各合法手の詳細
+       print("\n=== 先手の合法手 ===")
+       for i, move in enumerate(black_moves[:5]):  # 最初の5手のみ
+           print(f"{i+1}. {move}")
+           print(f"   移動元: {move.get_from()}")
+           print(f"   移動先: {move.get_to()}")
+           print(f"   駒: {move.get_piece()}")
+           print(f"   成り: {move.is_promote()}")
+           print(f"   打ち駒: {move.is_drop()}")
 
-カスタム評価関数
-===============
+       # ゲーム終了判定
+       is_finished, winner = board.is_finished()
+       if is_finished:
+           print(f"\nゲーム終了: 勝者 {winner}")
+       else:
+           print("\nゲーム継続中")
 
-.. code-block:: python
-
-   import rustshogi
-
-   def custom_evaluation(board):
-       """カスタム評価関数の例"""
-       # 基本的な駒の価値
-       piece_values = {
-           rustshogi.Piece.PAWN: 1,
-           rustshogi.Piece.LANCE: 3,
-           rustshogi.Piece.KNIGHT: 3,
-           rustshogi.Piece.SILVER: 5,
-           rustshogi.Piece.GOLD: 6,
-           rustshogi.Piece.BISHOP: 8,
-           rustshogi.Piece.ROOK: 10,
-           rustshogi.Piece.KING: 100,
-       }
-
-       evaluation = 0
-
-       # 盤上の駒を評価
-       for square in rustshogi.Square.all():
-           piece = board.get_piece(square)
-           if piece is not None:
-               value = piece_values.get(piece.type, 0)
-               if piece.color == rustshogi.Color.BLACK:
-                   evaluation += value
-               else:
-                   evaluation -= value
-
-       return evaluation
-
-   def use_custom_evaluation():
-       """カスタム評価関数の使用例"""
-       board = rustshogi.Board()
-
-       # カスタム評価関数を使用
-       custom_eval = custom_evaluation(board)
-       builtin_eval = board.evaluate()
-
-       print(f"カスタム評価: {custom_eval}")
-       print(f"組み込み評価: {builtin_eval}")
-
-対局の記録と再生
-===============
+持ち駒の管理
+===========
 
 .. code-block:: python
 
-   import rustshogi
+   from rustshogi import Hand, Piece, ColorType, PieceType
 
-   def record_and_replay():
-       """対局の記録と再生"""
-       board = rustshogi.Board()
-       moves_history = []
+   def hand_management_example():
+       """持ち駒の管理例"""
+       # 空の持ち駒を作成
+       hand = Hand([], [])
 
-       # 対局を記録
-       for i in range(10):
-           if board.is_game_over():
-               break
+       # 駒を追加
+       hand.add_piece(ColorType.Black, PieceType.Pawn)
+       hand.add_pieces(ColorType.Black, PieceType.Pawn, 3)  # 歩を3枚追加
 
-           legal_moves = board.get_legal_moves()
-           if not legal_moves:
-               break
+       # 持ち駒を確認
+       black_pieces = hand.get_player_pieces(ColorType.Black)
+       print(f"先手の持ち駒: {black_pieces}")
 
-           move = legal_moves[0]  # 最初の合法手
-           board.make_move(move)
-           moves_history.append(move)
+       # 駒を減らす
+       hand.decrease_piece(ColorType.Black, PieceType.Pawn)
 
-       print(f"記録された手数: {len(moves_history)}")
+       # 更新後の持ち駒を確認
+       black_pieces = hand.get_player_pieces(ColorType.Black)
+       print(f"更新後の先手の持ち駒: {black_pieces}")
 
-       # 初期局面に戻して再生
-       board = rustshogi.Board()
-       for i, move in enumerate(moves_history):
-           board.make_move(move)
-           print(f"再生 {i+1}: {move}")
+       return hand
 
-       return moves_history
+Gameクラスの使用
+==============
+
+.. code-block:: python
+
+   from rustshogi import Game, Board, ColorType, Move
+
+   def game_management_example():
+       """Gameクラスを使用した対局管理例"""
+       # 初期局面でゲームを作成
+       board = Board("startpos")
+       game = Game(board=board, move_number=1, turn=ColorType.Black)
+
+       print("=== ゲーム開始 ===")
+       print(f"手数: {game.move_number}")
+       print(f"手番: {game.turn}")
+
+       # 手を実行
+       legal_moves = board.search_moves(ColorType.Black)
+       if legal_moves:
+           move = legal_moves[0]
+           game.execute_move(move)
+           print(f"実行した手: {move}")
+
+       # ゲーム終了判定
+       is_finished, winner = game.is_finished()
+       if is_finished:
+           print(f"ゲーム終了: 勝者 {winner}")
+       else:
+           print("ゲーム継続中")
+
+       # ランダム対局の実行
+       random_game = game.random_play()
+       print(f"ランダム対局の結果: {random_game}")
+
+       return game

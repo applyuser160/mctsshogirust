@@ -18,9 +18,10 @@ Pythonバインディングを通じて、Pythonアプリケーションから�
 ----
 
 * 高速な将棋盤の表現と操作
-* 合法手の生成
-* 局面評価
-* MCTS（モンテカルロ木探索）アルゴリズム
+* 合法手の生成と検索
+* 駒の配置と移動
+* 持ち駒の管理
+* ゲーム状態の管理
 * Pythonバインディング
 
 インストール
@@ -35,16 +36,17 @@ Pythonバインディングを通じて、Pythonアプリケーションから�
 
 .. code-block:: python
 
-   import rustshogi
+   from rustshogi import Board, ColorType, Move, Address
 
    # 初期局面を作成
-   board = rustshogi.Board()
+   board = Board("startpos")
 
-   # 合法手を取得
-   legal_moves = board.get_legal_moves()
+   # 合法手を検索
+   legal_moves = board.search_moves(ColorType.Black)
 
-   # 手を指す
-   board.make_move(legal_moves[0])
+   # 手を実行
+   if legal_moves:
+       board.execute_move(legal_moves[0])
 
 詳細な使用方法については、:doc:`quickstart` を参照してください。
 

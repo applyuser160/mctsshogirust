@@ -29,17 +29,27 @@ API
 * :py:class:`Hand` - 持ち駒の管理
 * :py:class:`Game` - ゲーム管理
 
-既知の問題
-~~~~~~~~~~
+新機能
+~~~~~~
 
-* 一部の特殊な局面で合法手生成が不完全な場合がある
-* MCTSアルゴリズムのパラメータ調整が必要
+* 基本的な将棋盤の表現と操作（Boardクラス）
+* 合法手の生成と検索（search_movesメソッド）
+* 手の実行（execute_moveメソッド）
+* 駒の配置（deployメソッド）
+* 持ち駒の管理（Handクラス）
+* ゲーム状態の管理（Gameクラス）
+* 座標の表現（Addressクラス）
+* 駒の種類と色の表現（PieceType、ColorType列挙型）
+* Pythonバインディング
 
-今後の予定
-----------
+API
+~~~
 
-* より高度な評価関数の実装
-* 定跡データベースのサポート
-* 対局エンジンとの連携
-* パフォーマンスの最適化
-* より詳細なドキュメントの追加
+* :py:class:`Address` - 座標の表現
+* :py:class:`ColorType` - 先手・後手の表現
+* :py:class:`PieceType` - 駒の種類の表現
+* :py:class:`Piece` - 駒の表現
+* :py:class:`Move` - 手の表現
+* :py:class:`Hand` - 持ち駒の管理
+* :py:class:`Board` - 将棋盤の表現
+* :py:class:`Game` - ゲーム管理
