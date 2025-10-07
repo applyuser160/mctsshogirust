@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>例 &mdash; rustshogi 0.1.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=98e9f989"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=4755f45a"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="検索" href="search.html" />
+    <link rel="next" title="変更履歴" href="changelog.html" />
+    <link rel="prev" title="rustshogi package" href="reference/rustshogi.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            rustshogi
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">目次:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#pip">pipでのインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#id3">開発版のインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#id4">ソースからのビルド</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#id5">インストールの確認</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">クイックスタート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html#id2">基本的な使用方法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html#id4">合法手の検索</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html#id5">手を実行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html#id6">手の表現</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html#id7">ゲームの終了判定</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API リファレンス</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html#id1">モジュール概要</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html#id2">基本的な型</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id2">基本的な対局</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id3">駒の配置と移動</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id4">局面の解析</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id5">持ち駒の管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#game">Gameクラスの使用</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">変更履歴</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html#xx">バージョン 0.1.0 (2025-01-XX)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API リファレンス:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reference/rustshogi.html">rustshogi package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rustshogi</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">例</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>例<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>このセクションでは、rustshogiを使用した実用的な例を紹介します。</p>
+</section>
+<section id="id2">
+<h1>基本的な対局<a class="headerlink" href="#id2" title="Link to this heading"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rustshogi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Board</span><span class="p">,</span> <span class="n">ColorType</span><span class="p">,</span> <span class="n">Move</span><span class="p">,</span> <span class="n">Address</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">random_game</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ランダムな対局を実行&quot;&quot;&quot;</span>
+    <span class="n">board</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="s2">&quot;startpos&quot;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">is_finished</span><span class="p">,</span> <span class="n">winner</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">is_finished</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">is_finished</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ゲーム終了: 勝者 </span><span class="si">{</span><span class="n">winner</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="c1"># 現在の手番を決定</span>
+        <span class="n">current_color</span> <span class="o">=</span> <span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span> <span class="k">if</span> <span class="n">board</span><span class="o">.</span><span class="n">move_count</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ColorType</span><span class="o">.</span><span class="n">White</span>
+        <span class="n">legal_moves</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">search_moves</span><span class="p">(</span><span class="n">current_color</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">legal_moves</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;合法手がありません&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="c1"># ランダムに手を選択</span>
+        <span class="n">move</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">legal_moves</span><span class="p">)</span>
+        <span class="n">board</span><span class="o">.</span><span class="n">execute_move</span><span class="p">(</span><span class="n">move</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;手数 </span><span class="si">{</span><span class="n">board</span><span class="o">.</span><span class="n">move_count</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">move</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">board</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">board</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h1>駒の配置と移動<a class="headerlink" href="#id3" title="Link to this heading"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rustshogi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Board</span><span class="p">,</span> <span class="n">Address</span><span class="p">,</span> <span class="n">PieceType</span><span class="p">,</span> <span class="n">ColorType</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">piece_placement_example</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;駒の配置と移動の例&quot;&quot;&quot;</span>
+    <span class="n">board</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="s2">&quot;startpos&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 特定の位置に駒を配置</span>
+    <span class="n">address</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5五の位置</span>
+    <span class="n">board</span><span class="o">.</span><span class="n">deploy</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">PieceType</span><span class="o">.</span><span class="n">Pawn</span><span class="p">,</span> <span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+
+    <span class="c1"># 配置された駒を確認</span>
+    <span class="n">piece</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">get_piece</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;5五の駒: </span><span class="si">{</span><span class="n">piece</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 駒の移動</span>
+    <span class="n">legal_moves</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">search_moves</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">legal_moves</span><span class="p">:</span>
+        <span class="n">move</span> <span class="o">=</span> <span class="n">legal_moves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;実行する手: </span><span class="si">{</span><span class="n">move</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">board</span><span class="o">.</span><span class="n">execute_move</span><span class="p">(</span><span class="n">move</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">board</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h1>局面の解析<a class="headerlink" href="#id4" title="Link to this heading"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rustshogi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Board</span><span class="p">,</span> <span class="n">ColorType</span><span class="p">,</span> <span class="n">Address</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_position</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;局面の詳細な解析&quot;&quot;&quot;</span>
+    <span class="n">board</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="s2">&quot;startpos&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== 局面解析 ===&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;盤面状態:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">board</span><span class="p">)</span>
+
+    <span class="c1"># 先手と後手の合法手を比較</span>
+    <span class="n">black_moves</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">search_moves</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+    <span class="n">white_moves</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">search_moves</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">White</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;先手の合法手数: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">black_moves</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;後手の合法手数: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">white_moves</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 各合法手の詳細</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== 先手の合法手 ===&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">move</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">black_moves</span><span class="p">[:</span><span class="mi">5</span><span class="p">]):</span>  <span class="c1"># 最初の5手のみ</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">move</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   移動元: </span><span class="si">{</span><span class="n">move</span><span class="o">.</span><span class="n">get_from</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   移動先: </span><span class="si">{</span><span class="n">move</span><span class="o">.</span><span class="n">get_to</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   駒: </span><span class="si">{</span><span class="n">move</span><span class="o">.</span><span class="n">get_piece</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   成り: </span><span class="si">{</span><span class="n">move</span><span class="o">.</span><span class="n">is_promote</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   打ち駒: </span><span class="si">{</span><span class="n">move</span><span class="o">.</span><span class="n">is_drop</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ゲーム終了判定</span>
+    <span class="n">is_finished</span><span class="p">,</span> <span class="n">winner</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">is_finished</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_finished</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ゲーム終了: 勝者 </span><span class="si">{</span><span class="n">winner</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ゲーム継続中&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h1>持ち駒の管理<a class="headerlink" href="#id5" title="Link to this heading"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rustshogi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hand</span><span class="p">,</span> <span class="n">Piece</span><span class="p">,</span> <span class="n">ColorType</span><span class="p">,</span> <span class="n">PieceType</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">hand_management_example</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;持ち駒の管理例&quot;&quot;&quot;</span>
+    <span class="c1"># 空の持ち駒を作成</span>
+    <span class="n">hand</span> <span class="o">=</span> <span class="n">Hand</span><span class="p">([],</span> <span class="p">[])</span>
+
+    <span class="c1"># 駒を追加</span>
+    <span class="n">hand</span><span class="o">.</span><span class="n">add_piece</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">,</span> <span class="n">PieceType</span><span class="o">.</span><span class="n">Pawn</span><span class="p">)</span>
+    <span class="n">hand</span><span class="o">.</span><span class="n">add_pieces</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">,</span> <span class="n">PieceType</span><span class="o">.</span><span class="n">Pawn</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># 歩を3枚追加</span>
+
+    <span class="c1"># 持ち駒を確認</span>
+    <span class="n">black_pieces</span> <span class="o">=</span> <span class="n">hand</span><span class="o">.</span><span class="n">get_player_pieces</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;先手の持ち駒: </span><span class="si">{</span><span class="n">black_pieces</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 駒を減らす</span>
+    <span class="n">hand</span><span class="o">.</span><span class="n">decrease_piece</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">,</span> <span class="n">PieceType</span><span class="o">.</span><span class="n">Pawn</span><span class="p">)</span>
+
+    <span class="c1"># 更新後の持ち駒を確認</span>
+    <span class="n">black_pieces</span> <span class="o">=</span> <span class="n">hand</span><span class="o">.</span><span class="n">get_player_pieces</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;更新後の先手の持ち駒: </span><span class="si">{</span><span class="n">black_pieces</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">hand</span>
+</pre></div>
+</div>
+</section>
+<section id="game">
+<h1>Gameクラスの使用<a class="headerlink" href="#game" title="Link to this heading"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rustshogi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Board</span><span class="p">,</span> <span class="n">ColorType</span><span class="p">,</span> <span class="n">Move</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">game_management_example</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gameクラスを使用した対局管理例&quot;&quot;&quot;</span>
+    <span class="c1"># 初期局面でゲームを作成</span>
+    <span class="n">board</span> <span class="o">=</span> <span class="n">Board</span><span class="p">(</span><span class="s2">&quot;startpos&quot;</span><span class="p">)</span>
+    <span class="n">game</span> <span class="o">=</span> <span class="n">Game</span><span class="p">(</span><span class="n">board</span><span class="o">=</span><span class="n">board</span><span class="p">,</span> <span class="n">move_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">turn</span><span class="o">=</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== ゲーム開始 ===&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;手数: </span><span class="si">{</span><span class="n">game</span><span class="o">.</span><span class="n">move_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;手番: </span><span class="si">{</span><span class="n">game</span><span class="o">.</span><span class="n">turn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 手を実行</span>
+    <span class="n">legal_moves</span> <span class="o">=</span> <span class="n">board</span><span class="o">.</span><span class="n">search_moves</span><span class="p">(</span><span class="n">ColorType</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">legal_moves</span><span class="p">:</span>
+        <span class="n">move</span> <span class="o">=</span> <span class="n">legal_moves</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">game</span><span class="o">.</span><span class="n">execute_move</span><span class="p">(</span><span class="n">move</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;実行した手: </span><span class="si">{</span><span class="n">move</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ゲーム終了判定</span>
+    <span class="n">is_finished</span><span class="p">,</span> <span class="n">winner</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">is_finished</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_finished</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ゲーム終了: 勝者 </span><span class="si">{</span><span class="n">winner</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ゲーム継続中&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ランダム対局の実行</span>
+    <span class="n">random_game</span> <span class="o">=</span> <span class="n">game</span><span class="o">.</span><span class="n">random_play</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ランダム対局の結果: </span><span class="si">{</span><span class="n">random_game</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">game</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="reference/rustshogi.html" class="btn btn-neutral float-left" title="rustshogi package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changelog.html" class="btn btn-neutral float-right" title="変更履歴" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, applyuser160.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
