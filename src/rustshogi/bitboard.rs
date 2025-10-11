@@ -180,10 +180,11 @@ impl BitBoard {
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
         let mut result = Vec::new();
-        for i in 0..LENGTH_OF_BOARD {
-            if (self.0 >> (127 - i)) & 1 != 0 {
-                result.push(i);
-            }
+        let mut board = self.0;
+        while board != 0 {
+            let index = board.trailing_zeros() as u8;
+            result.push(127 - index);
+            board &= !(1u128 << index);
         }
         result
     }

@@ -33,11 +33,17 @@ mod tests {
         let mut board = Board::new();
         board.startpos();
         let result1 = board.get_able_move_squares(34);
-        assert_eq!(result1.get_trues(), vec![45]);
+        let mut result1_trues = result1.get_trues();
+        result1_trues.sort();
+        assert_eq!(result1_trues, vec![45]);
         let result2 = board.get_able_move_squares(78);
-        assert_eq!(result2.get_trues(), vec![67]);
-        let result1 = board.get_able_move_squares(30);
-        assert_eq!(result1.get_trues(), vec![25, 26, 27, 28, 29, 31]);
+        let mut result2_trues = result2.get_trues();
+        result2_trues.sort();
+        assert_eq!(result2_trues, vec![67]);
+        let result3 = board.get_able_move_squares(30);
+        let mut result3_trues = result3.get_trues();
+        result3_trues.sort();
+        assert_eq!(result3_trues, vec![25, 26, 27, 28, 29, 31]);
     }
 
     #[test]
@@ -46,7 +52,9 @@ mod tests {
         board.deploy(12, PieceType::Rook, ColorType::Black);
         let bit_movable = board.get_able_move_squares(12);
         let result = board.get_able_pro_move_squares(12, bit_movable);
-        assert_eq!(result.get_trues(), vec![78, 89, 100]);
+        let mut result_trues = result.get_trues();
+        result_trues.sort();
+        assert_eq!(result_trues, vec![78, 89, 100]);
     }
 
     #[test]
@@ -56,8 +64,10 @@ mod tests {
         let result1 = board.get_able_drop_squares(ColorType::Black, PieceType::Pawn);
         assert_eq!(result1.get_trues(), vec![] as Vec<u8>);
         let result2 = board.get_able_drop_squares(ColorType::White, PieceType::Knight);
-        assert_eq!(result2.get_trues().len(), 34);
-        assert_eq!(result2.get_trues()[0], 45);
+        let mut result2_trues = result2.get_trues();
+        result2_trues.sort();
+        assert_eq!(result2_trues.len(), 34);
+        assert_eq!(result2_trues[0], 45);
     }
 
     #[test]

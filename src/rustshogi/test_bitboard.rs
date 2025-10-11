@@ -47,7 +47,8 @@ mod tests {
     #[test]
     fn test_bitboard_get_trues() {
         let bitboard = BitBoard::from_u128(548949983232);
-        let trues = bitboard.get_trues();
+        let mut trues = bitboard.get_trues();
+        trues.sort();
         assert_eq!(trues[0], 89);
         assert_eq!(trues.len(), 18);
     }
