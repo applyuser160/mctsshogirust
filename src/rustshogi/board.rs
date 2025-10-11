@@ -1,5 +1,3 @@
-use bitvec::prelude::*;
-
 use super::address::Address;
 use super::bitboard::{
     generate_column, BitBoard, BIT_OF_FRAME, BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE,
