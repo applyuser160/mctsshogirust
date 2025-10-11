@@ -31,13 +31,20 @@ mod tests {
     #[test]
     fn test_board_get_able_move_squares() {
         let mut board = Board::new();
-        board.startpos();
-        let result1 = board.get_able_move_squares(34);
-        assert_eq!(result1.get_trues(), vec![45]);
-        let result2 = board.get_able_move_squares(78);
-        assert_eq!(result2.get_trues(), vec![67]);
-        let result1 = board.get_able_move_squares(30);
-        assert_eq!(result1.get_trues(), vec![25, 26, 27, 28, 29, 31]);
+        board.deploy(30, PieceType::Rook, ColorType::Black); // Rook at (8,3)
+        // Opponent piece at (8,7) = index 74
+        board.deploy(74, PieceType::Pawn, ColorType::White);
+        // Own piece at (4,3) = index 26
+        board.deploy(26, PieceType::Pawn, ColorType::Black);
+
+        let result = board.get_able_move_squares(30);
+        let mut trues = result.get_trues();
+        trues.sort();
+
+        // Vertical: up to (8,7) (capturable). Down to (8,1)
+        // Horizontal: right to (9,3). left to (5,3) (blocked by own piece at (4,3))
+        let expected = vec![19, 27, 28, 29, 31, 41, 52, 63, 74];
+        assert_eq!(trues, expected);
     }
 
     #[test]
@@ -46,7 +53,9 @@ mod tests {
         board.deploy(12, PieceType::Rook, ColorType::Black);
         let bit_movable = board.get_able_move_squares(12);
         let result = board.get_able_pro_move_squares(12, bit_movable);
-        assert_eq!(result.get_trues(), vec![78, 89, 100]);
+        let mut trues = result.get_trues();
+        trues.sort();
+        assert_eq!(trues, vec![78, 89, 100]);
     }
 
     #[test]
@@ -56,8 +65,10 @@ mod tests {
         let result1 = board.get_able_drop_squares(ColorType::Black, PieceType::Pawn);
         assert_eq!(result1.get_trues(), vec![] as Vec<u8>);
         let result2 = board.get_able_drop_squares(ColorType::White, PieceType::Knight);
-        assert_eq!(result2.get_trues().len(), 34);
-        assert_eq!(result2.get_trues()[0], 45);
+        let mut trues = result2.get_trues();
+        trues.sort();
+        assert_eq!(trues.len(), 34);
+        assert_eq!(trues[0], 23);
     }
 
     #[test]

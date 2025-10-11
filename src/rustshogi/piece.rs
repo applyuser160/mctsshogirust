@@ -21,13 +21,13 @@ pub const PROMOTE_CHANGE: u8 = 6;
 #[allow(dead_code)]
 #[pyclass(eq, eq_int)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter)]
-#[repr(usize)]
+#[repr(u8)]
 pub enum PieceType {
     None = 0,
     King,
     Gold,
     Rook,
-    Bichop,
+    Bishop,
     Silver,
     Knight,
     Lance,
@@ -47,7 +47,7 @@ impl PieceType {
             1 => PieceType::King,
             2 => PieceType::Gold,
             3 => PieceType::Rook,
-            4 => PieceType::Bichop,
+            4 => PieceType::Bishop,
             5 => PieceType::Silver,
             6 => PieceType::Knight,
             7 => PieceType::Lance,
@@ -68,7 +68,7 @@ impl PieceType {
             PieceType::King => String::from('k'),
             PieceType::Gold => String::from('g'),
             PieceType::Rook => String::from('r'),
-            PieceType::Bichop => String::from('b'),
+            PieceType::Bishop => String::from('b'),
             PieceType::Silver => String::from('s'),
             PieceType::Knight => String::from('n'),
             PieceType::Lance => String::from('l'),
@@ -83,7 +83,7 @@ impl PieceType {
             PieceType::King => "King",
             PieceType::Gold => "Gold",
             PieceType::Rook => "Rook",
-            PieceType::Bichop => "Bichop",
+            PieceType::Bishop => "Bishop",
             PieceType::Silver => "Silver",
             PieceType::Knight => "Knight",
             PieceType::Lance => "Lance",
@@ -179,7 +179,7 @@ impl Piece {
             PieceType::King => piece = 'k',
             PieceType::Gold => piece = 'g',
             PieceType::Rook => piece = 'r',
-            PieceType::Bichop => piece = 'b',
+            PieceType::Bishop => piece = 'b',
             PieceType::Silver => piece = 's',
             PieceType::Knight => piece = 'n',
             PieceType::Lance => piece = 'l',
@@ -209,7 +209,7 @@ impl Piece {
             'K' => self.piece_type = PieceType::King,
             'G' => self.piece_type = PieceType::Gold,
             'R' => self.piece_type = PieceType::Rook,
-            'B' => self.piece_type = PieceType::Bichop,
+            'B' => self.piece_type = PieceType::Bishop,
             'S' => self.piece_type = PieceType::Silver,
             'N' => self.piece_type = PieceType::Knight,
             'L' => self.piece_type = PieceType::Lance,
@@ -333,7 +333,7 @@ impl Piece {
                 MoveType::Long,
                 MoveType::None,
             ],
-            PieceType::Bichop => [
+            PieceType::Bishop => [
                 MoveType::None,
                 MoveType::Long,
                 MoveType::None,
@@ -450,7 +450,7 @@ impl Piece {
     pub fn able_pro(piece_type: PieceType) -> bool {
         match piece_type {
             PieceType::Rook => true,
-            PieceType::Bichop => true,
+            PieceType::Bishop => true,
             PieceType::Silver => true,
             PieceType::Knight => true,
             PieceType::Lance => true,

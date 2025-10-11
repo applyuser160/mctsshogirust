@@ -1,80 +1,81 @@
+use strum_macros::EnumIter;
+
 #[allow(dead_code)]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
+#[repr(usize)]
 pub enum DirectionName {
-    Up,
-    UpLeft,
-    Left,
-    DownLeft,
-    Down,
-    DownRight,
-    Right,
+    Up = 0,
     UpRight,
-    DirectionNameNumber = 8,
+    Right,
+    DownRight,
+    Down,
+    DownLeft,
+    Left,
+    UpLeft,
+    DirectionNameNumber,
 }
 
 impl DirectionName {
-    pub fn from_usize(n: usize) -> Self {
+    pub fn from_usize(n: usize) -> DirectionName {
         match n {
-            0 => Self::Up,
-            1 => Self::UpLeft,
-            2 => Self::Left,
-            3 => Self::DownLeft,
-            4 => Self::Down,
-            5 => Self::DownRight,
-            6 => Self::Right,
-            7 => Self::UpRight,
-            8 => Self::DirectionNameNumber,
-            _ => Self::DirectionNameNumber,
+            0 => DirectionName::Up,
+            1 => DirectionName::UpRight,
+            2 => DirectionName::Right,
+            3 => DirectionName::DownRight,
+            4 => DirectionName::Down,
+            5 => DirectionName::DownLeft,
+            6 => DirectionName::Left,
+            7 => DirectionName::UpLeft,
+            _ => DirectionName::Up,
         }
     }
 }
-
-#[derive(Clone)]
+#[allow(dead_code)]
+#[derive(Clone, Copy, Debug)]
 pub struct Direction {
-    #[allow(dead_code)]
-    pub name: DirectionName,
-
-    #[allow(dead_code)]
     pub vertical_vector: i8,
-
-    #[allow(dead_code)]
     pub horizon_vector: i8,
 }
 
-#[allow(dead_code)]
 impl Direction {
-    pub fn new(name: DirectionName) -> Self {
-        let mut vertical_vector: i8 = 0;
-        let mut horizon_vector: i8 = 0;
-        if name == DirectionName::Up {
-            vertical_vector = -1;
-            horizon_vector = 0;
-        } else if name == DirectionName::UpLeft {
-            vertical_vector = -1;
-            horizon_vector = 1;
-        } else if name == DirectionName::Left {
-            vertical_vector = 0;
-            horizon_vector = 1;
-        } else if name == DirectionName::DownLeft {
-            vertical_vector = 1;
-            horizon_vector = 1;
-        } else if name == DirectionName::Down {
-            vertical_vector = 1;
-            horizon_vector = 0;
-        } else if name == DirectionName::DownRight {
-            vertical_vector = 1;
-            horizon_vector = -1;
-        } else if name == DirectionName::Right {
-            vertical_vector = 0;
-            horizon_vector = -1;
-        } else if name == DirectionName::UpRight {
-            vertical_vector = -1;
-            horizon_vector = -1;
-        }
-        Self {
-            name,
-            vertical_vector,
-            horizon_vector,
+    pub fn new(direction_name: DirectionName) -> Self {
+        match direction_name {
+            DirectionName::Up => Self {
+                vertical_vector: -1,
+                horizon_vector: 0,
+            },
+            DirectionName::UpRight => Self {
+                vertical_vector: -1,
+                horizon_vector: 1,
+            },
+            DirectionName::Right => Self {
+                vertical_vector: 0,
+                horizon_vector: 1,
+            },
+            DirectionName::DownRight => Self {
+                vertical_vector: 1,
+                horizon_vector: 1,
+            },
+            DirectionName::Down => Self {
+                vertical_vector: 1,
+                horizon_vector: 0,
+            },
+            DirectionName::DownLeft => Self {
+                vertical_vector: 1,
+                horizon_vector: -1,
+            },
+            DirectionName::Left => Self {
+                vertical_vector: 0,
+                horizon_vector: -1,
+            },
+            DirectionName::UpLeft => Self {
+                vertical_vector: -1,
+                horizon_vector: -1,
+            },
+            DirectionName::DirectionNameNumber => Self {
+                vertical_vector: 0,
+                horizon_vector: 0,
+            },
         }
     }
 

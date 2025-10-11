@@ -129,6 +129,9 @@ impl Game {
         // used for benchmark only
         while !self.is_finished().0 {
             let moves = self.board.search_moves(self.turn);
+            if moves.is_empty() {
+                break;
+            }
             let amove = &moves[0];
             self.execute_move(amove);
             let is_finish = self.is_finished();
@@ -144,7 +147,12 @@ impl Game {
     pub fn random_play(&mut self) -> Self {
         while !self.is_finished().0 {
             let moves = self.board.search_moves(self.turn);
-            let mut random = Random::init();
+            if moves.is_empty() {
+                self.winner = get_reverse_color(self.turn);
+                break;
+            }
+            let move_count = moves.len();
+            let mut random = Random::new(0, (move_count - 1) as u16);
             let amove = &moves[random.generate_one() as usize];
             self.execute_move(amove);
             let is_finish = self.is_finished();

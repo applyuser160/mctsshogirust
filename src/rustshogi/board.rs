@@ -1,5 +1,3 @@
-use bitvec::prelude::*;
-
 use super::address::Address;
 use super::bitboard::{
     generate_column, BitBoard, BIT_OF_FRAME, BIT_OF_LAST1_ZONE_BLACK, BIT_OF_LAST1_ZONE_WHITE,
@@ -10,22 +8,21 @@ use super::color::{get_reverse_color, ColorType};
 use super::direction::{Direction, DirectionName};
 use super::hand::Hand;
 use super::moves::Move;
-use super::piece::{MoveType, Piece, PieceType, PIECE_TYPE_NUMBER, PROMOTE};
+use super::piece::{MoveType, Piece, PieceType, PROMOTE};
 
 use pyo3::prelude::*;
-use strum::IntoEnumIterator;
 
 #[allow(dead_code)]
 #[pyclass]
 #[derive(Clone, PartialEq, Debug)]
 pub struct Board {
+    pieces: [Piece; 121],
     pub has_piece: BitBoard,
     pub player_prossesion: [BitBoard; ColorType::ColorNumber as usize],
     pub is_frame: BitBoard,
     pub able_pro: [BitBoard; ColorType::ColorNumber as usize],
     pub last_one: [BitBoard; ColorType::ColorNumber as usize],
     pub last_two: [BitBoard; ColorType::ColorNumber as usize],
-    pub has_specific_piece: [BitBoard; PIECE_TYPE_NUMBER as usize],
     pub hand: Hand,
 }
 
@@ -37,22 +34,12 @@ impl Default for Board {
 
 impl Board {
     #[allow(dead_code)]
-    fn is_a_has_specific_piece(&self, index: u8, piece_type: PieceType) -> bool {
-        self.has_specific_piece[piece_type as usize].board[index as usize]
-    }
-
-    #[allow(dead_code)]
     fn drop(&mut self, index: u8) {
-        self.has_piece.board.set(index as usize, false);
+        self.has_piece.set(index as usize, false);
         for player_prosession in self.player_prossesion.iter_mut() {
-            player_prosession.board.set(index as usize, false);
+            player_prosession.set(index as usize, false);
         }
-        self.has_specific_piece[PieceType::None as usize]
-            .board
-            .set(index as usize, true);
-        for has_specific_piece in self.has_specific_piece.iter_mut().skip(1) {
-            has_specific_piece.board.set(index as usize, false);
-        }
+        self.pieces[index as usize] = Piece::new();
     }
 
     #[allow(dead_code)]
@@ -86,13 +73,11 @@ impl Board {
     }
 
     pub fn new() -> Self {
-        let is_frame = BitBoard::from_u128(BIT_OF_FRAME);
-        let mut has_specific_piece = BitBoard::from_u128(BIT_OF_FRAME);
-        has_specific_piece.flip();
         Self {
+            pieces: [Piece::new(); 121],
             has_piece: BitBoard::new(),
             player_prossesion: [BitBoard::new(), BitBoard::new()],
-            is_frame,
+            is_frame: BitBoard::from_u128(BIT_OF_FRAME),
             able_pro: [
                 BitBoard::from_u128(BIT_OF_PRO_ZONE_BLACK),
                 BitBoard::from_u128(BIT_OF_PRO_ZONE_WHITE),
@@ -105,39 +90,16 @@ impl Board {
                 BitBoard::from_u128(BIT_OF_LAST2_ZONE_BLACK),
                 BitBoard::from_u128(BIT_OF_LAST2_ZONE_WHITE),
             ],
-            has_specific_piece: [
-                has_specific_piece,
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-                BitBoard::new(),
-            ],
             hand: Hand::new(),
         }
     }
 
     #[allow(dead_code)]
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
-        self.has_piece.board.set(index as usize, true);
+        self.pieces[index as usize] = Piece::from(color, piece_type);
+        self.has_piece.set(index as usize, true);
         for (i, player_prossesion) in self.player_prossesion.iter_mut().enumerate() {
-            player_prossesion
-                .board
-                .set(index as usize, color == ColorType::from_u8(i as u8));
-        }
-        for (i, has_specific_piece) in self.has_specific_piece.iter_mut().enumerate() {
-            has_specific_piece
-                .board
-                .set(index as usize, piece_type == PieceType::from_usize(i));
+            player_prossesion.set(index as usize, color == ColorType::from_u8(i as u8));
         }
     }
 
@@ -190,7 +152,7 @@ impl Board {
         );
         self.deploy(
             Address::from_numbers(2, 2).to_index(),
-            PieceType::Bichop,
+            PieceType::Bishop,
             ColorType::Black,
         );
         self.deploy(
@@ -291,7 +253,7 @@ impl Board {
         );
         self.deploy(
             Address::from_numbers(8, 8).to_index(),
-            PieceType::Bichop,
+            PieceType::Bishop,
             ColorType::White,
         );
         self.deploy(
@@ -407,33 +369,17 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn get_piece_type_from_index(&self, index: u8) -> PieceType {
-        for piece_type in PieceType::iter() {
-            if self.is_a_has_specific_piece(index, piece_type) {
-                return piece_type;
-            }
-        }
-        PieceType::None
+        self.pieces[index as usize].piece_type
     }
 
     #[allow(dead_code)]
     pub fn get_color_type_from_index(&self, index: u8) -> ColorType {
-        let has_a_piece = self.has_piece.board[index as usize];
-        let is_black = self.player_prossesion[ColorType::Black as usize].board[index as usize];
-        if !has_a_piece {
-            ColorType::None
-        } else if is_black {
-            ColorType::Black
-        } else {
-            ColorType::White
-        }
+        self.pieces[index as usize].owner
     }
 
     #[allow(dead_code)]
     pub fn get_piece(&self, index: u8) -> Piece {
-        let piece_type = self.get_piece_type_from_index(index);
-        let color_type = self.get_color_type_from_index(index);
-
-        Piece::from(color_type, piece_type)
+        self.pieces[index as usize]
     }
 
     #[allow(dead_code)]
@@ -470,68 +416,72 @@ impl Board {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
 
-        let move_types: [MoveType; DirectionName::DirectionNameNumber as usize] =
-            Piece::get_movetype(piece_type);
-        let mut is_in_board = bitvec![1; DirectionName::DirectionNameNumber as usize];
-
-        let mut bit_board = BitBoard::new();
-        bit_board.board.set(index as usize, true);
+        let move_types = Piece::get_movetype(piece_type);
         let mut bit_movable = BitBoard::new();
+        let start_pos_bb = BitBoard::from_u128(1 << (120 - index));
 
-        for i in 1..LENGTH_OF_EDGE {
-            for (j, move_type) in move_types.iter().enumerate() {
-                if *move_type == MoveType::None {
-                    continue;
+        for (j, &move_type) in move_types.iter().enumerate() {
+            if move_type == MoveType::None {
+                continue;
+            }
+
+            let mut direction = Direction::new(DirectionName::from_usize(j));
+            if color_type == ColorType::White {
+                direction.reverse();
+            }
+
+            let v_step = direction.vertical_vector;
+            let h_step = direction.horizon_vector;
+
+            if move_type == MoveType::Hop {
+                let mut up = Direction::new(DirectionName::Up);
+                if color_type == ColorType::White {
+                    up.reverse();
+                }
+                let shift_hop = LENGTH_OF_FRAME as i8 * (v_step * 2 + up.vertical_vector) + h_step * 2;
+                let shift_val = shift_hop.abs() as usize;
+                let mut current_pos = start_pos_bb;
+
+                if shift_hop > 0 {
+                    current_pos >>= shift_val;
+                } else {
+                    current_pos <<= shift_val;
                 }
 
-                if is_in_board[j] {
-                    let mut direction = Direction::new(DirectionName::from_usize(j));
-                    let mut up = Direction::new(DirectionName::Up);
-                    if color_type == ColorType::White {
-                        direction.reverse();
-                        up.reverse();
-                    }
+                if !(&self.is_frame & &current_pos).any() && !(&self.player_prossesion[color_type as usize] & &current_pos).any() {
+                    bit_movable |= current_pos;
+                }
+                continue;
+            }
 
-                    let mut v = direction.vertical_vector * i as i8;
-                    let h = direction.horizon_vector * i as i8;
+            let shift_step = LENGTH_OF_FRAME as i8 * v_step + h_step;
+            let mut current_pos = start_pos_bb;
 
-                    if *move_type == MoveType::Hop {
-                        v += up.vertical_vector;
-                    }
+            for _ in 0..LENGTH_OF_EDGE {
+                let shift_val = shift_step.abs() as usize;
+                if shift_step > 0 {
+                    current_pos >>= shift_val;
+                } else {
+                    current_pos <<= shift_val;
+                }
 
-                    let shift_number = LENGTH_OF_FRAME as i8 * v + h;
+                if (&self.is_frame & &current_pos).any() {
+                    break;
+                }
+                if (&self.player_prossesion[color_type as usize] & &current_pos).any() {
+                    break;
+                }
 
-                    let bn1 = if shift_number > 0 {
-                        bit_board.clone() << shift_number as usize
-                    } else {
-                        bit_board.clone() >> shift_number.unsigned_abs() as usize
-                    };
+                bit_movable |= current_pos;
 
-                    if (&self.is_frame & &bn1).board.any() {
-                        is_in_board.set(j, false);
-                    } else if (&self.player_prossesion[get_reverse_color(color_type) as usize]
-                        & &bn1)
-                        .board
-                        .any()
-                    {
-                        is_in_board.set(j, false);
-                        bit_movable = &bit_movable | &bn1;
-                    } else if (&self.player_prossesion[color_type as usize] & &bn1)
-                        .board
-                        .any()
-                    {
-                        is_in_board.set(j, false);
-                    } else {
-                        bit_movable |= &bit_board | &bn1;
-                    }
-
-                    if *move_type != MoveType::Long {
-                        is_in_board.set(j, false);
-                    }
+                if (&self.player_prossesion[get_reverse_color(color_type) as usize] & &current_pos).any() {
+                    break;
+                }
+                if move_type != MoveType::Long {
+                    break;
                 }
             }
         }
-        bit_movable.board.set(index as usize, false);
         bit_movable
     }
 
@@ -541,7 +491,7 @@ impl Board {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
         let mut bit_board = BitBoard::new();
-        bit_board.board.set(index as usize, true);
+        bit_board.set(index as usize, true);
         let is_able_pro = Piece::able_pro(piece_type);
         if !is_able_pro {
             return result;
@@ -549,7 +499,7 @@ impl Board {
 
         let pro_area = &self.able_pro[color_type as usize];
 
-        if (&bit_board & pro_area).board.any() {
+        if (&bit_board & pro_area).any() {
             return bit_movable;
         }
 
@@ -558,32 +508,37 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn get_able_drop_squares(&self, color: ColorType, piece_type: PieceType) -> BitBoard {
-        let none = self.has_specific_piece[PieceType::None as usize].clone();
-        let mut last_not_two = self.last_two[color as usize].clone();
-        let mut last_not_one = self.last_one[color as usize].clone();
-        last_not_two.flip();
-        last_not_one.flip();
+        let mut none = BitBoard::new();
+        for i in 0..121 {
+            if self.pieces[i].piece_type == PieceType::None && !self.is_frame.get(i) {
+                none.set(i, true);
+            }
+        }
+        let last_not_two = !self.last_two[color as usize];
+        let last_not_one = !self.last_one[color as usize];
 
         match piece_type {
             PieceType::Gold => none,
             PieceType::Rook => none,
-            PieceType::Bichop => none,
+            PieceType::Bishop => none,
             PieceType::Silver => none,
             PieceType::Knight => &none & &last_not_two,
             PieceType::Lance => &none & &last_not_one,
             PieceType::Pawn => {
-                let pawn = &self.has_specific_piece[PieceType::Pawn as usize]
-                    & &self.player_prossesion[color as usize];
+                let mut pawn = BitBoard::new();
+                for (i, piece) in self.pieces.iter().enumerate() {
+                    if piece.piece_type == PieceType::Pawn && piece.owner == color {
+                        pawn.set(i, true);
+                    }
+                }
                 let pawn_indexs = pawn.get_trues();
                 let mut double_pawn = BitBoard::new();
 
                 for index in pawn_indexs {
-                    double_pawn = &double_pawn
-                        | &generate_column(Address::from_number(index).column as usize);
+                    double_pawn |= generate_column((index % LENGTH_OF_FRAME) as usize);
                 }
 
-                let mut not_double_pawn = double_pawn;
-                not_double_pawn.flip();
+                let not_double_pawn = !double_pawn;
 
                 &none & &(&last_not_one & &not_double_pawn)
             }
@@ -595,7 +550,7 @@ impl Board {
     pub fn search_moves(&self, color: ColorType) -> Vec<Move> {
         let mut vector_move: Vec<Move> = Vec::new();
 
-        let player_board = if color.to_bool() {
+        let player_board = if color == ColorType::White {
             &self.player_prossesion[ColorType::White as usize]
         } else {
             &self.player_prossesion[ColorType::Black as usize]
@@ -652,7 +607,7 @@ impl Board {
             from_index = moves.get_from().to_index();
         }
 
-        if self.has_piece.board[to_index as usize] {
+        if self.has_piece.get(to_index as usize) {
             self.move_to_hand(to_index, true);
         }
 
@@ -665,25 +620,26 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn is_finished(&self) -> (bool, ColorType) {
-        let winner;
-        let is_finish = self.has_specific_piece[PieceType::King as usize]
-            .board
-            .count_ones()
-            != ColorType::ColorNumber as usize;
-        if is_finish {
-            let is_black_win = (&self.has_specific_piece[PieceType::King as usize]
-                & &self.player_prossesion[ColorType::Black as usize])
-                .board
-                .any();
-            if is_black_win {
-                winner = ColorType::Black;
+        let mut king_count = 0;
+        let mut black_king_exists = false;
+        for piece in self.pieces.iter() {
+            if piece.piece_type == PieceType::King {
+                king_count += 1;
+                if piece.owner == ColorType::Black {
+                    black_king_exists = true;
+                }
+            }
+        }
+
+        if king_count < 2 {
+            if black_king_exists {
+                (true, ColorType::Black)
             } else {
-                winner = ColorType::White;
+                (true, ColorType::White)
             }
         } else {
-            winner = ColorType::None;
+            (false, ColorType::None)
         }
-        (is_finish, winner)
     }
 }
 
@@ -704,25 +660,18 @@ impl Board {
     }
 
     pub fn __eq__(&self, other: &Self) -> bool {
-        self.has_piece == other.has_piece
+        self.pieces.iter().zip(other.pieces.iter()).all(|(a, b)| a == b)
+            && self.has_piece == other.has_piece
             && self.player_prossesion == other.player_prossesion
             && self.is_frame == other.is_frame
             && self.able_pro == other.able_pro
             && self.last_one == other.last_one
             && self.last_two == other.last_two
-            && self.has_specific_piece == other.has_specific_piece
             && self.hand == other.hand
     }
 
     pub fn __ne__(&self, other: &Self) -> bool {
-        self.has_piece != other.has_piece
-            || self.player_prossesion != other.player_prossesion
-            || self.is_frame != other.is_frame
-            || self.able_pro != other.able_pro
-            || self.last_one != other.last_one
-            || self.last_two != other.last_two
-            || self.has_specific_piece != other.has_specific_piece
-            || self.hand != other.hand
+        !self.__eq__(other)
     }
 
     #[allow(dead_code)]
