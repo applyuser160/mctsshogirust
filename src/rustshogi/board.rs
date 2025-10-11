@@ -512,10 +512,11 @@ impl Board {
                     if (self.is_frame & bn1).0 != 0 {
                         is_in_board[j] = false;
                     } else if (self.player_prossesion[get_reverse_color(color_type) as usize] & bn1)
-                        .0 != 0
+                        .0
+                        != 0
                     {
                         is_in_board[j] = false;
-                        bit_movable = bit_movable | bn1;
+                        bit_movable |= bn1;
                     } else if (self.player_prossesion[color_type as usize] & bn1).0 != 0 {
                         is_in_board[j] = false;
                     } else {
@@ -554,9 +555,9 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn get_able_drop_squares(&self, color: ColorType, piece_type: PieceType) -> BitBoard {
-        let none = self.has_specific_piece[PieceType::None as usize].clone();
-        let mut last_not_two = self.last_two[color as usize].clone();
-        let mut last_not_one = self.last_one[color as usize].clone();
+        let none = self.has_specific_piece[PieceType::None as usize];
+        let mut last_not_two = self.last_two[color as usize];
+        let mut last_not_one = self.last_one[color as usize];
         last_not_two.flip();
         last_not_one.flip();
 
@@ -565,23 +566,23 @@ impl Board {
             PieceType::Rook => none,
             PieceType::Bichop => none,
             PieceType::Silver => none,
-            PieceType::Knight => &none & &last_not_two,
-            PieceType::Lance => &none & &last_not_one,
+            PieceType::Knight => none & last_not_two,
+            PieceType::Lance => none & last_not_one,
             PieceType::Pawn => {
-                let pawn = &self.has_specific_piece[PieceType::Pawn as usize]
-                    & &self.player_prossesion[color as usize];
+                let pawn = self.has_specific_piece[PieceType::Pawn as usize]
+                    & self.player_prossesion[color as usize];
                 let pawn_indexs = pawn.get_trues();
                 let mut double_pawn = BitBoard::new();
 
                 for index in pawn_indexs {
-                    double_pawn = &double_pawn
-                        | &generate_column((Address::from_number(index).column - 1) as usize);
+                    double_pawn |=
+                        generate_column((Address::from_number(index).column - 1) as usize);
                 }
 
                 let mut not_double_pawn = double_pawn;
                 not_double_pawn.flip();
 
-                &none & &(&last_not_one & &not_double_pawn)
+                none & (last_not_one & not_double_pawn)
             }
             _ => BitBoard::new(),
         }

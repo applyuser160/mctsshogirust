@@ -286,7 +286,7 @@ pub fn generate_columns(column_nos: Vec<usize>) -> BitBoard {
     for column_no in column_nos {
         // Assumes column_no is 0-indexed (0-8) for the 9 playable columns
         // The first playable row starts at index 12 (1*11 + 1)
-        let index = 1 * 11 + (column_no + 1);
+        let index = 11 + (column_no + 1);
         first_row_mask.0 |= 1u128 << (127 - index);
     }
 
@@ -301,7 +301,7 @@ pub fn generate_columns(column_nos: Vec<usize>) -> BitBoard {
 pub fn generate_column(column_no: usize) -> BitBoard {
     // Assumes column_no is 0-indexed (0-8) for the 9 playable columns
     let mut bitboard = BitBoard::new();
-    let index = 1 * 11 + (column_no + 1);
+    let index = 11 + (column_no + 1);
     let mut mask = 1u128 << (127 - index);
     for _r in 0..LENGTH_OF_EDGE {
         bitboard.0 |= mask;
