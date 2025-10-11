@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [ master, feature/* ]
+    branches: [ main, feature/* ]
   pull_request:
-    branches: [ master, feature/* ]
+    branches: [ main, feature/* ]
 
 jobs:
   rust-test:
