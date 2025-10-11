@@ -472,66 +472,72 @@ impl Board {
 
         let move_types: [MoveType; DirectionName::DirectionNameNumber as usize] =
             Piece::get_movetype(piece_type);
-        let mut is_in_board = bitvec![1; DirectionName::DirectionNameNumber as usize];
 
-        let mut bit_board = BitBoard::new();
-        bit_board.board.set(index as usize, true);
         let mut bit_movable = BitBoard::new();
+        let initial_pos = {
+            let mut pos = BitBoard::new();
+            pos.board.set(index as usize, true);
+            pos
+        };
 
-        for i in 1..LENGTH_OF_EDGE {
-            for (j, move_type) in move_types.iter().enumerate() {
-                if *move_type == MoveType::None {
-                    continue;
+        for (j, move_type) in move_types.iter().enumerate() {
+            if *move_type == MoveType::None {
+                continue;
+            }
+
+            let mut direction = Direction::new(DirectionName::from_usize(j));
+            let mut up = Direction::new(DirectionName::Up);
+            if color_type == ColorType::White {
+                direction.reverse();
+                up.reverse();
+            }
+
+            let mut v = direction.vertical_vector;
+            let h = direction.horizon_vector;
+
+            if *move_type == MoveType::Hop {
+                v += up.vertical_vector;
+            }
+
+            let shift_number = LENGTH_OF_FRAME as i8 * v + h;
+
+            let mut current_pos = initial_pos.clone();
+
+            for _ in 0..LENGTH_OF_EDGE {
+                let new_pos = if shift_number > 0 {
+                    current_pos << shift_number as usize
+                } else {
+                    current_pos >> shift_number.unsigned_abs() as usize
+                };
+
+                if (&self.is_frame & &new_pos).board.any() {
+                    break;
                 }
 
-                if is_in_board[j] {
-                    let mut direction = Direction::new(DirectionName::from_usize(j));
-                    let mut up = Direction::new(DirectionName::Up);
-                    if color_type == ColorType::White {
-                        direction.reverse();
-                        up.reverse();
-                    }
-
-                    let mut v = direction.vertical_vector * i as i8;
-                    let h = direction.horizon_vector * i as i8;
-
-                    if *move_type == MoveType::Hop {
-                        v += up.vertical_vector;
-                    }
-
-                    let shift_number = LENGTH_OF_FRAME as i8 * v + h;
-
-                    let bn1 = if shift_number > 0 {
-                        bit_board.clone() << shift_number as usize
-                    } else {
-                        bit_board.clone() >> shift_number.unsigned_abs() as usize
-                    };
-
-                    if (&self.is_frame & &bn1).board.any() {
-                        is_in_board.set(j, false);
-                    } else if (&self.player_prossesion[get_reverse_color(color_type) as usize]
-                        & &bn1)
-                        .board
-                        .any()
-                    {
-                        is_in_board.set(j, false);
-                        bit_movable = &bit_movable | &bn1;
-                    } else if (&self.player_prossesion[color_type as usize] & &bn1)
-                        .board
-                        .any()
-                    {
-                        is_in_board.set(j, false);
-                    } else {
-                        bit_movable |= &bit_board | &bn1;
-                    }
-
-                    if *move_type != MoveType::Long {
-                        is_in_board.set(j, false);
-                    }
+                if (&self.player_prossesion[color_type as usize] & &new_pos)
+                    .board
+                    .any()
+                {
+                    break;
                 }
+
+                bit_movable |= &new_pos;
+
+                if (&self.player_prossesion[get_reverse_color(color_type) as usize] & &new_pos)
+                    .board
+                    .any()
+                {
+                    break;
+                }
+
+                if *move_type != MoveType::Long {
+                    break;
+                }
+
+                current_pos = new_pos;
             }
         }
-        bit_movable.board.set(index as usize, false);
+
         bit_movable
     }
 
