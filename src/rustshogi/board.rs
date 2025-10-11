@@ -24,6 +24,7 @@ pub struct Board {
     pub last_one: [BitBoard; ColorType::ColorNumber as usize],
     pub last_two: [BitBoard; ColorType::ColorNumber as usize],
     pub has_specific_piece: [BitBoard; PIECE_TYPE_NUMBER as usize],
+    pub pawn_columns: [BitBoard; ColorType::ColorNumber as usize],
     pub hand: Hand,
 }
 
@@ -41,6 +42,17 @@ impl Board {
 
     #[allow(dead_code)]
     fn drop(&mut self, index: u8) {
+        let piece_type = self.get_piece_type_from_index(index);
+        let color = self.get_color_type_from_index(index);
+        if piece_type == PieceType::Pawn {
+            let column = Address::from_number(index).column;
+            let column_board = generate_column((column - 1) as usize);
+            let pawn_board = self.has_specific_piece[PieceType::Pawn as usize]
+                & self.player_prossesion[color as usize];
+            if (pawn_board & column_board).0.count_ones() <= 1 {
+                self.pawn_columns[color as usize] &= !column_board;
+            }
+        }
         let mask = !(1u128 << (127 - index));
         self.has_piece.0 &= mask;
         for player_prosession in self.player_prossesion.iter_mut() {
@@ -119,12 +131,18 @@ impl Board {
                 BitBoard::new(),
                 BitBoard::new(),
             ],
+            pawn_columns: [BitBoard::new(), BitBoard::new()],
             hand: Hand::new(),
         }
     }
 
     #[allow(dead_code)]
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
+        if piece_type == PieceType::Pawn {
+            let column = Address::from_number(index).column;
+            let column_board = generate_column((column - 1) as usize);
+            self.pawn_columns[color as usize] |= column_board;
+        }
         let mask = 1u128 << (127 - index);
         self.has_piece.0 |= mask;
         for (i, player_prossesion) in self.player_prossesion.iter_mut().enumerate() {
@@ -473,83 +491,110 @@ impl Board {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
 
-        let move_types: [MoveType; DirectionName::DirectionNameNumber as usize] =
-            Piece::get_movetype(piece_type);
-        let mut is_in_board = [true; DirectionName::DirectionNameNumber as usize];
-
+        let move_types = Piece::get_movetype(piece_type);
         let bit_board = BitBoard::from_u128(1u128 << (127 - index));
         let mut bit_movable = BitBoard::new();
 
-        for i in 1..LENGTH_OF_EDGE {
-            for (j, move_type) in move_types.iter().enumerate() {
-                if *move_type == MoveType::None {
-                    continue;
-                }
+        let opponent_color = get_reverse_color(color_type);
+        let friendly_board = self.player_prossesion[color_type as usize];
+        let opponent_board = self.player_prossesion[opponent_color as usize];
 
-                if is_in_board[j] {
-                    let mut direction = Direction::new(DirectionName::from_usize(j));
-                    let mut up = Direction::new(DirectionName::Up);
-                    if color_type == ColorType::White {
-                        direction.reverse();
-                        up.reverse();
-                    }
+        for (j, move_type) in move_types.iter().enumerate() {
+            if *move_type == MoveType::None {
+                continue;
+            }
 
-                    let mut v = direction.vertical_vector * i as i8;
-                    let h = direction.horizon_vector * i as i8;
+            let mut direction = Direction::new(DirectionName::from_usize(j));
+            if color_type == ColorType::White {
+                direction.reverse();
+            }
 
-                    if *move_type == MoveType::Hop {
-                        v += up.vertical_vector;
-                    }
-
-                    let shift_number = LENGTH_OF_FRAME as i8 * v + h;
-
-                    let bn1 = if shift_number > 0 {
+            match *move_type {
+                MoveType::Short => {
+                    let shift_number =
+                        LENGTH_OF_FRAME as i8 * direction.vertical_vector + direction.horizon_vector;
+                    let target_board = if shift_number > 0 {
                         bit_board << shift_number as usize
                     } else {
                         bit_board >> shift_number.unsigned_abs() as usize
                     };
 
-                    if (self.is_frame & bn1).0 != 0 {
-                        is_in_board[j] = false;
-                    } else if (self.player_prossesion[get_reverse_color(color_type) as usize] & bn1)
-                        .0
-                        != 0
+                    if (self.is_frame & target_board).0 == 0
+                        && (friendly_board & target_board).0 == 0
                     {
-                        is_in_board[j] = false;
-                        bit_movable |= bn1;
-                    } else if (self.player_prossesion[color_type as usize] & bn1).0 != 0 {
-                        is_in_board[j] = false;
-                    } else {
-                        bit_movable |= bit_board | bn1;
-                    }
-
-                    if *move_type != MoveType::Long {
-                        is_in_board[j] = false;
+                        bit_movable |= target_board;
                     }
                 }
+                MoveType::Hop => {
+                    let mut up = Direction::new(DirectionName::Up);
+                    if color_type == ColorType::White {
+                        up.reverse();
+                    }
+                    let v = direction.vertical_vector + up.vertical_vector;
+                    let h = direction.horizon_vector; // Not multiplied by i
+                    let shift_number = LENGTH_OF_FRAME as i8 * v + h;
+
+                    let target_board = if shift_number > 0 {
+                        bit_board << shift_number as usize
+                    } else {
+                        bit_board >> shift_number.unsigned_abs() as usize
+                    };
+
+                    if (self.is_frame & target_board).0 == 0
+                        && (friendly_board & target_board).0 == 0
+                    {
+                        bit_movable |= target_board;
+                    }
+                }
+                MoveType::Long => {
+                    let shift_number =
+                        LENGTH_OF_FRAME as i8 * direction.vertical_vector + direction.horizon_vector;
+                    let mut current_pos = bit_board;
+                    loop {
+                        let next_pos = if shift_number > 0 {
+                            current_pos << shift_number as usize
+                        } else {
+                            current_pos >> shift_number.unsigned_abs() as usize
+                        };
+
+                        if (self.is_frame & next_pos).0 != 0 {
+                            break; // Hit frame
+                        }
+                        if (friendly_board & next_pos).0 != 0 {
+                            break; // Hit friendly piece
+                        }
+
+                        bit_movable |= next_pos;
+                        current_pos = next_pos;
+
+                        if (opponent_board & next_pos).0 != 0 {
+                            break; // Hit opponent piece, can take it, but can't go further
+                        }
+                    }
+                }
+                _ => (),
             }
         }
-        bit_movable.0 &= !(1u128 << (127 - index));
         bit_movable
     }
 
     #[allow(dead_code)]
     pub fn get_able_pro_move_squares(&self, index: u8, bit_movable: BitBoard) -> BitBoard {
-        let result = BitBoard::new();
         let piece_type = self.get_piece_type_from_index(index);
-        let color_type = self.get_color_type_from_index(index);
-        let bit_board = BitBoard::from_u128(1u128 << (127 - index));
-        let is_able_pro = Piece::able_pro(piece_type);
-        if !is_able_pro {
-            return result;
+        if !Piece::able_pro(piece_type) {
+            return BitBoard::new();
         }
 
+        let color_type = self.get_color_type_from_index(index);
+        let bit_board = BitBoard::from_u128(1u128 << (127 - index));
         let pro_area = self.able_pro[color_type as usize];
 
+        // If the piece is already in the promotion zone, all its moves are promotable.
         if (bit_board & pro_area).0 != 0 {
             return bit_movable;
         }
 
+        // Otherwise, only moves that land in the promotion zone are promotable.
         bit_movable & pro_area
     }
 
@@ -569,20 +614,9 @@ impl Board {
             PieceType::Knight => none & last_not_two,
             PieceType::Lance => none & last_not_one,
             PieceType::Pawn => {
-                let pawn = self.has_specific_piece[PieceType::Pawn as usize]
-                    & self.player_prossesion[color as usize];
-                let pawn_indexs = pawn.get_trues();
-                let mut double_pawn = BitBoard::new();
-
-                for index in pawn_indexs {
-                    double_pawn |=
-                        generate_column((Address::from_number(index).column - 1) as usize);
-                }
-
-                let mut not_double_pawn = double_pawn;
-                not_double_pawn.flip();
-
-                none & (last_not_one & not_double_pawn)
+                let mut not_pawn_columns = self.pawn_columns[color as usize];
+                not_pawn_columns.flip();
+                none & last_not_one & not_pawn_columns
             }
             _ => BitBoard::new(),
         }
@@ -708,6 +742,7 @@ impl Board {
             && self.last_one == other.last_one
             && self.last_two == other.last_two
             && self.has_specific_piece == other.has_specific_piece
+            && self.pawn_columns == other.pawn_columns
             && self.hand == other.hand
     }
 
@@ -719,6 +754,7 @@ impl Board {
             || self.last_one != other.last_one
             || self.last_two != other.last_two
             || self.has_specific_piece != other.has_specific_piece
+            || self.pawn_columns != other.pawn_columns
             || self.hand != other.hand
     }
 

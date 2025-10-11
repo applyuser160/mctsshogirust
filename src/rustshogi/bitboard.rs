@@ -1,4 +1,4 @@
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Shl, ShlAssign, Shr, ShrAssign};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Shl, ShlAssign, Shr, ShrAssign};
 
 #[allow(dead_code)]
 pub const LENGTH_OF_BOARD: u8 = 121;
@@ -276,6 +276,14 @@ impl Shl<usize> for BitBoard {
 impl ShlAssign<usize> for BitBoard {
     fn shl_assign(&mut self, rhs: usize) {
         self.0 <<= rhs;
+    }
+}
+
+impl Not for BitBoard {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        BitBoard(!self.0)
     }
 }
 
