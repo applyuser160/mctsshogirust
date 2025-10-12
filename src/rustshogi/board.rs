@@ -403,7 +403,9 @@ impl Board {
         let mut board = Self::new();
         let parts: Vec<&str> = sfen.split(" ").collect();
         board.input_board(parts[0]);
-        board.input_hand(parts[1]);
+        if parts.len() > 1 {
+            board.input_hand(parts[1]);
+        }
         board
     }
 

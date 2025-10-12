@@ -68,5 +68,6 @@ fn rustshogi(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<moves::Move>()?;
     m.add_class::<hand::Hand>()?;
     m.add_class::<board::Board>()?;
+    m.add_class::<game::Game>()?;
     Ok(())
 }
