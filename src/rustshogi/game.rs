@@ -144,7 +144,7 @@ impl Game {
     pub fn random_play(&mut self) -> Self {
         while !self.is_finished().0 {
             let moves = self.board.search_moves(self.turn);
-            let mut random = Random::init();
+            let mut random = Random::new(0, (moves.len() - 1) as u16);
             let amove = &moves[random.generate_one() as usize];
             self.execute_move(amove);
             let is_finish = self.is_finished();
