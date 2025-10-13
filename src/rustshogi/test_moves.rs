@@ -1,18 +1,19 @@
 #[cfg(test)]
 
 mod tests {
+    use std::any::{Any, TypeId};
+
     use crate::{
         address::Address,
         color::ColorType,
         moves::Move,
         piece::{Piece, PieceType},
     };
-    use bitvec::prelude::*;
 
     #[test]
     fn test_moves_new() {
         let mv = Move::new();
-        assert_eq!(mv.value.len(), 16);
+        assert_eq!(mv.value.type_id(), TypeId::of::<u16>());
     }
 
     #[test]
@@ -23,9 +24,7 @@ mod tests {
         let from = Address::from_number(11);
         let to = Address::from_number(92);
         let mv = Move::from_standart(from, to, false);
-        let mut bits: BitVec<u16, Msb0> = bitvec![u16, Msb0; 0; 16];
-        bits.store_be(11787);
-        assert_eq!(mv.value, bits);
+        assert_eq!(mv.value, 11787);
     }
 
     #[test]
@@ -36,9 +35,7 @@ mod tests {
         let piece = Piece::from(ColorType::White, PieceType::Lance);
         let to = Address::from_number(52);
         let mv = Move::from_drop(piece, to);
-        let mut bits = bitvec![u16, Msb0; 0; 16];
-        bits.store_be(-26041);
-        assert_eq!(mv.value, bits);
+        assert_eq!(mv.value as i16, -26041);
     }
 
     #[test]
@@ -46,9 +43,7 @@ mod tests {
         /* result 0b0000110000001100 */
         let csa = String::from("1a2b");
         let mv = Move::from_csa(&csa);
-        let mut bits = bitvec![u16, Msb0; 0; 16];
-        bits.store_be(3084);
-        assert_eq!(mv.value, bits);
+        assert_eq!(mv.value, 3084);
     }
 
     #[test]
@@ -88,9 +83,7 @@ mod tests {
         /* result 0b1000110001001000 */
         let csa = String::from("p*2b");
         let mv = Move::from_csa(&csa);
-        let mut bits = bitvec![u16, Msb0; 0; 16];
-        bits.store_be(-29624);
-        assert_eq!(mv.value, bits);
+        assert_eq!(mv.value as i16, -29624);
         assert_eq!(mv.get_piece(), Piece::from_char('p'));
     }
 

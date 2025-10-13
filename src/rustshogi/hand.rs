@@ -24,7 +24,10 @@ impl Default for Hand {
 impl Hand {
     #[allow(dead_code)]
     fn calc_index(color_type: color::ColorType, piece_type: piece::PieceType) -> u16 {
-        color_type as u16 * piece::NOT_PRO_PIECE_TYPE_NUMBER as u16 + piece_type as u16 - 1
+        if piece_type == piece::PieceType::None {
+            return 0; // 安全なデフォルト値
+        }
+        color_type as u16 * piece::NOT_PRO_PIECE_TYPE_NUMBER as u16 + (piece_type as u16 - 1)
     }
 
     #[allow(dead_code)]
@@ -84,7 +87,7 @@ impl Hand {
     #[allow(dead_code)]
     pub fn decrease_piece(&mut self, color_type: color::ColorType, piece_type: piece::PieceType) {
         let index = Self::calc_index(color_type, piece_type);
-        self.counts[index as usize] -= 1;
+        self.counts[index as usize] = self.counts[index as usize].saturating_sub(1);
     }
 
     #[allow(dead_code)]

@@ -573,12 +573,11 @@ impl Board {
             PieceType::Pawn => {
                 let pawn = self.has_specific_piece[PieceType::Pawn as usize]
                     & self.player_prossesion[color as usize];
-                let pawn_indexs = pawn.get_trues();
                 let mut double_pawn = BitBoard::new();
 
-                for index in pawn_indexs {
+                for index in pawn.get_trues_iter() {
                     double_pawn |=
-                        generate_column((Address::from_number(index).column - 1) as usize);
+                        generate_column((Address::from_number(index).get_column() - 1) as usize);
                 }
 
                 let mut not_double_pawn = double_pawn;
@@ -600,26 +599,21 @@ impl Board {
             &self.player_prossesion[ColorType::Black as usize]
         };
 
-        let player_board_indexs = player_board.get_trues();
-
-        for player_board_index in player_board_indexs.iter() {
-            let move_board = self.get_able_move_squares(*player_board_index);
-            let move_indexs = move_board.get_trues();
-            vector_move.extend(move_indexs.iter().map(|move_index| {
+        for player_board_index in player_board.get_trues_iter() {
+            let move_board = self.get_able_move_squares(player_board_index);
+            vector_move.extend(move_board.get_trues_iter().map(|move_index| {
                 Move::from_standart(
-                    Address::from_number(*player_board_index),
-                    Address::from_number(*move_index),
+                    Address::from_number(player_board_index),
+                    Address::from_number(move_index),
                     false,
                 )
             }));
-            drop(move_indexs);
 
-            let pro_board = self.get_able_pro_move_squares(*player_board_index, move_board);
-            let move_indexs = pro_board.get_trues();
-            vector_move.extend(move_indexs.iter().map(|move_index| {
+            let pro_board = self.get_able_pro_move_squares(player_board_index, move_board);
+            vector_move.extend(pro_board.get_trues_iter().map(|move_index| {
                 Move::from_standart(
-                    Address::from_number(*player_board_index),
-                    Address::from_number(*move_index),
+                    Address::from_number(player_board_index),
+                    Address::from_number(move_index),
                     true,
                 )
             }));
@@ -629,9 +623,8 @@ impl Board {
         for player_hand_piece in player_hand_pieces.iter() {
             let move_board =
                 self.get_able_drop_squares(player_hand_piece.owner, player_hand_piece.piece_type);
-            let move_indexs = move_board.get_trues();
-            vector_move.extend(move_indexs.iter().map(|move_index| {
-                Move::from_drop(*player_hand_piece, Address::from_number(*move_index))
+            vector_move.extend(move_board.get_trues_iter().map(|move_index| {
+                Move::from_drop(*player_hand_piece, Address::from_number(move_index))
             }));
         }
 

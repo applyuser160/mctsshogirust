@@ -190,6 +190,20 @@ impl BitBoard {
     }
 
     #[allow(dead_code)]
+    pub fn get_trues_iter(&self) -> impl Iterator<Item = u8> + '_ {
+        let mut board = self.0;
+        std::iter::from_fn(move || {
+            if board == 0 {
+                None
+            } else {
+                let index = board.leading_zeros() as u8;
+                board &= !(1u128 << (127 - index));
+                Some(index)
+            }
+        })
+    }
+
+    #[allow(dead_code)]
     pub fn flip(&mut self) {
         let board_mask = !((1u128 << (128 - LENGTH_OF_BOARD as u32)) - 1);
         self.0 ^= board_mask;
