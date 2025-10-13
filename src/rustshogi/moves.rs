@@ -1,7 +1,3 @@
-use bitvec::prelude::*;
-
-use bitvec::prelude::BitVec;
-
 use crate::address::Address;
 use crate::piece::Piece;
 
@@ -14,7 +10,7 @@ use pyo3::prelude::*;
 #[pyclass]
 #[derive(Clone, Debug)]
 pub struct Move {
-    pub value: BitVec<u16, Msb0>,
+    pub value: u16,
 }
 
 impl Move {
@@ -33,20 +29,12 @@ impl Move {
     }
 
     fn base_constructor(&mut self, from: u16, to: u16, pro: u16, drop: u16) {
-        let mut bit_from = bitvec![u16, Msb0; 0; 16];
-        let mut bit_to = bitvec![u16, Msb0; 0; 16];
-        let mut bit_pro = bitvec![u16, Msb0; 0; 16];
-        let mut bit_drop = bitvec![u16, Msb0; 0; 16];
-        bit_from.store_be::<u16>(from);
-        bit_to.store_be::<u16>(to);
-        bit_pro.store_be::<u16>(pro);
-        bit_drop.store_be::<u16>(drop);
-
-        bit_drop.shift_left(15);
-        bit_pro.shift_left(14);
-        bit_to.shift_left(7);
-
-        self.value = bit_from | bit_to | bit_pro | bit_drop;
+        // ビット配置:
+        // bit 15: drop (1 bit)
+        // bit 14: promote (1 bit)
+        // bits 13-7: to (7 bits)
+        // bits 6-0: from/piece (7 bits)
+        self.value = (drop << 15) | (pro << 14) | (to << 7) | from;
     }
 
     #[allow(dead_code)]
@@ -71,9 +59,7 @@ impl Move {
 
     #[allow(dead_code)]
     pub fn new() -> Self {
-        Self {
-            value: bitvec![u16, Msb0; 0; 16],
-        }
+        Self { value: 0 }
     }
 
     #[allow(dead_code)]
@@ -106,39 +92,32 @@ impl Move {
 
     #[allow(dead_code)]
     pub fn get_is_drop(&self) -> bool {
-        self.value[0]
+        (self.value & (1 << 15)) != 0
     }
 
     #[allow(dead_code)]
     pub fn get_is_promote(&self) -> bool {
-        self.value[1]
-    }
-
-    #[allow(dead_code)]
-    pub fn get_base(&self, left: usize, right: usize) -> u8 {
-        let mut copy = self.value.clone();
-        copy.shift_left(left);
-        copy.shift_right(right);
-        let r: std::ops::Range<usize> = 8..16;
-        let f = copy.get(r).unwrap();
-        f.load::<u8>()
+        (self.value & (1 << 14)) != 0
     }
 
     #[allow(dead_code)]
     pub fn get_from(&self) -> address::Address {
-        let v = self.get_base(9, 9);
+        // bits 6-0: from (7 bits)
+        let v = (self.value & 0x7F) as u8;
         address::Address::from_number(v)
     }
 
     #[allow(dead_code)]
     pub fn get_to(&self) -> address::Address {
-        let v = self.get_base(2, 9);
+        // bits 13-7: to (7 bits)
+        let v = ((self.value >> 7) & 0x7F) as u8;
         address::Address::from_number(v)
     }
 
     #[allow(dead_code)]
     pub fn get_piece(&self) -> piece::Piece {
-        let v = self.get_base(9, 9);
+        // ドロップ手の場合、piece情報は下位7ビット（bits 0-6）に格納
+        let v = (self.value & 0x7F) as u8;
         piece::Piece::from_u8(v)
     }
 

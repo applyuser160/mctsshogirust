@@ -1,5 +1,4 @@
 use crate::color::ColorType;
-use bitvec::prelude::*;
 
 use super::direction;
 
@@ -236,20 +235,9 @@ impl Piece {
 
     #[allow(dead_code)]
     pub fn from_u8(num: u8) -> Self {
-        let mut bits = bitvec![u8, Msb0; 0; 8];
-        bits.store_be::<u8>(num);
-        let owner = ColorType::from_u8(bits[1] as u8);
-        let mut piece_type: u8 = 0;
-        let base: u8 = 2;
-        for i in 2..8 {
-            if bits[i] {
-                piece_type += base.pow((7 - i) as u32);
-            }
-        }
-        Self {
-            owner,
-            piece_type: PieceType::from_usize(piece_type as usize),
-        }
+        let owner = ColorType::from_u8((num & 0x40) >> 6);
+        let piece_type = PieceType::from_usize((num & 0x3F).into());
+        Self { owner, piece_type }
     }
 
     #[allow(dead_code)]

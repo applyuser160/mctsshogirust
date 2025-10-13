@@ -6,22 +6,22 @@ mod tests {
     #[test]
     fn test_address_from_number() {
         let address = Address::from_number(57);
-        assert_eq!(address.column, 2);
-        assert_eq!(address.row, 5);
+        assert_eq!(address.get_column(), 2);
+        assert_eq!(address.get_row(), 5);
     }
 
     #[test]
     fn test_address_from_numbers() {
         let address = Address::from_numbers(5, 9);
-        assert_eq!(address.column, 5);
-        assert_eq!(address.row, 9);
+        assert_eq!(address.get_column(), 5);
+        assert_eq!(address.get_row(), 9);
     }
 
     #[test]
     fn test_address_from_string() {
         let address = Address::from_string("9i");
-        assert_eq!(address.column, 9);
-        assert_eq!(address.row, 9);
+        assert_eq!(address.get_column(), 9);
+        assert_eq!(address.get_row(), 9);
     }
 
     #[test]
