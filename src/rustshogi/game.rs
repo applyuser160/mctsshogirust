@@ -5,6 +5,8 @@ use super::mctsresult::MctsResult;
 use super::moves::Move;
 use super::piece::Piece;
 use super::random::Random;
+use num_cpus;
+use rayon::prelude::*;
 
 use pyo3::prelude::*;
 
@@ -184,10 +186,65 @@ impl Game {
         }
         result
     }
+
+    pub fn random_move_parallel(&self, num: usize, num_threads: usize) -> MctsResult {
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(num_threads)
+            .build()
+            .unwrap();
+
+        let next_moves = self.board.search_moves(self.turn);
+        let next_move_count = next_moves.len() as u64;
+
+        if next_move_count == 0 {
+            return MctsResult::from(0, vec![]);
+        }
+
+        let results: Vec<MctsResult> = pool.install(|| {
+            (0..num)
+                .into_par_iter()
+                .map(|_| {
+                    let mut game_clone = self.clone();
+                    let mut result = MctsResult::from(next_move_count, next_moves.clone());
+                    let mut next_random = Random::new(0, result.next_move_count as u16);
+                    let random_one = next_random.generate_one() as usize;
+                    let next_move = result.next_moves[random_one].clone();
+                    game_clone.execute_move(&next_move);
+
+                    while !game_clone.is_finished().0 {
+                        let moves = game_clone.board.search_moves(game_clone.turn);
+                        if moves.is_empty() {
+                            break;
+                        }
+                        let move_count = moves.len();
+                        let mut random = Random::new(0, (move_count - 1) as u16);
+                        let mv = &moves[random.generate_one() as usize];
+                        game_clone.execute_move(mv);
+                    }
+                    let (_is_finished, winner) = game_clone.is_finished();
+                    result.plus_result(winner, random_one);
+                    result
+                })
+                .collect()
+        });
+
+        let mut final_result = MctsResult::from(next_move_count, next_moves);
+        for result in results {
+            final_result.merge(&result);
+        }
+        final_result
+    }
 }
 
 #[pymethods]
 impl Game {
+    #[pyo3(name = "random_move")]
+    #[pyo3(signature = (num, threads = None))]
+    pub fn python_random_move(&self, num: usize, threads: Option<usize>) -> MctsResult {
+        let num_threads = threads.unwrap_or_else(num_cpus::get);
+        self.random_move_parallel(num, num_threads)
+    }
+
     #[new]
     #[pyo3(signature = (board = Board::new_for_python("startpos".to_string()), move_number = 1, turn = ColorType::Black, winner = ColorType::None))]
     pub fn new_for_python(
