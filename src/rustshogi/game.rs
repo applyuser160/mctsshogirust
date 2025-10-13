@@ -166,7 +166,7 @@ impl Game {
         let copied_game = self.clone();
         for _i in 0..num {
             *self = copied_game.clone();
-            let mut next_random = Random::new(0, result.next_move_count as u16);
+            let mut next_random = Random::new(0, (result.next_move_count - 1) as u16);
             let random_one = next_random.generate_one() as usize;
             let next_move = result.next_moves[random_one].clone();
             self.execute_move(&next_move);
@@ -205,7 +205,7 @@ impl Game {
                 .into_par_iter()
                 .map(|_| {
                     let mut game_clone = self.clone();
-                    let mut next_random = Random::new(0, next_move_count as u16);
+                    let mut next_random = Random::new(0, (next_move_count - 1) as u16);
                     let random_one = next_random.generate_one() as usize;
                     let next_move = next_moves[random_one].clone();
                     game_clone.execute_move(&next_move);
