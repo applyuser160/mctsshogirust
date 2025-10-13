@@ -39,4 +39,14 @@ mod tests {
         );
         assert!(result_game.move_number <= 500);
     }
+
+    #[test]
+    fn test_game_random_move_parallel() {
+        let mut game = Game::new();
+        game.input_board("startpos".to_string());
+        let num = 10;
+        let threads = 2;
+        let result = game.random_move_parallel(num, threads);
+        assert_eq!(result.count, num as u64);
+    }
 }
