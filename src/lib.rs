@@ -1,66 +1,66 @@
-#[path = "address.rs"]
+#[path = "rustshogi/address.rs"]
 pub mod address;
-#[path = "bitboard.rs"]
+#[path = "rustshogi/bitboard.rs"]
 pub mod bitboard;
-#[path = "board.rs"]
+#[path = "rustshogi/board.rs"]
 pub mod board;
-#[path = "color.rs"]
+#[path = "rustshogi/color.rs"]
 pub mod color;
-#[path = "common.rs"]
+#[path = "rustshogi/common.rs"]
 pub mod common;
-#[path = "direction.rs"]
+#[path = "rustshogi/direction.rs"]
 pub mod direction;
-#[path = "game.rs"]
+#[path = "rustshogi/game.rs"]
 pub mod game;
-#[path = "hand.rs"]
+#[path = "rustshogi/hand.rs"]
 pub mod hand;
-#[path = "mctsresult.rs"]
+#[path = "rustshogi/mctsresult.rs"]
 pub mod mctsresult;
-#[path = "moves.rs"]
+#[path = "rustshogi/moves.rs"]
 pub mod moves;
-#[path = "piece.rs"]
+#[path = "rustshogi/piece.rs"]
 pub mod piece;
-#[path = "random.rs"]
+#[path = "rustshogi/random.rs"]
 pub mod random;
 
 #[cfg(test)]
-#[path = "test_address.rs"]
+#[path = "rustshogi/test_address.rs"]
 pub mod test_address;
 #[cfg(test)]
-#[path = "test_bitboard.rs"]
+#[path = "rustshogi/test_bitboard.rs"]
 pub mod test_bitboard;
 #[cfg(test)]
-#[path = "test_board.rs"]
+#[path = "rustshogi/test_board.rs"]
 pub mod test_board;
 #[cfg(test)]
-#[path = "test_color.rs"]
+#[path = "rustshogi/test_color.rs"]
 pub mod test_color;
 #[cfg(test)]
-#[path = "test_common.rs"]
+#[path = "rustshogi/test_common.rs"]
 pub mod test_common;
 #[cfg(test)]
-#[path = "test_direction.rs"]
+#[path = "rustshogi/test_direction.rs"]
 pub mod test_direction;
 #[cfg(test)]
-#[path = "test_game.rs"]
+#[path = "rustshogi/test_game.rs"]
 pub mod test_game;
 #[cfg(test)]
-#[path = "test_hand.rs"]
+#[path = "rustshogi/test_hand.rs"]
 pub mod test_hand;
 #[cfg(test)]
-#[path = "test_moves.rs"]
+#[path = "rustshogi/test_moves.rs"]
 pub mod test_moves;
 #[cfg(test)]
-#[path = "test_piece.rs"]
+#[path = "rustshogi/test_piece.rs"]
 pub mod test_piece;
 #[cfg(test)]
-#[path = "test_random.rs"]
+#[path = "rustshogi/test_random.rs"]
 pub mod test_random;
 
 use pyo3::prelude::*;
 
 #[pymodule]
-fn _core(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn rustshogi(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<address::Address>()?;
     m.add_class::<color::ColorType>()?;
     m.add_class::<piece::PieceType>()?;
