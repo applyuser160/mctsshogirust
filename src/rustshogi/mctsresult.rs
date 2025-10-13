@@ -1,12 +1,31 @@
 use super::color::ColorType;
 use super::moves::Move;
+use pyo3::prelude::*;
 
 #[allow(dead_code)]
+#[pyclass]
+#[derive(Clone)]
 pub struct MctsResult {
+    #[pyo3(get, set)]
     pub result: Vec<[u64; ColorType::ColorNumber as usize + 1]>,
+    #[pyo3(get, set)]
     pub next_moves: Vec<Move>,
+    #[pyo3(get, set)]
     pub next_move_count: u64,
+    #[pyo3(get, set)]
     pub count: u64,
+}
+
+#[pymethods]
+impl MctsResult {
+    pub fn merge(&mut self, other: &MctsResult) {
+        for i in 0..self.result.len() {
+            for j in 0..self.result[i].len() {
+                self.result[i][j] += other.result[i][j];
+            }
+        }
+        self.count += other.count;
+    }
 }
 
 impl Default for MctsResult {
