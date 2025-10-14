@@ -1,4 +1,6 @@
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Shl, ShlAssign, Shr, ShrAssign};
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::*;
 
 #[allow(dead_code)]
 pub const LENGTH_OF_BOARD: u8 = 121;
@@ -129,6 +131,7 @@ pub const STRING_OF_LAST2_ZONE_WHITE: &str = "\
 00000000000";
 
 #[allow(dead_code)]
+#[repr(align(32))]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct BitBoard(pub u128);
 
@@ -207,6 +210,83 @@ impl BitBoard {
     pub fn flip(&mut self) {
         let board_mask = !((1u128 << (128 - LENGTH_OF_BOARD as u32)) - 1);
         self.0 ^= board_mask;
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    pub fn simd_bitand(&self, rhs: &Self) -> Self {
+        if is_x86_feature_detected!("sse2") {
+            unsafe {
+                let a = _mm_loadu_si128(&self.0 as *const u128 as *const __m128i);
+                let b = _mm_loadu_si128(&rhs.0 as *const u128 as *const __m128i);
+                let result = _mm_and_si128(a, b);
+                BitBoard(std::mem::transmute(result))
+            }
+        } else {
+            BitBoard(self.0 & rhs.0)
+        }
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    pub fn simd_bitand(&self, rhs: &Self) -> Self {
+        BitBoard(self.0 & rhs.0)
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    pub fn simd_bitor(&self, rhs: &Self) -> Self {
+        if is_x86_feature_detected!("sse2") {
+            unsafe {
+                let a = _mm_loadu_si128(&self.0 as *const u128 as *const __m128i);
+                let b = _mm_loadu_si128(&rhs.0 as *const u128 as *const __m128i);
+                let result = _mm_or_si128(a, b);
+                BitBoard(std::mem::transmute(result))
+            }
+        } else {
+            BitBoard(self.0 | rhs.0)
+        }
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    pub fn simd_bitor(&self, rhs: &Self) -> Self {
+        BitBoard(self.0 | rhs.0)
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    pub fn simd_get_trues(&self) -> Vec<u8> {
+        if is_x86_feature_detected!("sse2") {
+            let mut result = Vec::with_capacity(self.0.count_ones() as usize);
+            unsafe {
+                let v = _mm_loadu_si128(&self.0 as *const u128 as *const __m128i);
+                let v_zero = _mm_setzero_si128();
+                let cmp = _mm_cmpeq_epi8(v, v_zero);
+                let zero_mask = _mm_movemask_epi8(cmp);
+                let mut non_zero_mask = !zero_mask & 0xFFFF;
+
+                let bytes = self.0.to_le_bytes();
+
+                while non_zero_mask != 0 {
+                    let byte_index = non_zero_mask.trailing_zeros() as usize;
+                    let mut byte = bytes[byte_index];
+
+                    while byte != 0 {
+                        let bit_in_byte_index = byte.trailing_zeros();
+                        let lsb_bit_index = (byte_index * 8) + bit_in_byte_index as usize;
+                        result.push(127 - lsb_bit_index as u8);
+                        byte &= byte - 1;
+                    }
+
+                    non_zero_mask &= non_zero_mask - 1;
+                }
+            }
+            result.sort_unstable_by(|a, b| b.cmp(a));
+            result
+        } else {
+            self.get_trues()
+        }
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    pub fn simd_get_trues(&self) -> Vec<u8> {
+        self.get_trues()
     }
 }
 

@@ -127,19 +127,25 @@ impl Board {
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         let mask = 1u128 << (127 - index);
         self.has_piece.0 |= mask;
+
+        let not_mask = !mask;
+        let color_u8 = color as u8;
+        let piece_type_usize = piece_type as usize;
+
         for (i, player_prossesion) in self.player_prossesion.iter_mut().enumerate() {
-            if color == ColorType::from_u8(i as u8) {
-                player_prossesion.0 |= mask;
-            } else {
-                player_prossesion.0 &= !mask;
-            }
+            let condition = (i as u8) == color_u8;
+            let cmp_mask = -(condition as i128) as u128;
+            let a = player_prossesion.0 | mask;
+            let b = player_prossesion.0 & not_mask;
+            player_prossesion.0 = (a & cmp_mask) | (b & !cmp_mask);
         }
+
         for (i, has_specific_piece) in self.has_specific_piece.iter_mut().enumerate() {
-            if piece_type == PieceType::from_usize(i) {
-                has_specific_piece.0 |= mask;
-            } else {
-                has_specific_piece.0 &= !mask;
-            }
+            let condition = i == piece_type_usize;
+            let cmp_mask = -(condition as i128) as u128;
+            let a = has_specific_piece.0 | mask;
+            let b = has_specific_piece.0 & not_mask;
+            has_specific_piece.0 = (a & cmp_mask) | (b & !cmp_mask);
         }
     }
 
