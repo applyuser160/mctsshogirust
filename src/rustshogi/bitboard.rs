@@ -300,17 +300,6 @@ impl BitBoard {
         }
         result
     }
-
-    #[allow(dead_code)]
-    pub fn get_trues_batch(boards: &[BitBoard]) -> Vec<Vec<u8>> {
-        // Note: SIMD optimization for this batch operation is highly complex.
-        // The number of set bits (and thus the length of the output vector) varies for each BitBoard.
-        // SIMD is best suited for fixed-size, predictable data parallelism.
-        // Efficiently handling variable-length output would require advanced techniques
-        // (like AVX512 compress store) not targeted here, and the complexity might outweigh
-        // the benefits over the already BMI2-optimized `get_trues` scalar function.
-        boards.iter().map(|b| b.get_trues()).collect()
-    }
 }
 
 const BOARD_MASK_U128: u128 = !((1u128 << (128 - LENGTH_OF_BOARD as u32)) - 1);

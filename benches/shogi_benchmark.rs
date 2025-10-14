@@ -49,12 +49,6 @@ fn benchmark_bitboard_operations(c: &mut Criterion) {
         });
     });
 
-    group.bench_function("get_trues_batch", |b| {
-        b.iter(|| {
-            let _ = BitBoard::get_trues_batch(boards_slice);
-        });
-    });
-
     group.finish();
 }
 

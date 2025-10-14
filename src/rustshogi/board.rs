@@ -597,7 +597,7 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn search_moves(&self, color: ColorType) -> Vec<Move> {
-        let mut vector_move: Vec<Move> = Vec::new();
+        let mut vector_move: Vec<Move> = Vec::with_capacity(128);
 
         let player_board = if color.to_bool() {
             &self.player_prossesion[ColorType::White as usize]
@@ -626,11 +626,11 @@ impl Board {
         }
 
         let player_hand_pieces = self.hand.get_player_pieces(color);
-        for player_hand_piece in player_hand_pieces.iter() {
+        for player_hand_piece in player_hand_pieces {
             let move_board =
                 self.get_able_drop_squares(player_hand_piece.owner, player_hand_piece.piece_type);
             vector_move.extend(move_board.get_trues_iter().map(|move_index| {
-                Move::from_drop(*player_hand_piece, Address::from_number(move_index))
+                Move::from_drop(player_hand_piece, Address::from_number(move_index))
             }));
         }
 
