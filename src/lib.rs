@@ -20,6 +20,8 @@ pub mod mctsresult;
 pub mod moves;
 #[path = "rustshogi/piece.rs"]
 pub mod piece;
+#[path = "rustshogi/move_pattern.rs"]
+pub mod move_pattern;
 #[path = "rustshogi/random.rs"]
 pub mod random;
 
