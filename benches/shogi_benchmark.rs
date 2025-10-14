@@ -1,5 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rustshogi::bitboard::BitBoard;
+use rustshogi::game::Game;
 
 fn benchmark_bitboard_operations(c: &mut Criterion) {
     let mut group = c.benchmark_group("BitBoard Operations");
@@ -44,6 +45,13 @@ fn benchmark_bitboard_operations(c: &mut Criterion) {
     group.bench_function("bitxor_batch", |b| {
         b.iter(|| {
             let _ = BitBoard::bitxor_batch(boards_slice);
+        });
+    });
+
+    group.bench_function("random_move_parallel", |b| {
+        b.iter(|| {
+            let game = Game::new();
+            let _result = game.random_move_parallel(100, 4);
         });
     });
 
