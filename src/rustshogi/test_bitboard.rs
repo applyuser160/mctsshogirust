@@ -6,15 +6,15 @@ mod tests {
     #[test]
     fn test_bitboard_new() {
         let bitboard = BitBoard::new();
-        assert_eq!((bitboard.0 >> (127 - 0)) & 1, 0);
+        assert_eq!((bitboard.to_u128() >> (127 - 0)) & 1, 0);
     }
 
     #[test]
     fn test_bitboard_from_u128() {
         let bitboard = BitBoard::from_u128(548949983232);
-        assert_eq!((bitboard.0 >> (127 - 88)) & 1, 0);
-        assert_eq!((bitboard.0 >> (127 - 89)) & 1, 1);
-        assert_eq!((bitboard.0 >> (127 - 90)) & 1, 1);
+        assert_eq!((bitboard.to_u128() >> (127 - 88)) & 1, 0);
+        assert_eq!((bitboard.to_u128() >> (127 - 89)) & 1, 1);
+        assert_eq!((bitboard.to_u128() >> (127 - 90)) & 1, 1);
     }
 
     #[test]
@@ -32,9 +32,9 @@ mod tests {
         01111111110\
         00000000000";
         let bitboard = BitBoard::from_str(s);
-        assert_eq!((bitboard.0 >> (127 - 88)) & 1, 0);
-        assert_eq!((bitboard.0 >> (127 - 89)) & 1, 1);
-        assert_eq!((bitboard.0 >> (127 - 90)) & 1, 1);
+        assert_eq!((bitboard.to_u128() >> (127 - 88)) & 1, 0);
+        assert_eq!((bitboard.to_u128() >> (127 - 89)) & 1, 1);
+        assert_eq!((bitboard.to_u128() >> (127 - 90)) & 1, 1);
     }
 
     #[test]
@@ -56,9 +56,9 @@ mod tests {
     fn test_bitboard_flip() {
         let mut bitboard = BitBoard::from_u128(548949983232);
         bitboard.flip();
-        assert_eq!((bitboard.0 >> (127 - 88)) & 1, 1);
-        assert_eq!((bitboard.0 >> (127 - 89)) & 1, 0);
-        assert_eq!((bitboard.0 >> (127 - 90)) & 1, 0);
+        assert_eq!((bitboard.to_u128() >> (127 - 88)) & 1, 1);
+        assert_eq!((bitboard.to_u128() >> (127 - 89)) & 1, 0);
+        assert_eq!((bitboard.to_u128() >> (127 - 90)) & 1, 0);
         assert_eq!(bitboard.get_trues().len(), 103);
     }
 
@@ -160,19 +160,19 @@ mod tests {
     fn test_bitboard_generate_columns_1() {
         let column_nos = vec![0, 1, 2];
         let bb = generate_columns(column_nos);
-        assert_eq!((bb.0 >> (127 - 12)) & 1, 1); // col 1, row 1
-        assert_eq!((bb.0 >> (127 - 13)) & 1, 1); // col 2, row 1
-        assert_eq!((bb.0 >> (127 - 14)) & 1, 1); // col 3, row 1
-        assert_eq!((bb.0 >> (127 - 102)) & 1, 1); // col 3, row 9
+        assert_eq!((bb.to_u128() >> (127 - 12)) & 1, 1); // col 1, row 1
+        assert_eq!((bb.to_u128() >> (127 - 13)) & 1, 1); // col 2, row 1
+        assert_eq!((bb.to_u128() >> (127 - 14)) & 1, 1); // col 3, row 1
+        assert_eq!((bb.to_u128() >> (127 - 102)) & 1, 1); // col 3, row 9
         assert_eq!(bb.get_trues().len(), 27);
     }
 
     #[test]
     fn test_bitboard_generate_columns_2() {
         let bb = generate_column(8); // Corresponds to the 9th column
-        assert_eq!((bb.0 >> (127 - 20)) & 1, 1); // 9th col, 1st row
-        assert_eq!((bb.0 >> (127 - 31)) & 1, 1); // 9th col, 2nd row
-        assert_eq!((bb.0 >> (127 - 108)) & 1, 1); // 9th col, 9th row
+        assert_eq!((bb.to_u128() >> (127 - 20)) & 1, 1); // 9th col, 1st row
+        assert_eq!((bb.to_u128() >> (127 - 31)) & 1, 1); // 9th col, 2nd row
+        assert_eq!((bb.to_u128() >> (127 - 108)) & 1, 1); // 9th col, 9th row
         assert_eq!(bb.get_trues().len(), 9);
     }
 }

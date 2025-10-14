@@ -1,28 +1,58 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use rustshogi::bitboard::BitBoard;
 
-fn benchmark_bitboard(c: &mut Criterion) {
-    use rustshogi::bitboard::BitBoard;
-    c.bench_function("bitbord", |b| {
+fn benchmark_bitboard_operations(c: &mut Criterion) {
+    let mut group = c.benchmark_group("BitBoard Operations");
+
+    let bb1 = black_box(BitBoard::from_u128(1124249833570304));
+    let bb2 = black_box(BitBoard::from_u128(548949983232));
+
+    group.bench_function("bitand", |b| {
         b.iter(|| {
-            let bb1 = BitBoard::from_u128(1124249833570304);
-            let bb2 = BitBoard::from_u128(548949983232);
-            let mut bb3 = bb1 & bb2;
-            bb3.flip();
-            let _ = bb3.clone() >> 1;
-            let _ = bb3.clone() << 1;
+            let _ = bb1 & bb2;
         });
     });
+
+    group.bench_function("bitor", |b| {
+        b.iter(|| {
+            let _ = bb1 | bb2;
+        });
+    });
+
+    group.bench_function("get_trues", |b| {
+        b.iter(|| {
+            let _ = bb1.get_trues();
+        });
+    });
+
+    group.finish();
 }
 
-fn benchmark_game_random_game(c: &mut Criterion) {
+fn benchmark_game_logic(c: &mut Criterion) {
+    use rustshogi::color::ColorType;
     use rustshogi::game::Game;
-    c.bench_function("random_game", |b| {
+
+    let mut group = c.benchmark_group("Game Logic");
+
+    let mut game = Game::new();
+    game.input_board("startpos".to_string());
+    let board = black_box(game.board);
+
+    group.bench_function("search_moves", |b| {
+        b.iter(|| {
+            let _ = board.search_moves(ColorType::Black);
+        });
+    });
+
+    group.bench_function("random_game", |b| {
         b.iter(|| {
             let mut game = Game::new();
             game.input_board("startpos".to_string());
             let _result_game = game.one_play();
         });
     });
+
+    group.finish();
 }
 
 fn benchmark_direction(c: &mut Criterion) {
