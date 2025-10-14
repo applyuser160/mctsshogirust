@@ -1,6 +1,8 @@
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Shl, ShlAssign, Shr, ShrAssign};
+use std::ops::{
+    BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Shl, ShlAssign, Shr, ShrAssign,
+};
 
 #[allow(dead_code)]
 pub const LENGTH_OF_BOARD: u8 = 121;
@@ -186,6 +188,14 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("bmi2") {
+                return unsafe { self.get_trues_bmi2() };
+            }
+        }
+
+        // Scalar fallback
         let mut result = Vec::new();
         let mut d0 = self.data[0];
         while d0 != 0 {
@@ -199,6 +209,33 @@ impl BitBoard {
             result.push(index + 64);
             d1 &= !(1u64 << (63 - index));
         }
+        result
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "bmi2")]
+    unsafe fn get_trues_bmi2(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        let mut d0 = self.data[0];
+        let mut d0_results = Vec::new();
+        while d0 != 0 {
+            let index = d0.trailing_zeros() as u8;
+            d0_results.push(63 - index);
+            d0 = _blsr_u64(d0);
+        }
+        d0_results.reverse();
+        result.append(&mut d0_results);
+
+        let mut d1 = self.data[1];
+        let mut d1_results = Vec::new();
+        while d1 != 0 {
+            let index = d1.trailing_zeros() as u8;
+            d1_results.push(64 + (63 - index));
+            d1 = _blsr_u64(d1);
+        }
+        d1_results.reverse();
+        result.append(&mut d1_results);
+
         result
     }
 
@@ -233,17 +270,81 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn flip(&mut self) {
+        *self ^= &BOARD_MASK;
+    }
+
+    #[allow(dead_code)]
+    pub fn bitand_batch(boards: &[BitBoard]) -> BitBoard {
+        if boards.is_empty() {
+            return BitBoard::from_u128(u128::MAX); // AND identity
+        }
+
         #[cfg(target_arch = "x86_64")]
         {
-            if is_x86_feature_detected!("sse2") {
-                *self = unsafe { sse2_xor(self, &BOARD_MASK) };
-                return;
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2::bitand_batch_avx2(boards) };
             }
         }
-        let board_mask = !((1u128 << (128 - LENGTH_OF_BOARD as u32)) - 1);
-        let current = self.to_u128();
-        let flipped = current ^ board_mask;
-        *self = Self::from_u128(flipped);
+
+        // Scalar fallback
+        let mut result = boards[0];
+        for board in &boards[1..] {
+            result &= *board;
+        }
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn bitor_batch(boards: &[BitBoard]) -> BitBoard {
+        if boards.is_empty() {
+            return BitBoard::new(); // OR identity
+        }
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2::bitor_batch_avx2(boards) };
+            }
+        }
+
+        // Scalar fallback
+        let mut result = boards[0];
+        for board in &boards[1..] {
+            result |= *board;
+        }
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn bitxor_batch(boards: &[BitBoard]) -> BitBoard {
+        if boards.is_empty() {
+            return BitBoard::new(); // XOR identity
+        }
+
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2::bitxor_batch_avx2(boards) };
+            }
+        }
+
+        // Scalar fallback
+        let mut result = boards[0];
+        for board in &boards[1..] {
+            result ^= *board;
+        }
+        result
+    }
+
+    #[allow(dead_code)]
+    pub fn get_trues_batch(boards: &[BitBoard]) -> Vec<Vec<u8>> {
+        // Note: SIMD optimization for this batch operation is highly complex.
+        // The number of set bits (and thus the length of the output vector) varies for each BitBoard.
+        // SIMD is best suited for fixed-size, predictable data parallelism.
+        // Efficiently handling variable-length output would require advanced techniques
+        // (like AVX512 compress store) not targeted here, and the complexity might outweigh
+        // the benefits over the already BMI2-optimized `get_trues` scalar function.
+        boards.iter().map(|b| b.get_trues()).collect()
     }
 }
 
@@ -404,6 +505,66 @@ impl BitOrAssign<&BitBoard> for BitBoard {
     }
 }
 
+impl BitXor for BitBoard {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("sse2") {
+                return unsafe { sse2_xor(&self, &rhs) };
+            }
+        }
+        BitBoard {
+            data: [self.data[0] ^ rhs.data[0], self.data[1] ^ rhs.data[1]],
+        }
+    }
+}
+
+impl BitXor<&BitBoard> for &BitBoard {
+    type Output = BitBoard;
+
+    fn bitxor(self, rhs: &BitBoard) -> Self::Output {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("sse2") {
+                return unsafe { sse2_xor(self, rhs) };
+            }
+        }
+        BitBoard {
+            data: [self.data[0] ^ rhs.data[0], self.data[1] ^ rhs.data[1]],
+        }
+    }
+}
+
+impl BitXorAssign for BitBoard {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("sse2") {
+                *self = unsafe { sse2_xor(self, &rhs) };
+                return;
+            }
+        }
+        self.data[0] ^= rhs.data[0];
+        self.data[1] ^= rhs.data[1];
+    }
+}
+
+impl BitXorAssign<&BitBoard> for BitBoard {
+    fn bitxor_assign(&mut self, rhs: &BitBoard) {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("sse2") {
+                *self = unsafe { sse2_xor(self, rhs) };
+                return;
+            }
+        }
+        self.data[0] ^= rhs.data[0];
+        self.data[1] ^= rhs.data[1];
+    }
+}
+
 impl Shr<usize> for BitBoard {
     type Output = Self;
 
@@ -499,3 +660,114 @@ pub fn generate_column(column_no: usize) -> BitBoard {
 //         write!(f, "{}", convert_string(*self))
 //     }
 // }
+
+#[cfg(target_arch = "x86_64")]
+mod avx2 {
+    use super::BitBoard;
+    use std::arch::x86_64::*;
+
+    #[target_feature(enable = "avx2")]
+    pub(super) unsafe fn bitand_batch_avx2(boards: &[BitBoard]) -> BitBoard {
+        assert!(!boards.is_empty());
+
+        if boards.len() == 1 {
+            return boards[0];
+        }
+
+        // Process boards in chunks of 2.
+        // acc_vec will hold two parallel accumulations.
+        // Lane 1: boards[0] & boards[2] & ...
+        // Lane 2: boards[1] & boards[3] & ...
+        let mut acc_vec = _mm256_loadu_si256(boards.as_ptr() as *const __m256i);
+
+        let mut i = 2;
+        while i + 1 < boards.len() {
+            let next_vec = _mm256_loadu_si256(boards[i..].as_ptr() as *const __m256i);
+            acc_vec = _mm256_and_si256(acc_vec, next_vec);
+            i += 2;
+        }
+
+        // Reduce the two lanes in acc_vec.
+        let mut temp_output = [0u64; 4];
+        _mm256_storeu_si256(temp_output.as_mut_ptr() as *mut __m256i, acc_vec);
+
+        let mut result = BitBoard {
+            data: [temp_output[0], temp_output[1]],
+        } & BitBoard {
+            data: [temp_output[2], temp_output[3]],
+        };
+
+        // Handle the last board if the count is odd.
+        if i < boards.len() {
+            result &= boards[i];
+        }
+
+        result
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub(super) unsafe fn bitor_batch_avx2(boards: &[BitBoard]) -> BitBoard {
+        assert!(!boards.is_empty());
+
+        if boards.len() == 1 {
+            return boards[0];
+        }
+
+        let mut acc_vec = _mm256_loadu_si256(boards.as_ptr() as *const __m256i);
+
+        let mut i = 2;
+        while i + 1 < boards.len() {
+            let next_vec = _mm256_loadu_si256(boards[i..].as_ptr() as *const __m256i);
+            acc_vec = _mm256_or_si256(acc_vec, next_vec);
+            i += 2;
+        }
+
+        let mut temp_output = [0u64; 4];
+        _mm256_storeu_si256(temp_output.as_mut_ptr() as *mut __m256i, acc_vec);
+
+        let mut result = BitBoard {
+            data: [temp_output[0], temp_output[1]],
+        } | BitBoard {
+            data: [temp_output[2], temp_output[3]],
+        };
+
+        if i < boards.len() {
+            result |= boards[i];
+        }
+
+        result
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub(super) unsafe fn bitxor_batch_avx2(boards: &[BitBoard]) -> BitBoard {
+        assert!(!boards.is_empty());
+
+        if boards.len() == 1 {
+            return boards[0];
+        }
+
+        let mut acc_vec = _mm256_loadu_si256(boards.as_ptr() as *const __m256i);
+
+        let mut i = 2;
+        while i + 1 < boards.len() {
+            let next_vec = _mm256_loadu_si256(boards[i..].as_ptr() as *const __m256i);
+            acc_vec = _mm256_xor_si256(acc_vec, next_vec);
+            i += 2;
+        }
+
+        let mut temp_output = [0u64; 4];
+        _mm256_storeu_si256(temp_output.as_mut_ptr() as *mut __m256i, acc_vec);
+
+        let mut result = BitBoard {
+            data: [temp_output[0], temp_output[1]],
+        } ^ BitBoard {
+            data: [temp_output[2], temp_output[3]],
+        };
+
+        if i < boards.len() {
+            result ^= boards[i];
+        }
+
+        result
+    }
+}
