@@ -186,6 +186,19 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx512f") {
+                return unsafe { self.get_trues_avx512f() };
+            }
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { self.get_trues_avx2() };
+            }
+        }
+        self.get_trues_scalar()
+    }
+
+    fn get_trues_scalar(&self) -> Vec<u8> {
         let mut result = Vec::new();
         let mut d0 = self.data[0];
         while d0 != 0 {
@@ -200,6 +213,20 @@ impl BitBoard {
             d1 &= !(1u64 << (63 - index));
         }
         result
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx2")]
+    #[allow(dead_code)]
+    unsafe fn get_trues_avx2(&self) -> Vec<u8> {
+        self.get_trues_scalar()
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx512f")]
+    #[allow(dead_code)]
+    unsafe fn get_trues_avx512f(&self) -> Vec<u8> {
+        self.get_trues_scalar()
     }
 
     #[allow(dead_code)]
@@ -235,6 +262,14 @@ impl BitBoard {
     pub fn flip(&mut self) {
         #[cfg(target_arch = "x86_64")]
         {
+            if is_x86_feature_detected!("avx512f") {
+                *self = unsafe { avx512f_xor(self, &BOARD_MASK) };
+                return;
+            }
+            if is_x86_feature_detected!("avx2") {
+                *self = unsafe { avx2_xor(self, &BOARD_MASK) };
+                return;
+            }
             if is_x86_feature_detected!("sse2") {
                 *self = unsafe { sse2_xor(self, &BOARD_MASK) };
                 return;
@@ -253,40 +288,75 @@ static BOARD_MASK: BitBoard = BitBoard {
 };
 
 #[cfg(target_arch = "x86_64")]
-/// Performs a bitwise XOR operation using SSE2 intrinsics.
-///
-/// # Safety
-/// This function is unsafe because it uses SIMD intrinsics and assumes that the
-/// `sse2` feature is available on the CPU.
 unsafe fn sse2_xor(a: &BitBoard, b: &BitBoard) -> BitBoard {
-    // Load the two 64-bit integers of each BitBoard into a 128-bit SSE register.
     let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
     let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
-
-    // Perform the bitwise XOR operation on the 128-bit registers.
     let result = _mm_xor_si128(a_vec, b_vec);
-
-    // Store the result back into a BitBoard data array.
     let mut output = [0u64; 2];
     _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
     BitBoard { data: output }
 }
 
 #[cfg(target_arch = "x86_64")]
-/// Performs a bitwise AND operation using SSE2 intrinsics.
-///
-/// # Safety
-/// This function is unsafe because it uses SIMD intrinsics and assumes that the
-/// `sse2` feature is available on the CPU.
-unsafe fn sse2_bitand(a: &BitBoard, b: &BitBoard) -> BitBoard {
-    // Load the two 64-bit integers of each BitBoard into a 128-bit SSE register.
+#[target_feature(enable = "avx512f")]
+unsafe fn avx512f_bitor(a: &BitBoard, b: &BitBoard) -> BitBoard {
     let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
     let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
+    let result = _mm_or_si128(a_vec, b_vec);
+    let mut output = [0u64; 2];
+    _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
+    BitBoard { data: output }
+}
 
-    // Perform the bitwise AND operation on the 128-bit registers.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn avx512f_bitand(a: &BitBoard, b: &BitBoard) -> BitBoard {
+    let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
+    let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
     let result = _mm_and_si128(a_vec, b_vec);
+    let mut output = [0u64; 2];
+    _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
+    BitBoard { data: output }
+}
 
-    // Store the result back into a BitBoard data array.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn avx512f_xor(a: &BitBoard, b: &BitBoard) -> BitBoard {
+    let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
+    let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
+    let result = _mm_xor_si128(a_vec, b_vec);
+    let mut output = [0u64; 2];
+    _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
+    BitBoard { data: output }
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn avx2_xor(a: &BitBoard, b: &BitBoard) -> BitBoard {
+    let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
+    let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
+    let result = _mm_xor_si128(a_vec, b_vec);
+    let mut output = [0u64; 2];
+    _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
+    BitBoard { data: output }
+}
+
+#[cfg(target_arch = "x86_64")]
+unsafe fn sse2_bitand(a: &BitBoard, b: &BitBoard) -> BitBoard {
+    let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
+    let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
+    let result = _mm_and_si128(a_vec, b_vec);
+    let mut output = [0u64; 2];
+    _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
+    BitBoard { data: output }
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn avx2_bitand(a: &BitBoard, b: &BitBoard) -> BitBoard {
+    let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
+    let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
+    let result = _mm_and_si128(a_vec, b_vec);
     let mut output = [0u64; 2];
     _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
     BitBoard { data: output }
@@ -298,6 +368,12 @@ impl BitAnd for BitBoard {
     fn bitand(self, rhs: Self) -> Self::Output {
         #[cfg(target_arch = "x86_64")]
         {
+            if is_x86_feature_detected!("avx512f") {
+                return unsafe { avx512f_bitand(&self, &rhs) };
+            }
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2_bitand(&self, &rhs) };
+            }
             if is_x86_feature_detected!("sse2") {
                 return unsafe { sse2_bitand(&self, &rhs) };
             }
@@ -314,6 +390,12 @@ impl BitAnd<&BitBoard> for &BitBoard {
     fn bitand(self, rhs: &BitBoard) -> Self::Output {
         #[cfg(target_arch = "x86_64")]
         {
+            if is_x86_feature_detected!("avx512f") {
+                return unsafe { avx512f_bitand(self, rhs) };
+            }
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2_bitand(self, rhs) };
+            }
             if is_x86_feature_detected!("sse2") {
                 return unsafe { sse2_bitand(self, rhs) };
             }
@@ -339,20 +421,21 @@ impl BitAndAssign<&BitBoard> for BitBoard {
 }
 
 #[cfg(target_arch = "x86_64")]
-/// Performs a bitwise OR operation using SSE2 intrinsics.
-///
-/// # Safety
-/// This function is unsafe because it uses SIMD intrinsics and assumes that the
-/// `sse2` feature is available on the CPU.
 unsafe fn sse2_bitor(a: &BitBoard, b: &BitBoard) -> BitBoard {
-    // Load the two 64-bit integers of each BitBoard into a 128-bit SSE register.
     let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
     let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
-
-    // Perform the bitwise OR operation on the 128-bit registers.
     let result = _mm_or_si128(a_vec, b_vec);
+    let mut output = [0u64; 2];
+    _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
+    BitBoard { data: output }
+}
 
-    // Store the result back into a BitBoard data array.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx2")]
+unsafe fn avx2_bitor(a: &BitBoard, b: &BitBoard) -> BitBoard {
+    let a_vec = _mm_loadu_si128(a.data.as_ptr() as *const __m128i);
+    let b_vec = _mm_loadu_si128(b.data.as_ptr() as *const __m128i);
+    let result = _mm_or_si128(a_vec, b_vec);
     let mut output = [0u64; 2];
     _mm_storeu_si128(output.as_mut_ptr() as *mut __m128i, result);
     BitBoard { data: output }
@@ -364,6 +447,12 @@ impl BitOr for BitBoard {
     fn bitor(self, rhs: Self) -> Self::Output {
         #[cfg(target_arch = "x86_64")]
         {
+            if is_x86_feature_detected!("avx512f") {
+                return unsafe { avx512f_bitor(&self, &rhs) };
+            }
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2_bitor(&self, &rhs) };
+            }
             if is_x86_feature_detected!("sse2") {
                 return unsafe { sse2_bitor(&self, &rhs) };
             }
@@ -380,8 +469,14 @@ impl BitOr<&BitBoard> for &BitBoard {
     fn bitor(self, rhs: &BitBoard) -> Self::Output {
         #[cfg(target_arch = "x86_64")]
         {
+            if is_x86_feature_detected!("avx512f") {
+                return unsafe { avx512f_bitor(self, &rhs) };
+            }
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2_bitor(self, &rhs) };
+            }
             if is_x86_feature_detected!("sse2") {
-                return unsafe { sse2_bitor(self, rhs) };
+                return unsafe { sse2_bitor(self, &rhs) };
             }
         }
         BitBoard {

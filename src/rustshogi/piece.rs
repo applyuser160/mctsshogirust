@@ -460,26 +460,55 @@ impl Piece {
 
     #[allow(dead_code)]
     #[cfg(target_arch = "x86_64")]
-    #[target_feature(enable = "sse2")]
     pub unsafe fn able_pro_batch_simd(piece_types: &[PieceType; 16]) -> u16 {
-        use std::arch::x86_64::*;
+        if is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512bw") {
+            return Self::able_pro_batch_avx512f(piece_types);
+        }
+        if is_x86_feature_detected!("avx2") {
+            return Self::able_pro_batch_avx2(piece_types);
+        }
+        Self::able_pro_batch_sse2(piece_types)
+    }
 
-        // PieceType is repr(usize) but fits in u8. We create a u8 array to load from.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "sse2")]
+    unsafe fn able_pro_batch_sse2(piece_types: &[PieceType; 16]) -> u16 {
+        use std::arch::x86_64::*;
         let piece_data: [u8; 16] = std::array::from_fn(|i| piece_types[i] as u8);
         let pieces = _mm_loadu_si128(piece_data.as_ptr() as *const __m128i);
-
-        // Promotable pieces have IDs from Rook (3) to Pawn (8).
-        // Check if 2 < piece_id < 9.
         let lower_bound = _mm_set1_epi8(2);
         let upper_bound = _mm_set1_epi8(9);
-
         let gt_lower = _mm_cmpgt_epi8(pieces, lower_bound);
         let lt_upper = _mm_cmplt_epi8(pieces, upper_bound);
-
         let in_range = _mm_and_si128(gt_lower, lt_upper);
-
-        // Create a bitmask from the most significant bit of each 8-bit element.
         _mm_movemask_epi8(in_range) as u16
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx2")]
+    unsafe fn able_pro_batch_avx2(piece_types: &[PieceType; 16]) -> u16 {
+        use std::arch::x86_64::*;
+        let piece_data: [u8; 16] = std::array::from_fn(|i| piece_types[i] as u8);
+        let pieces = _mm_loadu_si128(piece_data.as_ptr() as *const __m128i);
+        let lower_bound = _mm_set1_epi8(2);
+        let upper_bound = _mm_set1_epi8(9);
+        let gt_lower = _mm_cmpgt_epi8(pieces, lower_bound);
+        let lt_upper = _mm_cmplt_epi8(pieces, upper_bound);
+        let in_range = _mm_and_si128(gt_lower, lt_upper);
+        _mm_movemask_epi8(in_range) as u16
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx512f", enable = "avx512bw")]
+    unsafe fn able_pro_batch_avx512f(piece_types: &[PieceType; 16]) -> u16 {
+        use std::arch::x86_64::*;
+        let piece_data: [u8; 16] = std::array::from_fn(|i| piece_types[i] as u8);
+        let pieces = _mm_loadu_si128(piece_data.as_ptr() as *const __m128i);
+        let lower_bound = _mm_set1_epi8(2);
+        let upper_bound = _mm_set1_epi8(9);
+        let gt_mask = _mm_cmpgt_epi8_mask(pieces, lower_bound);
+        let lt_mask = _mm_cmplt_epi8_mask(pieces, upper_bound);
+        gt_mask & lt_mask
     }
 }
 
