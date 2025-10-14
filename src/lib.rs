@@ -16,12 +16,12 @@ pub mod game;
 pub mod hand;
 #[path = "rustshogi/mctsresult.rs"]
 pub mod mctsresult;
+#[path = "rustshogi/move_pattern.rs"]
+pub mod move_pattern;
 #[path = "rustshogi/moves.rs"]
 pub mod moves;
 #[path = "rustshogi/piece.rs"]
 pub mod piece;
-#[path = "rustshogi/move_pattern.rs"]
-pub mod move_pattern;
 #[path = "rustshogi/random.rs"]
 pub mod random;
 

@@ -26,9 +26,7 @@ fn benchmark_bitboard_operations(c: &mut Criterion) {
     });
 
     // Batch operations benchmarks
-    let boards: Vec<BitBoard> = (0..10)
-        .map(|i| BitBoard::from_u128(1u128 << i))
-        .collect();
+    let boards: Vec<BitBoard> = (0..10).map(|i| BitBoard::from_u128(1u128 << i)).collect();
     let boards_slice = black_box(&boards);
 
     group.bench_function("bitand_batch", |b| {
