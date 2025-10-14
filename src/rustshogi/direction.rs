@@ -85,14 +85,15 @@ impl Direction {
     #[allow(dead_code)]
     #[cfg(target_arch = "x86_64")]
     #[target_feature(enable = "sse2")]
-    pub unsafe fn get_all_direction_vectors_simd() -> (std::arch::x86_64::__m128i, std::arch::x86_64::__m128i) {
+    pub unsafe fn get_all_direction_vectors_simd(
+    ) -> (std::arch::x86_64::__m128i, std::arch::x86_64::__m128i) {
         use std::arch::x86_64::_mm_set_epi8;
 
         // Vectors are: Up, UpLeft, Left, DownLeft, Down, DownRight, Right, UpRight
         // vertical:   -1, -1, 0, 1, 1, 1, 0, -1
         // horizontal:  0,  1, 1, 1, 0,-1,-1, -1
         let vertical_vectors = _mm_set_epi8(
-            0, 0, 0, 0, 0, 0, 0, 0, // padding
+            0, 0, 0, 0, 0, 0, 0, 0,  // padding
             -1, // UpRight
             0,  // Right
             1,  // DownRight
@@ -103,7 +104,7 @@ impl Direction {
             -1, // Up
         );
         let horizontal_vectors = _mm_set_epi8(
-            0, 0, 0, 0, 0, 0, 0, 0, // padding
+            0, 0, 0, 0, 0, 0, 0, 0,  // padding
             -1, // UpRight
             -1, // Right
             -1, // DownRight

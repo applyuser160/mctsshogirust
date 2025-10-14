@@ -47,10 +47,22 @@ fn benchmark_piece(c: &mut Criterion) {
     use rustshogi::piece::{Piece, PieceType};
     let mut group = c.benchmark_group("piece");
     let piece_types = [
-        PieceType::Rook, PieceType::Bichop, PieceType::Silver, PieceType::Knight,
-        PieceType::Lance, PieceType::Pawn, PieceType::King, PieceType::Gold,
-        PieceType::Rook, PieceType::Bichop, PieceType::Silver, PieceType::Knight,
-        PieceType::Lance, PieceType::Pawn, PieceType::King, PieceType::Gold,
+        PieceType::Rook,
+        PieceType::Bichop,
+        PieceType::Silver,
+        PieceType::Knight,
+        PieceType::Lance,
+        PieceType::Pawn,
+        PieceType::King,
+        PieceType::Gold,
+        PieceType::Rook,
+        PieceType::Bichop,
+        PieceType::Silver,
+        PieceType::Knight,
+        PieceType::Lance,
+        PieceType::Pawn,
+        PieceType::King,
+        PieceType::Gold,
     ];
 
     group.bench_function("able_pro_batch", |b| {
