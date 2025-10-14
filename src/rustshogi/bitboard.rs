@@ -188,14 +188,6 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
-        #[cfg(target_arch = "x86_64")]
-        {
-            if is_x86_feature_detected!("bmi2") {
-                return unsafe { self.get_trues_bmi2() };
-            }
-        }
-
-        // Scalar fallback
         let mut result = Vec::new();
         let mut d0 = self.data[0];
         while d0 != 0 {
@@ -209,33 +201,6 @@ impl BitBoard {
             result.push(index + 64);
             d1 &= !(1u64 << (63 - index));
         }
-        result
-    }
-
-    #[cfg(target_arch = "x86_64")]
-    #[target_feature(enable = "bmi2")]
-    unsafe fn get_trues_bmi2(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        let mut d0 = self.data[0];
-        let mut d0_results = Vec::new();
-        while d0 != 0 {
-            let index = d0.trailing_zeros() as u8;
-            d0_results.push(63 - index);
-            d0 = _blsr_u64(d0);
-        }
-        d0_results.reverse();
-        result.append(&mut d0_results);
-
-        let mut d1 = self.data[1];
-        let mut d1_results = Vec::new();
-        while d1 != 0 {
-            let index = d1.trailing_zeros() as u8;
-            d1_results.push(64 + (63 - index));
-            d1 = _blsr_u64(d1);
-        }
-        d1_results.reverse();
-        result.append(&mut d1_results);
-
         result
     }
 
