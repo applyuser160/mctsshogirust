@@ -44,33 +44,17 @@ pub struct Direction {
 #[allow(dead_code)]
 impl Direction {
     pub fn new(name: DirectionName) -> Self {
-        let mut vertical_vector: i8 = 0;
-        let mut horizon_vector: i8 = 0;
-        if name == DirectionName::Up {
-            vertical_vector = -1;
-            horizon_vector = 0;
-        } else if name == DirectionName::UpLeft {
-            vertical_vector = -1;
-            horizon_vector = 1;
-        } else if name == DirectionName::Left {
-            vertical_vector = 0;
-            horizon_vector = 1;
-        } else if name == DirectionName::DownLeft {
-            vertical_vector = 1;
-            horizon_vector = 1;
-        } else if name == DirectionName::Down {
-            vertical_vector = 1;
-            horizon_vector = 0;
-        } else if name == DirectionName::DownRight {
-            vertical_vector = 1;
-            horizon_vector = -1;
-        } else if name == DirectionName::Right {
-            vertical_vector = 0;
-            horizon_vector = -1;
-        } else if name == DirectionName::UpRight {
-            vertical_vector = -1;
-            horizon_vector = -1;
-        }
+        let (vertical_vector, horizon_vector) = match name {
+            DirectionName::Up => (-1, 0),
+            DirectionName::UpLeft => (-1, 1),
+            DirectionName::Left => (0, 1),
+            DirectionName::DownLeft => (1, 1),
+            DirectionName::Down => (1, 0),
+            DirectionName::DownRight => (1, -1),
+            DirectionName::Right => (0, -1),
+            DirectionName::UpRight => (-1, -1),
+            DirectionName::DirectionNameNumber => (0, 0),
+        };
         Self {
             name,
             vertical_vector,
@@ -81,5 +65,55 @@ impl Direction {
     pub fn reverse(&mut self) {
         self.vertical_vector *= -1;
         self.horizon_vector *= -1;
+    }
+
+    #[allow(dead_code)]
+    pub fn get_all_direction_vectors() -> &'static [(i8, i8); 8] {
+        static DIRECTION_VECTORS: [(i8, i8); 8] = [
+            (-1, 0),  // Up
+            (-1, 1),  // UpLeft
+            (0, 1),   // Left
+            (1, 1),   // DownLeft
+            (1, 0),   // Down
+            (1, -1),  // DownRight
+            (0, -1),  // Right
+            (-1, -1), // UpRight
+        ];
+        &DIRECTION_VECTORS
+    }
+
+    #[allow(dead_code)]
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "sse2")]
+    pub unsafe fn get_all_direction_vectors_simd() -> (std::arch::x86_64::__m128i, std::arch::x86_64::__m128i) {
+        use std::arch::x86_64::_mm_set_epi8;
+
+        // Vectors are: Up, UpLeft, Left, DownLeft, Down, DownRight, Right, UpRight
+        // vertical:   -1, -1, 0, 1, 1, 1, 0, -1
+        // horizontal:  0,  1, 1, 1, 0,-1,-1, -1
+        let vertical_vectors = _mm_set_epi8(
+            0, 0, 0, 0, 0, 0, 0, 0, // padding
+            -1, // UpRight
+            0,  // Right
+            1,  // DownRight
+            1,  // Down
+            1,  // DownLeft
+            0,  // Left
+            -1, // UpLeft
+            -1, // Up
+        );
+        let horizontal_vectors = _mm_set_epi8(
+            0, 0, 0, 0, 0, 0, 0, 0, // padding
+            -1, // UpRight
+            -1, // Right
+            -1, // DownRight
+            0,  // Down
+            1,  // DownLeft
+            1,  // Left
+            1,  // UpLeft
+            0,  // Up
+        );
+
+        (vertical_vectors, horizontal_vectors)
     }
 }
