@@ -141,8 +141,8 @@ fn benchmark_random(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    benchmark_bitboard,
-    benchmark_game_random_game,
+    benchmark_bitboard_operations,
+    benchmark_game_logic,
     benchmark_direction,
     benchmark_piece,
     benchmark_random
