@@ -36,19 +36,22 @@ impl Default for Board {
 impl Board {
     #[allow(dead_code)]
     fn is_a_has_specific_piece(&self, index: u8, piece_type: PieceType) -> bool {
-        (self.has_specific_piece[piece_type as usize].0 >> (127 - index)) & 1 != 0
+        (self.has_specific_piece[piece_type as usize].to_u128() >> (127 - index)) & 1 != 0
     }
 
     #[allow(dead_code)]
     fn drop(&mut self, index: u8) {
-        let mask = !(1u128 << (127 - index));
-        self.has_piece.0 &= mask;
+        let bit = 1u128 << (127 - index);
+        let bit_mask = BitBoard::from_u128(bit);
+        let not_bit_mask = BitBoard::from_u128(!bit);
+
+        self.has_piece &= not_bit_mask;
         for player_prosession in self.player_prossesion.iter_mut() {
-            player_prosession.0 &= mask;
+            *player_prosession &= not_bit_mask;
         }
-        self.has_specific_piece[PieceType::None as usize].0 |= 1u128 << (127 - index);
+        self.has_specific_piece[PieceType::None as usize] |= bit_mask;
         for has_specific_piece in self.has_specific_piece.iter_mut().skip(1) {
-            has_specific_piece.0 &= mask;
+            *has_specific_piece &= not_bit_mask;
         }
     }
 
@@ -126,19 +129,22 @@ impl Board {
     #[allow(dead_code)]
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         let mask = 1u128 << (127 - index);
-        self.has_piece.0 |= mask;
+        let bit_mask = BitBoard::from_u128(mask);
+        let not_bit_mask = BitBoard::from_u128(!mask);
+
+        self.has_piece |= bit_mask;
         for (i, player_prossesion) in self.player_prossesion.iter_mut().enumerate() {
             if color == ColorType::from_u8(i as u8) {
-                player_prossesion.0 |= mask;
+                *player_prossesion |= bit_mask;
             } else {
-                player_prossesion.0 &= !mask;
+                *player_prossesion &= not_bit_mask;
             }
         }
         for (i, has_specific_piece) in self.has_specific_piece.iter_mut().enumerate() {
             if piece_type == PieceType::from_usize(i) {
-                has_specific_piece.0 |= mask;
+                *has_specific_piece |= bit_mask;
             } else {
-                has_specific_piece.0 &= !mask;
+                *has_specific_piece &= not_bit_mask;
             }
         }
     }
@@ -421,9 +427,9 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn get_color_type_from_index(&self, index: u8) -> ColorType {
-        let has_a_piece = (self.has_piece.0 >> (127 - index)) & 1 != 0;
+        let has_a_piece = (self.has_piece.to_u128() >> (127 - index)) & 1 != 0;
         let is_black =
-            (self.player_prossesion[ColorType::Black as usize].0 >> (127 - index)) & 1 != 0;
+            (self.player_prossesion[ColorType::Black as usize].to_u128() >> (127 - index)) & 1 != 0;
         if !has_a_piece {
             ColorType::None
         } else if is_black {
@@ -511,18 +517,18 @@ impl Board {
                         bit_board >> shift_number.unsigned_abs() as usize
                     };
 
-                    if (self.is_frame & bn1).0 != 0 {
+                    if (self.is_frame & bn1) != BitBoard::new() {
                         is_in_board[j] = false;
                     } else if (self.player_prossesion[get_reverse_color(color_type) as usize] & bn1)
-                        .0
-                        != 0
+                        != BitBoard::new()
                     {
                         is_in_board[j] = false;
                         bit_movable |= bn1;
-                    } else if (self.player_prossesion[color_type as usize] & bn1).0 != 0 {
+                    } else if (self.player_prossesion[color_type as usize] & bn1) != BitBoard::new()
+                    {
                         is_in_board[j] = false;
                     } else {
-                        bit_movable |= bit_board | bn1;
+                        bit_movable |= bn1;
                     }
 
                     if *move_type != MoveType::Long {
@@ -531,7 +537,7 @@ impl Board {
                 }
             }
         }
-        bit_movable.0 &= !(1u128 << (127 - index));
+        bit_movable &= BitBoard::from_u128(!(1u128 << (127 - index)));
         bit_movable
     }
 
@@ -548,7 +554,7 @@ impl Board {
 
         let pro_area = self.able_pro[color_type as usize];
 
-        if (bit_board & pro_area).0 != 0 {
+        if (bit_board & pro_area) != BitBoard::new() {
             return bit_movable;
         }
 
@@ -644,7 +650,7 @@ impl Board {
             from_index = moves.get_from().to_index();
         }
 
-        if (self.has_piece.0 >> (127 - to_index)) & 1 != 0 {
+        if (self.has_piece.to_u128() >> (127 - to_index)) & 1 != 0 {
             self.move_to_hand(to_index, true);
         }
 
@@ -659,14 +665,13 @@ impl Board {
     pub fn is_finished(&self) -> (bool, ColorType) {
         let winner;
         let is_finish = self.has_specific_piece[PieceType::King as usize]
-            .0
+            .to_u128()
             .count_ones()
             != ColorType::ColorNumber as u32;
         if is_finish {
             let is_black_win = (self.has_specific_piece[PieceType::King as usize]
                 & self.player_prossesion[ColorType::Black as usize])
-                .0
-                != 0;
+                != BitBoard::new();
             if is_black_win {
                 winner = ColorType::Black;
             } else {
