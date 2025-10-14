@@ -366,21 +366,7 @@ impl BitAnd for BitBoard {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        #[cfg(target_arch = "x86_64")]
-        {
-            if is_x86_feature_detected!("avx512f") {
-                return unsafe { avx512f_bitand(&self, &rhs) };
-            }
-            if is_x86_feature_detected!("avx2") {
-                return unsafe { avx2_bitand(&self, &rhs) };
-            }
-            if is_x86_feature_detected!("sse2") {
-                return unsafe { sse2_bitand(&self, &rhs) };
-            }
-        }
-        BitBoard {
-            data: [self.data[0] & rhs.data[0], self.data[1] & rhs.data[1]],
-        }
+        (&self).bitand(&rhs)
     }
 }
 
@@ -445,21 +431,7 @@ impl BitOr for BitBoard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        #[cfg(target_arch = "x86_64")]
-        {
-            if is_x86_feature_detected!("avx512f") {
-                return unsafe { avx512f_bitor(&self, &rhs) };
-            }
-            if is_x86_feature_detected!("avx2") {
-                return unsafe { avx2_bitor(&self, &rhs) };
-            }
-            if is_x86_feature_detected!("sse2") {
-                return unsafe { sse2_bitor(&self, &rhs) };
-            }
-        }
-        BitBoard {
-            data: [self.data[0] | rhs.data[0], self.data[1] | rhs.data[1]],
-        }
+        (&self).bitor(&rhs)
     }
 }
 
@@ -470,13 +442,13 @@ impl BitOr<&BitBoard> for &BitBoard {
         #[cfg(target_arch = "x86_64")]
         {
             if is_x86_feature_detected!("avx512f") {
-                return unsafe { avx512f_bitor(self, rhs) };
+                return unsafe { avx512f_bitor(self, &rhs) };
             }
             if is_x86_feature_detected!("avx2") {
-                return unsafe { avx2_bitor(self, rhs) };
+                return unsafe { avx2_bitor(self, &rhs) };
             }
             if is_x86_feature_detected!("sse2") {
-                return unsafe { sse2_bitor(self, rhs) };
+                return unsafe { sse2_bitor(self, &rhs) };
             }
         }
         BitBoard {
