@@ -524,7 +524,8 @@ impl Board {
                     {
                         is_in_board[j] = false;
                         bit_movable |= bn1;
-                    } else if (self.player_prossesion[color_type as usize] & bn1) != BitBoard::new() {
+                    } else if (self.player_prossesion[color_type as usize] & bn1) != BitBoard::new()
+                    {
                         is_in_board[j] = false;
                     } else {
                         bit_movable |= bn1;

@@ -1,6 +1,6 @@
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Shl, ShlAssign, Shr, ShrAssign};
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Shl, ShlAssign, Shr, ShrAssign};
 
 #[allow(dead_code)]
 pub const LENGTH_OF_BOARD: u8 = 121;
