@@ -22,9 +22,8 @@ use std::hash::Hash;
 
 const CACHE_SIZE: usize = 70000;
 
-static MOVE_CACHE: Lazy<Mutex<LruCache<(Board, ColorType), Vec<Move>>>> = Lazy::new(|| {
-    Mutex::new(LruCache::new(NonZeroUsize::new(CACHE_SIZE).unwrap()))
-});
+static MOVE_CACHE: Lazy<Mutex<LruCache<(Board, ColorType), Vec<Move>>>> =
+    Lazy::new(|| Mutex::new(LruCache::new(NonZeroUsize::new(CACHE_SIZE).unwrap())));
 
 #[allow(dead_code)]
 #[pyclass]
