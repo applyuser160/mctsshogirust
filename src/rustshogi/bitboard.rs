@@ -186,6 +186,42 @@ impl BitBoard {
 
     #[allow(dead_code)]
     pub fn get_trues(&self) -> Vec<u8> {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("sse4.2") {
+                return unsafe { self.get_trues_sse42() };
+            }
+        }
+        self.get_trues_scalar()
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "sse4.2")]
+    unsafe fn get_trues_sse42(&self) -> Vec<u8> {
+        let d0 = self.data[0];
+        let d1 = self.data[1];
+        let popcnt0 = d0.count_ones() as usize;
+        let popcnt1 = d1.count_ones() as usize;
+        let mut result = Vec::with_capacity(popcnt0 + popcnt1);
+
+        let mut temp_d0 = d0;
+        // The compiler should use lzcnt here because of target_feature
+        for _ in 0..popcnt0 {
+            let index = temp_d0.leading_zeros() as u8;
+            result.push(index);
+            temp_d0 &= !(1u64 << (63 - index));
+        }
+
+        let mut temp_d1 = d1;
+        for _ in 0..popcnt1 {
+            let index = temp_d1.leading_zeros() as u8;
+            result.push(index + 64);
+            temp_d1 &= !(1u64 << (63 - index));
+        }
+        result
+    }
+
+    fn get_trues_scalar(&self) -> Vec<u8> {
         let mut result = Vec::new();
         let mut d0 = self.data[0];
         while d0 != 0 {
