@@ -1,6 +1,3 @@
-#![feature(stdarch_x86_avx512)]
-#![feature(avx512_target_feature)]
-
 #[path = "rustshogi/address.rs"]
 pub mod address;
 #[path = "rustshogi/bitboard.rs"]

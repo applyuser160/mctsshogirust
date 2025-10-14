@@ -470,13 +470,13 @@ impl BitOr<&BitBoard> for &BitBoard {
         #[cfg(target_arch = "x86_64")]
         {
             if is_x86_feature_detected!("avx512f") {
-                return unsafe { avx512f_bitor(self, &rhs) };
+                return unsafe { avx512f_bitor(self, rhs) };
             }
             if is_x86_feature_detected!("avx2") {
-                return unsafe { avx2_bitor(self, &rhs) };
+                return unsafe { avx2_bitor(self, rhs) };
             }
             if is_x86_feature_detected!("sse2") {
-                return unsafe { sse2_bitor(self, &rhs) };
+                return unsafe { sse2_bitor(self, rhs) };
             }
         }
         BitBoard {
