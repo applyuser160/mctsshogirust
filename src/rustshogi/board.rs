@@ -10,12 +10,24 @@ use super::hand::Hand;
 use super::moves::Move;
 use super::piece::{MoveType, Piece, PieceType, PIECE_TYPE_NUMBER, PROMOTE};
 
+use lru::LruCache;
+use once_cell::sync::Lazy;
 use pyo3::prelude::*;
+use std::num::NonZeroUsize;
+use std::sync::Mutex;
 use strum::IntoEnumIterator;
+
+use std::hash::Hash;
+
+const CACHE_SIZE: usize = 70000;
+
+static MOVE_CACHE: Lazy<Mutex<LruCache<(Board, ColorType), Vec<Move>>>> = Lazy::new(|| {
+    Mutex::new(LruCache::new(NonZeroUsize::new(CACHE_SIZE).unwrap()))
+});
 
 #[allow(dead_code)]
 #[pyclass]
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Board {
     pub has_piece: BitBoard,
     pub player_prossesion: [BitBoard; ColorType::ColorNumber as usize],
@@ -597,6 +609,11 @@ impl Board {
 
     #[allow(dead_code)]
     pub fn search_moves(&self, color: ColorType) -> Vec<Move> {
+        let mut cache = MOVE_CACHE.lock().unwrap();
+        if let Some(moves) = cache.get(&(self.clone(), color)) {
+            return moves.clone();
+        }
+
         let mut vector_move: Vec<Move> = Vec::with_capacity(128);
 
         let player_board = if color.to_bool() {
@@ -634,6 +651,7 @@ impl Board {
             }));
         }
 
+        cache.put((self.clone(), color), vector_move.clone());
         vector_move
     }
 

@@ -133,7 +133,7 @@ pub const STRING_OF_LAST2_ZONE_WHITE: &str = "\
 00000000000";
 
 #[allow(dead_code)]
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct BitBoard {
     // data[0] is MSB, data[1] is LSB
     data: [u64; 2],
