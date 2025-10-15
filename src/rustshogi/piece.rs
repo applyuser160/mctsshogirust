@@ -19,7 +19,7 @@ pub const PROMOTE_CHANGE: u8 = 6;
 
 #[allow(dead_code)]
 #[pyclass(eq, eq_int)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter, Hash)]
 #[repr(usize)]
 pub enum PieceType {
     None = 0,
@@ -146,7 +146,7 @@ pub enum MoveType {
 
 #[allow(dead_code)]
 #[pyclass]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub struct Piece {
     #[pyo3(get, set)]
     pub owner: ColorType,
@@ -436,15 +436,50 @@ impl Piece {
 
     #[allow(dead_code)]
     pub fn able_pro(piece_type: PieceType) -> bool {
-        match piece_type {
-            PieceType::Rook => true,
-            PieceType::Bichop => true,
-            PieceType::Silver => true,
-            PieceType::Knight => true,
-            PieceType::Lance => true,
-            PieceType::Pawn => true,
-            _ => false,
+        matches!(
+            piece_type,
+            PieceType::Rook
+                | PieceType::Bichop
+                | PieceType::Silver
+                | PieceType::Knight
+                | PieceType::Lance
+                | PieceType::Pawn
+        )
+    }
+
+    #[allow(dead_code)]
+    pub fn able_pro_batch(piece_types: &[PieceType]) -> u16 {
+        let mut mask = 0u16;
+        for (i, &pt) in piece_types.iter().enumerate().take(16) {
+            if Self::able_pro(pt) {
+                mask |= 1 << i;
+            }
         }
+        mask
+    }
+
+    #[allow(dead_code)]
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "sse2")]
+    pub unsafe fn able_pro_batch_simd(piece_types: &[PieceType; 16]) -> u16 {
+        use std::arch::x86_64::*;
+
+        // PieceType is repr(usize) but fits in u8. We create a u8 array to load from.
+        let piece_data: [u8; 16] = std::array::from_fn(|i| piece_types[i] as u8);
+        let pieces = _mm_loadu_si128(piece_data.as_ptr() as *const __m128i);
+
+        // Promotable pieces have IDs from Rook (3) to Pawn (8).
+        // Check if 2 < piece_id < 9.
+        let lower_bound = _mm_set1_epi8(2);
+        let upper_bound = _mm_set1_epi8(9);
+
+        let gt_lower = _mm_cmpgt_epi8(pieces, lower_bound);
+        let lt_upper = _mm_cmplt_epi8(pieces, upper_bound);
+
+        let in_range = _mm_and_si128(gt_lower, lt_upper);
+
+        // Create a bitmask from the most significant bit of each 8-bit element.
+        _mm_movemask_epi8(in_range) as u16
     }
 }
 
