@@ -651,10 +651,7 @@ mod avx2 {
     use std::arch::x86_64::*;
 
     #[target_feature(enable = "avx2")]
-    pub(super) unsafe fn shift_right_batch_avx2(
-        boards: &[BitBoard],
-        rhs: usize,
-    ) -> Vec<BitBoard> {
+    pub(super) unsafe fn shift_right_batch_avx2(boards: &[BitBoard], rhs: usize) -> Vec<BitBoard> {
         if rhs == 0 {
             return boards.to_vec();
         }
@@ -706,10 +703,7 @@ mod avx2 {
     }
 
     #[target_feature(enable = "avx2")]
-    pub(super) unsafe fn shift_left_batch_avx2(
-        boards: &[BitBoard],
-        rhs: usize,
-    ) -> Vec<BitBoard> {
+    pub(super) unsafe fn shift_left_batch_avx2(boards: &[BitBoard], rhs: usize) -> Vec<BitBoard> {
         if rhs == 0 {
             return boards.to_vec();
         }

@@ -202,8 +202,7 @@ mod tests {
         ];
 
         for i in [0, 1, 33, 63, 64, 90, 127, 128, 200] {
-            let scalar_results: Vec<BitBoard> =
-                boards.iter().map(|b| *b >> i).collect();
+            let scalar_results: Vec<BitBoard> = boards.iter().map(|b| *b >> i).collect();
             let batch_results = BitBoard::shift_right_batch(&boards, i);
             assert_eq!(scalar_results.len(), batch_results.len());
             for (s, b) in scalar_results.iter().zip(batch_results.iter()) {
@@ -223,8 +222,7 @@ mod tests {
         ];
 
         for i in [0, 1, 33, 63, 64, 90, 127, 128, 200] {
-            let scalar_results: Vec<BitBoard> =
-                boards.iter().map(|b| *b << i).collect();
+            let scalar_results: Vec<BitBoard> = boards.iter().map(|b| *b << i).collect();
             let batch_results = BitBoard::shift_left_batch(&boards, i);
             assert_eq!(scalar_results.len(), batch_results.len());
             for (s, b) in scalar_results.iter().zip(batch_results.iter()) {
