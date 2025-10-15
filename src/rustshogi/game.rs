@@ -200,15 +200,26 @@ impl Game {
             return MctsResult::from(0, vec![]);
         }
 
+        let initial_states: Vec<(Game, usize)> = pool.install(|| {
+            next_moves
+                .par_iter()
+                .enumerate()
+                .map(|(i, move_to_execute)| {
+                    let mut game_clone = self.clone();
+                    game_clone.execute_move(move_to_execute);
+                    (game_clone, i)
+                })
+                .collect()
+        });
+
         let results: Vec<(ColorType, usize)> = pool.install(|| {
             (0..num)
                 .into_par_iter()
                 .map(|_| {
-                    let mut game_clone = self.clone();
                     let mut next_random = Random::new(0, (next_move_count - 1) as u16);
                     let random_one = next_random.generate_one() as usize;
-                    let next_move = next_moves[random_one].clone();
-                    game_clone.execute_move(&next_move);
+                    let (initial_state, move_index) = &initial_states[random_one];
+                    let mut game_clone = initial_state.clone();
 
                     while !game_clone.is_finished().0 {
                         let moves = game_clone.board.search_moves(game_clone.turn);
@@ -221,7 +232,7 @@ impl Game {
                         game_clone.execute_move(mv);
                     }
                     let (_is_finished, winner) = game_clone.is_finished();
-                    (winner, random_one)
+                    (winner, *move_index)
                 })
                 .collect()
         });

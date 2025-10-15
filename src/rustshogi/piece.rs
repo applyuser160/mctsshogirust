@@ -19,7 +19,7 @@ pub const PROMOTE_CHANGE: u8 = 6;
 
 #[allow(dead_code)]
 #[pyclass(eq, eq_int)]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter, Hash)]
 #[repr(usize)]
 pub enum PieceType {
     None = 0,
@@ -146,7 +146,7 @@ pub enum MoveType {
 
 #[allow(dead_code)]
 #[pyclass]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub struct Piece {
     #[pyo3(get, set)]
     pub owner: ColorType,

@@ -5,7 +5,7 @@ use pyo3::prelude::*;
 
 #[allow(dead_code)]
 #[pyclass]
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Hand {
     #[pyo3(get, set)]
     pub pieces: [piece::Piece;
