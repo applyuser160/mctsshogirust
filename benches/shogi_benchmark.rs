@@ -48,12 +48,53 @@ fn benchmark_bitboard_operations(c: &mut Criterion) {
         });
     });
 
-    group.bench_function("random_move_parallel", |b| {
+    // count_ones benchmark
+    let bb_max = black_box(BitBoard::from_u128(u128::MAX));
+    group.bench_function("count_ones", |b| {
         b.iter(|| {
-            let game = Game::new();
-            let _result = game.random_move_parallel(100, 4);
+            let _ = bb_max.count_ones();
         });
     });
+
+    // Batch shift benchmarks
+    let batch_boards: Vec<BitBoard> = (0..100)
+        .map(|i| BitBoard::from_u128(u128::wrapping_add(u128::MAX / (i + 1), i)))
+        .collect();
+    let batch_boards_slice = black_box(&batch_boards);
+
+    for &shift_amount in &[1, 33, 65] {
+        // Scalar shift benchmarks
+        group.bench_function(format!("shift_right_batch_scalar_{}", shift_amount), |b| {
+            b.iter(|| {
+                let _ = batch_boards_slice
+                    .iter()
+                    .map(|board| *board >> shift_amount)
+                    .collect::<Vec<_>>();
+            });
+        });
+        group.bench_function(format!("shift_left_batch_scalar_{}", shift_amount), |b| {
+            b.iter(|| {
+                let _ = batch_boards_slice
+                    .iter()
+                    .map(|board| *board << shift_amount)
+                    .collect::<Vec<_>>();
+            });
+        });
+
+        // AVX2 shift benchmarks
+        if cfg!(target_feature = "avx2") {
+            group.bench_function(format!("shift_right_batch_avx2_{}", shift_amount), |b| {
+                b.iter(|| {
+                    let _ = BitBoard::shift_right_batch(batch_boards_slice, shift_amount);
+                });
+            });
+            group.bench_function(format!("shift_left_batch_avx2_{}", shift_amount), |b| {
+                b.iter(|| {
+                    let _ = BitBoard::shift_left_batch(batch_boards_slice, shift_amount);
+                });
+            });
+        }
+    }
 
     group.finish();
 }

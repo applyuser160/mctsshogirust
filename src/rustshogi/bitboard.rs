@@ -300,6 +300,36 @@ impl BitBoard {
         }
         result
     }
+
+    #[allow(dead_code)]
+    pub fn count_ones(&self) -> u32 {
+        // The Rust compiler automatically optimizes this to `popcnt` on supported CPUs.
+        self.data[0].count_ones() + self.data[1].count_ones()
+    }
+
+    #[allow(dead_code)]
+    pub fn shift_left_batch(boards: &[BitBoard], rhs: usize) -> Vec<BitBoard> {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2::shift_left_batch_avx2(boards, rhs) };
+            }
+        }
+        // Scalar fallback
+        boards.iter().map(|b| *b << rhs).collect()
+    }
+
+    #[allow(dead_code)]
+    pub fn shift_right_batch(boards: &[BitBoard], rhs: usize) -> Vec<BitBoard> {
+        #[cfg(target_arch = "x86_64")]
+        {
+            if is_x86_feature_detected!("avx2") {
+                return unsafe { avx2::shift_right_batch_avx2(boards, rhs) };
+            }
+        }
+        // Scalar fallback
+        boards.iter().map(|b| *b >> rhs).collect()
+    }
 }
 
 const BOARD_MASK_U128: u128 = !((1u128 << (128 - LENGTH_OF_BOARD as u32)) - 1);
@@ -619,6 +649,109 @@ pub fn generate_column(column_no: usize) -> BitBoard {
 mod avx2 {
     use super::BitBoard;
     use std::arch::x86_64::*;
+
+    #[target_feature(enable = "avx2")]
+    pub(super) unsafe fn shift_right_batch_avx2(boards: &[BitBoard], rhs: usize) -> Vec<BitBoard> {
+        if rhs == 0 {
+            return boards.to_vec();
+        }
+        if rhs >= 128 {
+            return vec![BitBoard::new(); boards.len()];
+        }
+
+        let mut result = Vec::with_capacity(boards.len());
+        let mut i = 0;
+
+        // Process boards in chunks of 2 (256 bits)
+        while i + 1 < boards.len() {
+            let board_ptr = boards.as_ptr().add(i) as *const __m256i;
+            let v = _mm256_loadu_si256(board_ptr);
+
+            let shifted_v = if rhs < 64 {
+                let shift_vec = _mm256_set1_epi64x(rhs as i64);
+                let shifted_right = _mm256_srlv_epi64(v, shift_vec);
+                let shuffled_v = _mm256_permute4x64_epi64(v, 0xA0); // [d0, d0, d2, d2]
+                let shift_left_vec = _mm256_set1_epi64x((64 - rhs) as i64);
+                let shifted_left = _mm256_sllv_epi64(shuffled_v, shift_left_vec);
+                let mask = _mm256_set_epi64x(-1, 0, -1, 0);
+                let carry = _mm256_and_si256(shifted_left, mask);
+                _mm256_or_si256(shifted_right, carry)
+            } else {
+                let shift_vec = _mm256_set1_epi64x((rhs - 64) as i64);
+                let shuffled_v = _mm256_permute4x64_epi64(v, 0xA0); // [d0, d0, d2, d2]
+                let shifted = _mm256_srlv_epi64(shuffled_v, shift_vec);
+                let mask = _mm256_set_epi64x(-1, 0, -1, 0);
+                _mm256_and_si256(shifted, mask)
+            };
+
+            let mut output = [0u64; 4];
+            _mm256_storeu_si256(output.as_mut_ptr() as *mut __m256i, shifted_v);
+            result.push(BitBoard {
+                data: [output[0], output[1]],
+            });
+            result.push(BitBoard {
+                data: [output[2], output[3]],
+            });
+            i += 2;
+        }
+
+        if i < boards.len() {
+            result.push(boards[i] >> rhs);
+        }
+
+        result
+    }
+
+    #[target_feature(enable = "avx2")]
+    pub(super) unsafe fn shift_left_batch_avx2(boards: &[BitBoard], rhs: usize) -> Vec<BitBoard> {
+        if rhs == 0 {
+            return boards.to_vec();
+        }
+        if rhs >= 128 {
+            return vec![BitBoard::new(); boards.len()];
+        }
+
+        let mut result = Vec::with_capacity(boards.len());
+        let mut i = 0;
+
+        while i + 1 < boards.len() {
+            let board_ptr = boards.as_ptr().add(i) as *const __m256i;
+            let v = _mm256_loadu_si256(board_ptr);
+
+            let shifted_v = if rhs < 64 {
+                let shift_vec = _mm256_set1_epi64x(rhs as i64);
+                let shifted_left = _mm256_sllv_epi64(v, shift_vec);
+                let shuffled_v = _mm256_permute4x64_epi64(v, 0xF5); // [d1, d1, d3, d3]
+                let shift_right_vec = _mm256_set1_epi64x((64 - rhs) as i64);
+                let shifted_right = _mm256_srlv_epi64(shuffled_v, shift_right_vec);
+                let mask = _mm256_set_epi64x(0, -1, 0, -1);
+                let carry = _mm256_and_si256(shifted_right, mask);
+                _mm256_or_si256(shifted_left, carry)
+            } else {
+                let shift_vec = _mm256_set1_epi64x((rhs - 64) as i64);
+                let shuffled_v = _mm256_permute4x64_epi64(v, 0xF5); // [d1, d1, d3, d3]
+                let shifted = _mm256_sllv_epi64(shuffled_v, shift_vec);
+                let mask = _mm256_set_epi64x(0, -1, 0, -1);
+                _mm256_and_si256(shifted, mask)
+            };
+
+            let mut output = [0u64; 4];
+            _mm256_storeu_si256(output.as_mut_ptr() as *mut __m256i, shifted_v);
+            result.push(BitBoard {
+                data: [output[0], output[1]],
+            });
+            result.push(BitBoard {
+                data: [output[2], output[3]],
+            });
+            i += 2;
+        }
+
+        if i < boards.len() {
+            result.push(boards[i] << rhs);
+        }
+
+        result
+    }
 
     #[target_feature(enable = "avx2")]
     pub(super) unsafe fn bitand_batch_avx2(boards: &[BitBoard]) -> BitBoard {

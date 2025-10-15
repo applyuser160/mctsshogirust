@@ -175,4 +175,59 @@ mod tests {
         assert_eq!((bb.to_u128() >> (127 - 108)) & 1, 1); // 9th col, 9th row
         assert_eq!(bb.get_trues().len(), 9);
     }
+
+    #[test]
+    fn test_count_ones() {
+        let bb1 = BitBoard::from_u128(0);
+        assert_eq!(bb1.count_ones(), 0);
+
+        let bb2 = BitBoard::from_u128(u128::MAX);
+        assert_eq!(bb2.count_ones(), 128);
+
+        let bb3 = BitBoard::from_u128(0b101010);
+        assert_eq!(bb3.count_ones(), 3);
+
+        let bb4 = generate_column(3);
+        assert_eq!(bb4.count_ones(), 9);
+    }
+
+    #[test]
+    fn test_shift_right_batch() {
+        let boards = vec![
+            BitBoard::from_u128(u128::MAX),
+            BitBoard::from_u128(0),
+            BitBoard::from_u128(1 << 127),
+            BitBoard::from_u128(0b101010),
+            generate_column(4),
+        ];
+
+        for i in [0, 1, 33, 63, 64, 90, 127, 128, 200] {
+            let scalar_results: Vec<BitBoard> = boards.iter().map(|b| *b >> i).collect();
+            let batch_results = BitBoard::shift_right_batch(&boards, i);
+            assert_eq!(scalar_results.len(), batch_results.len());
+            for (s, b) in scalar_results.iter().zip(batch_results.iter()) {
+                assert_eq!(s.to_u128(), b.to_u128(), "Failed at shift {}", i);
+            }
+        }
+    }
+
+    #[test]
+    fn test_shift_left_batch() {
+        let boards = vec![
+            BitBoard::from_u128(u128::MAX),
+            BitBoard::from_u128(0),
+            BitBoard::from_u128(1),
+            BitBoard::from_u128(0b101010),
+            generate_column(4),
+        ];
+
+        for i in [0, 1, 33, 63, 64, 90, 127, 128, 200] {
+            let scalar_results: Vec<BitBoard> = boards.iter().map(|b| *b << i).collect();
+            let batch_results = BitBoard::shift_left_batch(&boards, i);
+            assert_eq!(scalar_results.len(), batch_results.len());
+            for (s, b) in scalar_results.iter().zip(batch_results.iter()) {
+                assert_eq!(s.to_u128(), b.to_u128(), "Failed at shift {}", i);
+            }
+        }
+    }
 }
