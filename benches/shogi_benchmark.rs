@@ -1,6 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rustshogi::bitboard::BitBoard;
-use rustshogi::game::Game;
 
 fn benchmark_bitboard_operations(c: &mut Criterion) {
     let mut group = c.benchmark_group("BitBoard Operations");
