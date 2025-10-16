@@ -150,7 +150,7 @@ print(f"ゲーム終了: 勝者 = {winner}")
 
 ## ドキュメント
 
-https://applyuser160.github.io/mctsshogirust/
+https://applyuser160.github.io/rustshogi/
 
 ## データ構造
 
