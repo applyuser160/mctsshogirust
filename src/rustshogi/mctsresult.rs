@@ -2,7 +2,6 @@ use super::color::ColorType;
 use super::moves::Move;
 use pyo3::prelude::*;
 
-#[allow(dead_code)]
 #[pyclass]
 #[derive(Clone)]
 pub struct MctsResult {
@@ -35,7 +34,6 @@ impl Default for MctsResult {
 }
 
 impl MctsResult {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             result: Vec::new(),
@@ -45,7 +43,6 @@ impl MctsResult {
         }
     }
 
-    #[allow(dead_code)]
     pub fn from(next_move_count: u64, next_moves: Vec<Move>) -> Self {
         let mut result: Vec<[u64; ColorType::ColorNumber as usize + 1]> = Vec::new();
         for _i in 0..next_move_count {
@@ -59,7 +56,6 @@ impl MctsResult {
         }
     }
 
-    #[allow(dead_code)]
     pub fn plus_result(&mut self, winner: ColorType, next_move_index: usize) {
         if winner as i8 > -1 {
             self.result[next_move_index][winner as usize] += 1;
@@ -68,7 +64,6 @@ impl MctsResult {
         self.count += 1;
     }
 
-    #[allow(dead_code)]
     pub fn calc_result(&mut self, turn: ColorType) {
         let mut best_index: usize = 0;
         let mut best_win_per: f64 = 0.0;

@@ -9,39 +9,32 @@ pub struct Address {
 }
 
 impl Address {
-    #[allow(dead_code)]
     pub fn from_number(index: u8) -> Self {
         Self { value: index }
     }
 
-    #[allow(dead_code)]
     pub fn from_numbers(c: u8, r: u8) -> Self {
         Self { value: r * 11 + c }
     }
 
-    #[allow(dead_code)]
     pub fn from_string(string: &str) -> Self {
         Self {
             value: (string.as_bytes()[0] - 48) * 11 + (string.as_bytes()[1] - 96),
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_column(&self) -> u8 {
         self.value % 11
     }
 
-    #[allow(dead_code)]
     pub fn get_row(&self) -> u8 {
         self.value / 11
     }
 
-    #[allow(dead_code)]
     pub fn to_index(&self) -> u8 {
         self.value
     }
 
-    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         let mut string = String::new();
         let column = common::integer_to_char(self.value % 11);
@@ -108,19 +101,16 @@ impl Address {
         self.value = (row as u8) * 11 + column;
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "to_int")]
     pub fn python_to_int(&self) -> usize {
         self.to_index() as usize
     }
 }
 
-#[allow(dead_code)]
 pub fn index_to_row(index: u8) -> u8 {
     index / 11
 }
 
-#[allow(dead_code)]
 pub fn index_to_column(index: u8) -> u8 {
     index % 11
 }

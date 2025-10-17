@@ -8,16 +8,14 @@ use pyo3::prelude::*;
 
 // extern crate num;
 
-#[allow(dead_code)]
 pub const PROMOTE: u8 = 8;
-#[allow(dead_code)]
+
 pub const PIECE_TYPE_NUMBER: u8 = 15;
-#[allow(dead_code)]
+
 pub const NOT_PRO_PIECE_TYPE_NUMBER: u8 = 8;
-#[allow(dead_code)]
+
 pub const PROMOTE_CHANGE: u8 = 6;
 
-#[allow(dead_code)]
 #[pyclass(eq, eq_int)]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, EnumIter, Hash)]
 #[repr(usize)]
@@ -123,7 +121,6 @@ impl PieceType {
     }
 }
 
-#[allow(dead_code)]
 pub enum HandPiece {
     HPawn,
     HLance,
@@ -135,7 +132,6 @@ pub enum HandPiece {
     HandPieceNum,
 }
 
-#[allow(dead_code)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum MoveType {
     None,
@@ -144,7 +140,6 @@ pub enum MoveType {
     Long,
 }
 
-#[allow(dead_code)]
 #[pyclass]
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub struct Piece {
@@ -161,7 +156,6 @@ impl Default for Piece {
 }
 
 impl Piece {
-    #[allow(dead_code)]
     pub fn convert_string(piece_type: PieceType, owner: ColorType) -> String {
         let mut result = String::with_capacity(3);
         let piece_type_df: PieceType;
@@ -194,7 +188,6 @@ impl Piece {
         result
     }
 
-    #[allow(dead_code)]
     fn convert_from_string(&mut self, character: char) {
         let mut character = character;
         if character as u8 > 83 {
@@ -217,7 +210,6 @@ impl Piece {
         }
     }
 
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             owner: ColorType::None,
@@ -225,7 +217,6 @@ impl Piece {
         }
     }
 
-    #[allow(dead_code)]
     pub fn from(color_type: ColorType, piece_type: PieceType) -> Self {
         Self {
             owner: color_type,
@@ -233,21 +224,18 @@ impl Piece {
         }
     }
 
-    #[allow(dead_code)]
     pub fn from_u8(num: u8) -> Self {
         let owner = ColorType::from_u8((num & 0x40) >> 6);
         let piece_type = PieceType::from_usize((num & 0x3F).into());
         Self { owner, piece_type }
     }
 
-    #[allow(dead_code)]
     pub fn from_char(character: char) -> Self {
         let mut res = Self::new();
         res.convert_from_string(character);
         res
     }
 
-    #[allow(dead_code)]
     pub fn from_string(str: &str) -> Self {
         let mut promote: u8 = 0;
         let piece_str: char;
@@ -264,19 +252,16 @@ impl Piece {
         res
     }
 
-    #[allow(dead_code)]
     pub fn to_u8(&self) -> u8 {
         let mut res = self.piece_type as u8;
         res += (self.owner as u8) << 6;
         res
     }
 
-    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         Self::convert_string(self.piece_type, self.owner)
     }
 
-    #[allow(dead_code)]
     pub fn get_movetype(
         piece_type: PieceType,
     ) -> [MoveType; direction::DirectionName::DirectionNameNumber as usize] {
@@ -434,7 +419,6 @@ impl Piece {
         }
     }
 
-    #[allow(dead_code)]
     pub fn able_pro(piece_type: PieceType) -> bool {
         matches!(
             piece_type,
@@ -447,7 +431,6 @@ impl Piece {
         )
     }
 
-    #[allow(dead_code)]
     pub fn able_pro_batch(piece_types: &[PieceType]) -> u16 {
         let mut mask = 0u16;
         for (i, &pt) in piece_types.iter().enumerate().take(16) {
@@ -458,7 +441,6 @@ impl Piece {
         mask
     }
 
-    #[allow(dead_code)]
     #[cfg(target_arch = "x86_64")]
     #[target_feature(enable = "sse2")]
     pub unsafe fn able_pro_batch_simd(piece_types: &[PieceType; 16]) -> u16 {

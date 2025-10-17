@@ -10,7 +10,6 @@ use rayon::prelude::*;
 
 use pyo3::prelude::*;
 
-#[allow(dead_code)]
 #[pyclass]
 #[derive(Clone)]
 pub struct Game {
@@ -31,7 +30,6 @@ impl Default for Game {
 }
 
 impl Game {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             board: Board::new(),
@@ -41,7 +39,6 @@ impl Game {
         }
     }
 
-    #[allow(dead_code)]
     pub fn from(board: Board, move_number: u16, turn: ColorType, winner: ColorType) -> Self {
         Self {
             board,
@@ -51,7 +48,6 @@ impl Game {
         }
     }
 
-    #[allow(dead_code)]
     pub fn input_board(&mut self, sfen: String) {
         let startpos = String::from("startpos");
         if startpos == sfen {
@@ -80,7 +76,6 @@ impl Game {
         }
     }
 
-    #[allow(dead_code)]
     pub fn input_hand(&mut self, sfen: String) {
         if sfen == "-" {
             return;
@@ -100,17 +95,14 @@ impl Game {
         }
     }
 
-    #[allow(dead_code)]
     pub fn input_move_number(&mut self, sfen: String) {
         self.move_number = sfen.parse::<u16>().unwrap_or(0);
     }
 
-    #[allow(dead_code)]
     pub fn input_turn(&mut self, sfen: String) {
         self.turn = convert_from_string(sfen.chars().next().unwrap_or(' '));
     }
 
-    #[allow(dead_code)]
     pub fn is_finished(&self) -> (bool, ColorType) {
         if self.move_number >= 500 {
             (true, ColorType::None)
@@ -119,14 +111,12 @@ impl Game {
         }
     }
 
-    #[allow(dead_code)]
     pub fn execute_move(&mut self, mv: &Move) {
         self.board.execute_move(mv);
         self.move_number += 1;
         self.turn = get_reverse_color(self.turn);
     }
 
-    #[allow(dead_code)]
     pub fn one_play(&mut self) -> Self {
         // used for benchmark only
         while !self.is_finished().0 {
@@ -142,7 +132,6 @@ impl Game {
         self.clone()
     }
 
-    #[allow(dead_code)]
     pub fn random_play(&mut self) -> Self {
         while !self.is_finished().0 {
             let moves = self.board.search_moves(self.turn);
@@ -156,35 +145,6 @@ impl Game {
             }
         }
         self.clone()
-    }
-
-    #[allow(dead_code)]
-    pub fn random_move(&mut self, num: usize) -> MctsResult {
-        let mut result = MctsResult::new();
-        result.next_moves = self.board.search_moves(self.turn);
-        result.next_move_count = result.next_moves.len() as u64;
-        let copied_game = self.clone();
-        for _i in 0..num {
-            *self = copied_game.clone();
-            let mut next_random = Random::new(0, (result.next_move_count - 1) as u16);
-            let random_one = next_random.generate_one() as usize;
-            let next_move = result.next_moves[random_one].clone();
-            self.execute_move(&next_move);
-
-            while !self.is_finished().0 {
-                let moves = self.board.search_moves(self.turn);
-                let move_count = moves.len();
-                let mut random = Random::new(0, (move_count - 1) as u16);
-                let mv = &moves[random.generate_one() as usize];
-                self.execute_move(mv);
-                let is_finish = self.is_finished();
-                if is_finish.0 {
-                    result.plus_result(self.winner, random_one);
-                    break;
-                }
-            }
-        }
-        result
     }
 
     pub fn random_move_parallel(&self, num: usize, num_threads: usize) -> MctsResult {
@@ -270,43 +230,36 @@ impl Game {
         }
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "input_board")]
     pub fn python_input_board(&mut self, sfen: String) {
         self.input_board(sfen);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "input_hand")]
     pub fn python_input_hand(&mut self, sfen: String) {
         self.input_hand(sfen);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "input_move_number")]
     pub fn python_input_move_number(&mut self, sfen: String) {
         self.input_move_number(sfen);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "input_turn")]
     pub fn python_input_turn(&mut self, sfen: String) {
         self.input_turn(sfen);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "is_finished")]
     pub fn python_is_finished(&self) -> (bool, ColorType) {
         self.is_finished()
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "execute_move")]
     pub fn python_execute_move(&mut self, moves: &Move) {
         self.execute_move(moves);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "random_play")]
     pub fn python_random_play(&mut self) -> Self {
         self.random_play()

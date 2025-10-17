@@ -7,7 +7,6 @@ pub struct Random {
 }
 
 impl Random {
-    #[allow(dead_code)]
     pub fn init() -> Self {
         Self {
             rng: thread_rng(),
@@ -16,7 +15,6 @@ impl Random {
         }
     }
 
-    #[allow(dead_code)]
     pub fn new(min: u16, max: u16) -> Self {
         Self {
             rng: thread_rng(),
@@ -25,12 +23,10 @@ impl Random {
         }
     }
 
-    #[allow(dead_code)]
     pub fn generate_one(&mut self) -> u16 {
         self.rng.gen_range(self.min..=self.max)
     }
 
-    #[allow(dead_code)]
     pub fn generate_multi(&mut self, length: u16) -> Vec<u16> {
         let mut result: Vec<u16> = Vec::new();
         for _i in 0..length {
@@ -41,7 +37,7 @@ impl Random {
     }
 
     // Fast scalar version using Lemire's method for unbiased range mapping
-    #[allow(dead_code)]
+
     pub fn generate_multi_fast(&mut self, length: u16) -> Vec<u16> {
         let mut result = Vec::with_capacity(length as usize);
         let range = u64::from(self.max - self.min + 1);
@@ -60,7 +56,7 @@ impl Random {
     }
 
     // SSE2 SIMD version
-    #[allow(dead_code)]
+
     #[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
     pub unsafe fn generate_multi_sse2(&mut self, length: u16) -> Vec<u16> {
         use std::arch::x86_64::*;
