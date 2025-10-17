@@ -1,3 +1,4 @@
+use super::board::Board;
 use super::color::ColorType;
 use super::moves::Move;
 use pyo3::prelude::*;
@@ -6,24 +7,23 @@ use pyo3::prelude::*;
 #[derive(Clone)]
 pub struct MctsResult {
     #[pyo3(get, set)]
-    pub result: Vec<[u64; ColorType::ColorNumber as usize + 1]>,
+    pub board: Board,
     #[pyo3(get, set)]
-    pub next_moves: Vec<Move>,
+    pub mv: Move,
     #[pyo3(get, set)]
-    pub next_move_count: u64,
+    pub white_wins: u64,
     #[pyo3(get, set)]
-    pub count: u64,
+    pub black_wins: u64,
+    #[pyo3(get, set)]
+    pub total_games: u64,
 }
 
 #[pymethods]
 impl MctsResult {
     pub fn merge(&mut self, other: &MctsResult) {
-        for i in 0..self.result.len() {
-            for j in 0..self.result[i].len() {
-                self.result[i][j] += other.result[i][j];
-            }
-        }
-        self.count += other.count;
+        self.white_wins += other.white_wins;
+        self.black_wins += other.black_wins;
+        self.total_games += other.total_games;
     }
 }
 
@@ -36,54 +36,53 @@ impl Default for MctsResult {
 impl MctsResult {
     pub fn new() -> Self {
         Self {
-            result: Vec::new(),
-            next_moves: Vec::new(),
-            next_move_count: 0,
-            count: 0,
+            board: Board::new(),
+            mv: Move::new(),
+            white_wins: 0,
+            black_wins: 0,
+            total_games: 0,
         }
     }
 
-    pub fn from(next_move_count: u64, next_moves: Vec<Move>) -> Self {
-        let mut result: Vec<[u64; ColorType::ColorNumber as usize + 1]> = Vec::new();
-        for _i in 0..next_move_count {
-            result.push([0; ColorType::ColorNumber as usize + 1]);
-        }
+    pub fn from(board: Board, mv: Move) -> Self {
         Self {
-            result,
-            next_moves,
-            next_move_count,
-            count: 0,
+            board,
+            mv,
+            white_wins: 0,
+            black_wins: 0,
+            total_games: 0,
         }
     }
 
-    pub fn plus_result(&mut self, winner: ColorType, next_move_index: usize) {
-        if winner as i8 > -1 {
-            self.result[next_move_index][winner as usize] += 1;
+    pub fn plus_result(&mut self, winner: ColorType) {
+        match winner {
+            ColorType::White => self.white_wins += 1,
+            ColorType::Black => self.black_wins += 1,
+            _ => {}
         }
-        self.result[next_move_index][ColorType::ColorNumber as usize] += 1;
-        self.count += 1;
+        self.total_games += 1;
     }
 
-    pub fn calc_result(&mut self, turn: ColorType) {
-        let mut best_index: usize = 0;
-        let mut best_win_per: f64 = 0.0;
-
-        for i in 0..self.next_move_count as usize {
-            let total = self.result[i][ColorType::ColorNumber as usize] as f64;
-            let current_turn_win = if turn == ColorType::White {
-                self.result[i][ColorType::White as usize] as f64
-            } else {
-                self.result[i][ColorType::Black as usize] as f64
-            };
-            let win_per = current_turn_win / total;
-
-            if win_per > best_win_per {
-                best_win_per = win_per;
-                best_index = i;
-            }
+    pub fn calc_result(&self, turn: ColorType) -> f64 {
+        if self.total_games == 0 {
+            return 0.0;
         }
 
-        println!("{} times played!", self.count);
-        println!("bestmove {}", self.next_moves[best_index].to_string());
+        let current_turn_wins = if turn == ColorType::White {
+            self.white_wins as f64
+        } else {
+            self.black_wins as f64
+        };
+
+        current_turn_wins / self.total_games as f64
+    }
+
+    pub fn print_result(&self) {
+        println!("{} times played!", self.total_games);
+        println!("bestmove {}", self.mv.to_string());
+        println!(
+            "White wins: {}, Black wins: {}",
+            self.white_wins, self.black_wins
+        );
     }
 }
