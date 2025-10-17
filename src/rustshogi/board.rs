@@ -25,7 +25,6 @@ const CACHE_SIZE: usize = 70000;
 static MOVE_CACHE: Lazy<Mutex<LruCache<(Board, ColorType), Vec<Move>>>> =
     Lazy::new(|| Mutex::new(LruCache::new(NonZeroUsize::new(CACHE_SIZE).unwrap())));
 
-#[allow(dead_code)]
 #[pyclass]
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Board {
@@ -46,12 +45,10 @@ impl Default for Board {
 }
 
 impl Board {
-    #[allow(dead_code)]
     fn is_a_has_specific_piece(&self, index: u8, piece_type: PieceType) -> bool {
         (self.has_specific_piece[piece_type as usize].to_u128() >> (127 - index)) & 1 != 0
     }
 
-    #[allow(dead_code)]
     fn drop(&mut self, index: u8) {
         let bit = 1u128 << (127 - index);
         let bit_mask = BitBoard::from_u128(bit);
@@ -67,7 +64,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     fn move_standard(&mut self, from_index: u8, to_index: u8) {
         let piece_type = self.get_piece_type_from_index(from_index);
         let color_type = self.get_color_type_from_index(from_index);
@@ -75,7 +71,6 @@ impl Board {
         self.deploy(to_index, piece_type, color_type);
     }
 
-    #[allow(dead_code)]
     fn move_to_hand(&mut self, index: u8, is_color_reverse: bool) {
         let mut piece_type = self.get_piece_type_from_index(index);
         if piece_type as u8 > PROMOTE {
@@ -91,7 +86,6 @@ impl Board {
         self.hand.add_piece(color_type, piece_type);
     }
 
-    #[allow(dead_code)]
     fn move_from_hand(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         self.hand.decrease_piece(color, piece_type);
         self.deploy(index, piece_type, color);
@@ -138,7 +132,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn deploy(&mut self, index: u8, piece_type: PieceType, color: ColorType) {
         let mask = 1u128 << (127 - index);
         let bit_mask = BitBoard::from_u128(mask);
@@ -161,7 +154,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn startpos(&mut self) {
         self.deploy(
             Address::from_numbers(1, 1).to_index(),
@@ -368,7 +360,6 @@ impl Board {
         self.hand = Hand::new();
     }
 
-    #[allow(dead_code)]
     pub fn input_board(&mut self, sfen: &str) {
         let startpos = String::from("startpos");
         if startpos == sfen {
@@ -397,7 +388,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn input_hand(&mut self, sfen: &str) {
         if sfen == "-" {
             return;
@@ -416,7 +406,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn from_sfen(sfen: String) -> Self {
         let mut board = Self::new();
         let parts: Vec<&str> = sfen.split(" ").collect();
@@ -427,7 +416,6 @@ impl Board {
         board
     }
 
-    #[allow(dead_code)]
     pub fn get_piece_type_from_index(&self, index: u8) -> PieceType {
         for piece_type in PieceType::iter() {
             if self.is_a_has_specific_piece(index, piece_type) {
@@ -437,7 +425,6 @@ impl Board {
         PieceType::None
     }
 
-    #[allow(dead_code)]
     pub fn get_color_type_from_index(&self, index: u8) -> ColorType {
         let has_a_piece = (self.has_piece.to_u128() >> (127 - index)) & 1 != 0;
         let is_black =
@@ -451,7 +438,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_piece(&self, index: u8) -> Piece {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
@@ -459,7 +445,6 @@ impl Board {
         Piece::from(color_type, piece_type)
     }
 
-    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         let mut result = String::new();
         for row in (1..=LENGTH_OF_EDGE).rev() {
@@ -488,7 +473,6 @@ impl Board {
         result
     }
 
-    #[allow(dead_code)]
     pub fn get_able_move_squares(&self, index: u8) -> BitBoard {
         let piece_type = self.get_piece_type_from_index(index);
         let color_type = self.get_color_type_from_index(index);
@@ -595,7 +579,6 @@ impl Board {
         bit_movable
     }
 
-    #[allow(dead_code)]
     pub fn get_able_pro_move_squares(&self, index: u8, bit_movable: BitBoard) -> BitBoard {
         let result = BitBoard::new();
         let piece_type = self.get_piece_type_from_index(index);
@@ -615,7 +598,6 @@ impl Board {
         bit_movable & pro_area
     }
 
-    #[allow(dead_code)]
     pub fn get_able_drop_squares(&self, color: ColorType, piece_type: PieceType) -> BitBoard {
         let none = self.has_specific_piece[PieceType::None as usize];
         let mut last_not_two = self.last_two[color as usize];
@@ -649,7 +631,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn search_moves(&self, color: ColorType) -> Vec<Move> {
         let mut cache = MOVE_CACHE.lock().unwrap();
         if let Some(moves) = cache.get(&(self.clone(), color)) {
@@ -697,7 +678,6 @@ impl Board {
         vector_move
     }
 
-    #[allow(dead_code)]
     pub fn execute_move(&mut self, moves: &Move) {
         let is_drop = moves.get_is_drop();
         let to_index = moves.get_to().to_index();
@@ -721,7 +701,6 @@ impl Board {
         }
     }
 
-    #[allow(dead_code)]
     pub fn is_finished(&self) -> (bool, ColorType) {
         let winner;
         let is_finish = self.has_specific_piece[PieceType::King as usize]
@@ -782,37 +761,31 @@ impl Board {
             || self.hand != other.hand
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "deploy")]
     pub fn python_deploy(&mut self, address: &Address, piece_type: PieceType, color: ColorType) {
         self.deploy(address.to_index(), piece_type, color);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "startpos")]
     pub fn python_startpos(&mut self) {
         self.startpos();
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "get_piece")]
     pub fn python_get_piece(&self, address: &Address) -> Piece {
         self.get_piece(address.to_index())
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "search_moves")]
     pub fn python_search_moves(&self, color: ColorType) -> Vec<Move> {
         self.search_moves(color)
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "execute_move")]
     pub fn python_execute_move(&mut self, moves: &Move) {
         self.execute_move(moves);
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "is_finished")]
     pub fn python_is_finished(&self) -> (bool, ColorType) {
         self.is_finished()

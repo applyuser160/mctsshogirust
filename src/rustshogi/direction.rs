@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum DirectionName {
     Up,
@@ -31,17 +30,13 @@ impl DirectionName {
 
 #[derive(Clone)]
 pub struct Direction {
-    #[allow(dead_code)]
     pub name: DirectionName,
 
-    #[allow(dead_code)]
     pub vertical_vector: i8,
 
-    #[allow(dead_code)]
     pub horizon_vector: i8,
 }
 
-#[allow(dead_code)]
 impl Direction {
     pub fn new(name: DirectionName) -> Self {
         let (vertical_vector, horizon_vector) = match name {
@@ -67,7 +62,6 @@ impl Direction {
         self.horizon_vector *= -1;
     }
 
-    #[allow(dead_code)]
     pub fn get_all_direction_vectors() -> &'static [(i8, i8); 8] {
         static DIRECTION_VECTORS: [(i8, i8); 8] = [
             (-1, 0),  // Up
@@ -82,7 +76,6 @@ impl Direction {
         &DIRECTION_VECTORS
     }
 
-    #[allow(dead_code)]
     #[cfg(target_arch = "x86_64")]
     #[target_feature(enable = "sse2")]
     pub unsafe fn get_all_direction_vectors_simd(

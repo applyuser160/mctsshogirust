@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 pub fn alphabet_to_number(alphabet: char) -> char {
     ((alphabet as u8) - 48) as char
 }
@@ -7,7 +6,6 @@ pub fn number_to_alphabet(number: char) -> char {
     ((number as u8) + 48) as char
 }
 
-#[allow(dead_code)]
 pub fn char_to_integer(character: char) -> u8 {
     (character as u8) - 48
 }

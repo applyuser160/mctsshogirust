@@ -1,6 +1,5 @@
 use pyo3::prelude::*;
 
-#[allow(dead_code)]
 #[pyclass(eq, eq_int)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]
 pub enum ColorType {
@@ -60,7 +59,6 @@ impl ColorType {
     }
 }
 
-#[allow(dead_code)]
 pub fn get_reverse_color(color_type: ColorType) -> ColorType {
     match color_type {
         ColorType::Black => ColorType::White,
@@ -69,7 +67,6 @@ pub fn get_reverse_color(color_type: ColorType) -> ColorType {
     }
 }
 
-#[allow(dead_code)]
 pub fn convert_string(color_type: ColorType) -> char {
     match color_type {
         ColorType::Black => 'b',
@@ -78,7 +75,6 @@ pub fn convert_string(color_type: ColorType) -> char {
     }
 }
 
-#[allow(dead_code)]
 pub fn convert_from_string(character: char) -> ColorType {
     match character {
         'b' => ColorType::Black,

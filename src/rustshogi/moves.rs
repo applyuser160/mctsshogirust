@@ -6,7 +6,6 @@ use super::piece;
 
 use pyo3::prelude::*;
 
-#[allow(dead_code)]
 #[pyclass]
 #[derive(Clone, Debug)]
 pub struct Move {
@@ -14,12 +13,10 @@ pub struct Move {
 }
 
 impl Move {
-    #[allow(dead_code)]
     fn is_drop(csa: &str) -> bool {
         csa.chars().nth(1) == Some('*')
     }
 
-    #[allow(dead_code)]
     fn is_promote(csa: &str) -> bool {
         if csa.len() > 4 {
             csa.chars().nth(4) == Some('+')
@@ -37,7 +34,6 @@ impl Move {
         self.value = (drop << 15) | (pro << 14) | (to << 7) | from;
     }
 
-    #[allow(dead_code)]
     fn standart_constructor(
         &mut self,
         from: address::Address,
@@ -52,31 +48,26 @@ impl Move {
         );
     }
 
-    #[allow(dead_code)]
     fn drop_constructor(&mut self, piece: piece::Piece, to: address::Address) {
         self.base_constructor(piece.to_u8() as u16, to.to_index() as u16, 0, 1)
     }
 
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self { value: 0 }
     }
 
-    #[allow(dead_code)]
     pub fn from_standart(from: address::Address, to: address::Address, promote: bool) -> Self {
         let mut res = Self::new();
         res.standart_constructor(from, to, promote);
         res
     }
 
-    #[allow(dead_code)]
     pub fn from_drop(piece: piece::Piece, to: address::Address) -> Self {
         let mut res = Self::new();
         res.drop_constructor(piece, to);
         res
     }
 
-    #[allow(dead_code)]
     pub fn from_csa(csa: &str) -> Self {
         let mut res = Self::new();
         let to = address::Address::from_string(&csa[2..]);
@@ -90,38 +81,32 @@ impl Move {
         res
     }
 
-    #[allow(dead_code)]
     pub fn get_is_drop(&self) -> bool {
         (self.value & (1 << 15)) != 0
     }
 
-    #[allow(dead_code)]
     pub fn get_is_promote(&self) -> bool {
         (self.value & (1 << 14)) != 0
     }
 
-    #[allow(dead_code)]
     pub fn get_from(&self) -> address::Address {
         // bits 6-0: from (7 bits)
         let v = (self.value & 0x7F) as u8;
         address::Address::from_number(v)
     }
 
-    #[allow(dead_code)]
     pub fn get_to(&self) -> address::Address {
         // bits 13-7: to (7 bits)
         let v = ((self.value >> 7) & 0x7F) as u8;
         address::Address::from_number(v)
     }
 
-    #[allow(dead_code)]
     pub fn get_piece(&self) -> piece::Piece {
         // ドロップ手の場合、piece情報は下位7ビット（bits 0-6）に格納
         let v = (self.value & 0x7F) as u8;
         piece::Piece::from_u8(v)
     }
 
-    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         let mut first = String::with_capacity(2);
         if self.get_is_drop() {
@@ -182,31 +167,26 @@ impl Move {
         self.value != other.value
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "is_drop")]
     pub fn python_is_drop(&self) -> bool {
         self.get_is_drop()
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "is_promote")]
     pub fn python_is_promote(&self) -> bool {
         self.get_is_promote()
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "get_from")]
     pub fn python_get_from(&self) -> address::Address {
         self.get_from()
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "get_to")]
     pub fn python_get_to(&self) -> address::Address {
         self.get_to()
     }
 
-    #[allow(dead_code)]
     #[pyo3(name = "get_piece")]
     pub fn python_get_piece(&self) -> piece::Piece {
         self.get_piece()
