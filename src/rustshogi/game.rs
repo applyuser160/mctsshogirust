@@ -160,36 +160,47 @@ impl Game {
             return vec![];
         }
 
-        let results: Vec<MctsResult> = pool.install(|| {
-            next_moves
-                .par_iter()
-                .map(|mv| {
-                    let mut mcts_result = MctsResult::from(self.board.clone(), mv.clone());
+        // 各手に対してMctsResultを初期化
+        let mut results: Vec<MctsResult> = next_moves
+            .iter()
+            .map(|mv| MctsResult::from(self.board.clone(), mv.clone()))
+            .collect();
 
-                    // 各手に対してnum回のシミュレーションを実行
-                    for _ in 0..num {
-                        let mut game_clone = self.clone();
-                        game_clone.execute_move(mv);
+        // 全体でnum回のシミュレーションを実行
+        let simulation_results: Vec<(ColorType, usize)> = pool.install(|| {
+            (0..num)
+                .into_par_iter()
+                .map(|_| {
+                    // ランダムに手を選択
+                    let mut random = Random::new(0, (next_move_count - 1) as u16);
+                    let selected_move_index = random.generate_one() as usize;
 
-                        while !game_clone.is_finished().0 {
-                            let moves = game_clone.board.search_moves(game_clone.turn);
-                            if moves.is_empty() {
-                                break;
-                            }
-                            let move_count = moves.len();
-                            let mut random = Random::new(0, (move_count - 1) as u16);
-                            let random_move = &moves[random.generate_one() as usize];
-                            game_clone.execute_move(random_move);
+                    // 選択された手でゲームを開始
+                    let mut game_clone = self.clone();
+                    game_clone.execute_move(&next_moves[selected_move_index]);
+
+                    // ランダムプレイでゲーム終了まで実行
+                    while !game_clone.is_finished().0 {
+                        let moves = game_clone.board.search_moves(game_clone.turn);
+                        if moves.is_empty() {
+                            break;
                         }
-
-                        let (_is_finished, winner) = game_clone.is_finished();
-                        mcts_result.plus_result(winner);
+                        let move_count = moves.len();
+                        let mut random = Random::new(0, (move_count - 1) as u16);
+                        let random_move = &moves[random.generate_one() as usize];
+                        game_clone.execute_move(random_move);
                     }
 
-                    mcts_result
+                    let (_is_finished, winner) = game_clone.is_finished();
+                    (winner, selected_move_index)
                 })
                 .collect()
         });
+
+        // 結果を各MctsResultに集計
+        for (winner, move_index) in simulation_results {
+            results[move_index].plus_result(winner);
+        }
 
         results
     }

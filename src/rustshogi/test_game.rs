@@ -51,9 +51,12 @@ mod tests {
         // 結果が空でないことを確認
         assert!(!results.is_empty());
 
-        // 各結果の総ゲーム数がnumと一致することを確認
+        // 全体の総ゲーム数がnumと一致することを確認
+        let total_games: u64 = results.iter().map(|r| r.total_games).sum();
+        assert_eq!(total_games, num as u64);
+
+        // 各結果の妥当性を確認
         for result in &results {
-            assert_eq!(result.total_games, num as u64);
             // 白と黒の勝利数の合計が総ゲーム数以下であることを確認
             assert!(result.white_wins + result.black_wins <= result.total_games);
         }
