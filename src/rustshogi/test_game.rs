@@ -46,7 +46,20 @@ mod tests {
         game.input_board("startpos".to_string());
         let num = 10;
         let threads = 2;
-        let result = game.random_move_parallel(num, threads);
-        assert_eq!(result.count, num as u64);
+        let results = game.random_move_parallel(num, threads);
+
+        // 結果が空でないことを確認
+        assert!(!results.is_empty());
+
+        // 各結果の総ゲーム数がnumと一致することを確認
+        for result in &results {
+            assert_eq!(result.total_games, num as u64);
+            // 白と黒の勝利数の合計が総ゲーム数以下であることを確認
+            assert!(result.white_wins + result.black_wins <= result.total_games);
+        }
+
+        // 結果の数が可能な手の数と一致することを確認
+        let possible_moves = game.board.search_moves(game.turn);
+        assert_eq!(results.len(), possible_moves.len());
     }
 }

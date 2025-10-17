@@ -147,61 +147,51 @@ impl Game {
         self.clone()
     }
 
-    pub fn random_move_parallel(&self, num: usize, num_threads: usize) -> MctsResult {
+    pub fn random_move_parallel(&self, num: usize, num_threads: usize) -> Vec<MctsResult> {
         let pool = rayon::ThreadPoolBuilder::new()
             .num_threads(num_threads)
             .build()
             .unwrap();
 
         let next_moves = self.board.search_moves(self.turn);
-        let next_move_count = next_moves.len() as u64;
+        let next_move_count = next_moves.len();
 
         if next_move_count == 0 {
-            return MctsResult::from(0, vec![]);
+            return vec![];
         }
 
-        let initial_states: Vec<(Game, usize)> = pool.install(|| {
+        let results: Vec<MctsResult> = pool.install(|| {
             next_moves
                 .par_iter()
-                .enumerate()
-                .map(|(i, move_to_execute)| {
-                    let mut game_clone = self.clone();
-                    game_clone.execute_move(move_to_execute);
-                    (game_clone, i)
-                })
-                .collect()
-        });
+                .map(|mv| {
+                    let mut mcts_result = MctsResult::from(self.board.clone(), mv.clone());
 
-        let results: Vec<(ColorType, usize)> = pool.install(|| {
-            (0..num)
-                .into_par_iter()
-                .map(|_| {
-                    let mut next_random = Random::new(0, (next_move_count - 1) as u16);
-                    let random_one = next_random.generate_one() as usize;
-                    let (initial_state, move_index) = &initial_states[random_one];
-                    let mut game_clone = initial_state.clone();
-
-                    while !game_clone.is_finished().0 {
-                        let moves = game_clone.board.search_moves(game_clone.turn);
-                        if moves.is_empty() {
-                            break;
-                        }
-                        let move_count = moves.len();
-                        let mut random = Random::new(0, (move_count - 1) as u16);
-                        let mv = &moves[random.generate_one() as usize];
+                    // 各手に対してnum回のシミュレーションを実行
+                    for _ in 0..num {
+                        let mut game_clone = self.clone();
                         game_clone.execute_move(mv);
+
+                        while !game_clone.is_finished().0 {
+                            let moves = game_clone.board.search_moves(game_clone.turn);
+                            if moves.is_empty() {
+                                break;
+                            }
+                            let move_count = moves.len();
+                            let mut random = Random::new(0, (move_count - 1) as u16);
+                            let random_move = &moves[random.generate_one() as usize];
+                            game_clone.execute_move(random_move);
+                        }
+
+                        let (_is_finished, winner) = game_clone.is_finished();
+                        mcts_result.plus_result(winner);
                     }
-                    let (_is_finished, winner) = game_clone.is_finished();
-                    (winner, *move_index)
+
+                    mcts_result
                 })
                 .collect()
         });
 
-        let mut final_result = MctsResult::from(next_move_count, next_moves);
-        for (winner, random_one) in results {
-            final_result.plus_result(winner, random_one);
-        }
-        final_result
+        results
     }
 }
 
@@ -209,7 +199,7 @@ impl Game {
 impl Game {
     #[pyo3(name = "random_move")]
     #[pyo3(signature = (num, threads = None))]
-    pub fn python_random_move(&self, num: usize, threads: Option<usize>) -> MctsResult {
+    pub fn python_random_move(&self, num: usize, threads: Option<usize>) -> Vec<MctsResult> {
         let num_threads = threads.unwrap_or_else(num_cpus::get);
         self.random_move_parallel(num, num_threads)
     }
