@@ -65,4 +65,13 @@ mod tests {
         let possible_moves = game.board.search_moves(game.turn);
         assert_eq!(results.len(), possible_moves.len());
     }
+
+    #[test]
+    fn test_game_generate_random_board() {
+        let mut game = Game::new();
+        game.input_board("startpos".to_string());
+        let board = game.generate_random_board();
+
+        assert!(board.is_finished().0 || !board.is_finished().0);
+    }
 }

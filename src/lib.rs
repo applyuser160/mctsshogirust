@@ -20,6 +20,8 @@ pub mod mctsresult;
 pub mod move_pattern;
 #[path = "rustshogi/moves.rs"]
 pub mod moves;
+#[path = "rustshogi/pca.rs"]
+pub mod pca;
 #[path = "rustshogi/piece.rs"]
 pub mod piece;
 #[path = "rustshogi/random.rs"]
@@ -34,6 +36,9 @@ pub mod test_bitboard;
 #[cfg(test)]
 #[path = "rustshogi/test_board.rs"]
 pub mod test_board;
+#[cfg(test)]
+#[path = "rustshogi/test_board_pca.rs"]
+pub mod test_board_pca;
 #[cfg(test)]
 #[path = "rustshogi/test_color.rs"]
 pub mod test_color;
@@ -52,6 +57,9 @@ pub mod test_hand;
 #[cfg(test)]
 #[path = "rustshogi/test_moves.rs"]
 pub mod test_moves;
+#[cfg(test)]
+#[path = "rustshogi/test_pca.rs"]
+pub mod test_pca;
 #[cfg(test)]
 #[path = "rustshogi/test_piece.rs"]
 pub mod test_piece;
