@@ -70,6 +70,9 @@ pub mod test_pca;
 #[cfg(test)]
 #[path = "rustshogi/test_piece.rs"]
 pub mod test_piece;
+#[cfg(test)]
+#[path = "rustshogi/test_random.rs"]
+pub mod test_random;
 
 use pyo3::prelude::*;
 
