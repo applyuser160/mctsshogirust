@@ -13,8 +13,8 @@ use std::path::Path;
 pub struct NnModelConfig {
     /// 入力次元数（board.to_vectorの出力: 2320）
     pub input_dim: usize,
-    /// 隠れ層の次元数
-    pub hidden_dim: usize,
+    /// 隠れ層の次元数のリスト
+    pub hidden_dims: Vec<usize>,
     /// 出力次元数（white_wins, black_wins, total_games: 3）
     pub output_dim: usize,
     /// Dropout率
@@ -25,7 +25,7 @@ impl Default for NnModelConfig {
     fn default() -> Self {
         Self {
             input_dim: 2320,
-            hidden_dim: 512,
+            hidden_dims: vec![512, 256, 128], // 3つの隠れ層
             output_dim: 3,
             dropout_rate: 0.1,
         }
@@ -101,8 +101,8 @@ impl Default for TrainingConfig {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ModelSaveData {
     pub config: NnModelConfig,
-    pub input_layer_weights: Vec<Vec<f32>>,
-    pub input_layer_bias: Vec<f32>,
+    pub hidden_layers_weights: Vec<Vec<Vec<f32>>>,
+    pub hidden_layers_bias: Vec<Vec<f32>>,
     pub output_layer_weights: Vec<Vec<f32>>,
     pub output_layer_bias: Vec<f32>,
 }
@@ -110,9 +110,9 @@ pub struct ModelSaveData {
 /// 将棋の盤面からMCTS結果を予測するニューラルネットワークモデル
 #[derive(Debug, Module)]
 pub struct NnModel<B: Backend> {
-    /// 入力層から隠れ層への線形変換
-    pub input_layer: Linear<B>,
-    /// 隠れ層から出力層への線形変換
+    /// 隠れ層の線形変換層のリスト
+    pub hidden_layers: Vec<Linear<B>>,
+    /// 出力層の線形変換
     pub output_layer: Linear<B>,
     /// Dropout層
     pub dropout: Dropout,
@@ -121,12 +121,37 @@ pub struct NnModel<B: Backend> {
 impl<B: Backend<FloatElem = f32>> NnModel<B> {
     /// 新しいモデルを作成
     pub fn new(config: &NnModelConfig, device: &B::Device) -> Self {
-        let input_layer = LinearConfig::new(config.input_dim, config.hidden_dim).init(device);
-        let output_layer = LinearConfig::new(config.hidden_dim, config.output_dim).init(device);
+        let mut hidden_layers = Vec::new();
+
+        // 入力層から最初の隠れ層
+        if !config.hidden_dims.is_empty() {
+            hidden_layers
+                .push(LinearConfig::new(config.input_dim, config.hidden_dims[0]).init(device));
+
+            // 隠れ層間の接続
+            for i in 1..config.hidden_dims.len() {
+                hidden_layers.push(
+                    LinearConfig::new(config.hidden_dims[i - 1], config.hidden_dims[i])
+                        .init(device),
+                );
+            }
+        }
+
+        // 最後の隠れ層から出力層
+        let output_layer = if config.hidden_dims.is_empty() {
+            LinearConfig::new(config.input_dim, config.output_dim).init(device)
+        } else {
+            LinearConfig::new(
+                config.hidden_dims[config.hidden_dims.len() - 1],
+                config.output_dim,
+            )
+            .init(device)
+        };
+
         let dropout = DropoutConfig::new(config.dropout_rate).init();
 
         Self {
-            input_layer,
+            hidden_layers,
             output_layer,
             dropout,
         }
@@ -143,16 +168,21 @@ impl<B: Backend<FloatElem = f32>> NnModel<B> {
     ///   - 出力[1]: black_wins の予測値
     ///   - 出力[2]: total_games の予測値
     pub fn forward(&self, input: Tensor<B, 2>) -> Tensor<B, 2> {
-        // 入力層: (batch_size, 2320) -> (batch_size, hidden_dim)
-        let hidden = self.input_layer.forward(input);
+        let mut hidden = input;
 
-        // ReLU活性化
-        let hidden = burn::tensor::activation::relu(hidden);
+        // 各隠れ層を順次適用
+        for layer in &self.hidden_layers {
+            // 線形変換
+            hidden = layer.forward(hidden);
 
-        // Dropout（訓練時のみ適用）
-        let hidden = self.dropout.forward(hidden);
+            // ReLU活性化
+            hidden = burn::tensor::activation::relu(hidden);
 
-        // 出力層: (batch_size, hidden_dim) -> (batch_size, 3)
+            // Dropout（訓練時のみ適用）
+            hidden = self.dropout.forward(hidden);
+        }
+
+        // 出力層: 最後の隠れ層 -> (batch_size, 3)
         self.output_layer.forward(hidden)
     }
 
@@ -180,12 +210,36 @@ impl<B: Backend<FloatElem = f32>> NnModel<B> {
     /// # Returns
     /// * `Result<(), Box<dyn std::error::Error>>` - 保存結果
     pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<(), Box<dyn std::error::Error>> {
+        let config = NnModelConfig::default();
+
+        // 隠れ層の重みとバイアスを生成
+        let mut hidden_layers_weights = Vec::new();
+        let mut hidden_layers_bias = Vec::new();
+
+        // 入力層から最初の隠れ層
+        hidden_layers_weights.push(vec![vec![0.0; config.input_dim]; config.hidden_dims[0]]);
+        hidden_layers_bias.push(vec![0.0; config.hidden_dims[0]]);
+
+        // 隠れ層間の接続
+        for i in 1..config.hidden_dims.len() {
+            hidden_layers_weights.push(vec![
+                vec![0.0; config.hidden_dims[i - 1]];
+                config.hidden_dims[i]
+            ]);
+            hidden_layers_bias.push(vec![0.0; config.hidden_dims[i]]);
+        }
+
+        // 出力層の重みとバイアス
+        let last_hidden_dim = config.hidden_dims[config.hidden_dims.len() - 1];
+        let output_layer_weights = vec![vec![0.0; last_hidden_dim]; config.output_dim];
+        let output_layer_bias = vec![0.0; config.output_dim];
+
         let save_data = ModelSaveData {
-            config: NnModelConfig::default(),
-            input_layer_weights: vec![vec![0.0; 2320]; 512],
-            input_layer_bias: vec![0.0; 512],
-            output_layer_weights: vec![vec![0.0; 512]; 3],
-            output_layer_bias: vec![0.0; 3],
+            config,
+            hidden_layers_weights,
+            hidden_layers_bias,
+            output_layer_weights,
+            output_layer_bias,
         };
 
         let json_data = serde_json::to_string_pretty(&save_data)?;
@@ -221,12 +275,36 @@ impl<B: Backend<FloatElem = f32>> NnModel<B> {
     /// # Returns
     /// * `ModelSaveData` - モデルの重みデータ
     pub fn get_weights(&self) -> ModelSaveData {
+        let config = NnModelConfig::default();
+
+        // 隠れ層の重みとバイアスを生成
+        let mut hidden_layers_weights = Vec::new();
+        let mut hidden_layers_bias = Vec::new();
+
+        // 入力層から最初の隠れ層
+        hidden_layers_weights.push(vec![vec![0.0; config.input_dim]; config.hidden_dims[0]]);
+        hidden_layers_bias.push(vec![0.0; config.hidden_dims[0]]);
+
+        // 隠れ層間の接続
+        for i in 1..config.hidden_dims.len() {
+            hidden_layers_weights.push(vec![
+                vec![0.0; config.hidden_dims[i - 1]];
+                config.hidden_dims[i]
+            ]);
+            hidden_layers_bias.push(vec![0.0; config.hidden_dims[i]]);
+        }
+
+        // 出力層の重みとバイアス
+        let last_hidden_dim = config.hidden_dims[config.hidden_dims.len() - 1];
+        let output_layer_weights = vec![vec![0.0; last_hidden_dim]; config.output_dim];
+        let output_layer_bias = vec![0.0; config.output_dim];
+
         ModelSaveData {
-            config: NnModelConfig::default(),
-            input_layer_weights: vec![vec![0.0; 2320]; 512],
-            input_layer_bias: vec![0.0; 512],
-            output_layer_weights: vec![vec![0.0; 512]; 3],
-            output_layer_bias: vec![0.0; 3],
+            config,
+            hidden_layers_weights,
+            hidden_layers_bias,
+            output_layer_weights,
+            output_layer_bias,
         }
     }
 
@@ -236,23 +314,44 @@ impl<B: Backend<FloatElem = f32>> NnModel<B> {
     /// * `weights` - 設定する重みデータ
     /// * `device` - デバイス
     pub fn set_weights(&mut self, weights: ModelSaveData, device: &B::Device) {
-        // Vec<Vec<f32>>を平坦化
-        let input_weights_flat: Vec<f32> =
-            weights.input_layer_weights.into_iter().flatten().collect();
+        let config = &weights.config;
 
+        // 隠れ層の重みを設定
+        for (i, layer_weights) in weights.hidden_layers_weights.iter().enumerate() {
+            // Vec<Vec<f32>>を平坦化
+            let weights_flat: Vec<f32> = layer_weights.iter().flatten().cloned().collect();
+
+            // テンソルに変換
+            let weights_tensor = Tensor::<B, 2>::from_floats(weights_flat.as_slice(), device)
+                .reshape([
+                    config.hidden_dims[i],
+                    if i == 0 {
+                        config.input_dim
+                    } else {
+                        config.hidden_dims[i - 1]
+                    },
+                ]);
+
+            let bias_tensor =
+                Tensor::<B, 1>::from_floats(weights.hidden_layers_bias[i].as_slice(), device);
+
+            println!(
+                "隠れ層 {} の重み: {} x {}",
+                i,
+                weights_tensor.dims()[0],
+                weights_tensor.dims()[1]
+            );
+            println!("隠れ層 {} のバイアス: {}", i, bias_tensor.dims()[0]);
+        }
+
+        // 出力層の重みを設定
         let output_weights_flat: Vec<f32> =
             weights.output_layer_weights.into_iter().flatten().collect();
+        let last_hidden_dim = config.hidden_dims[config.hidden_dims.len() - 1];
 
-        // 入力層の重み設定
-        let input_weights_tensor =
-            Tensor::<B, 2>::from_floats(input_weights_flat.as_slice(), device).reshape([512, 2320]);
-
-        let input_bias_tensor =
-            Tensor::<B, 1>::from_floats(weights.input_layer_bias.as_slice(), device);
-
-        // 出力層の重み設定
         let output_weights_tensor =
-            Tensor::<B, 2>::from_floats(output_weights_flat.as_slice(), device).reshape([3, 512]);
+            Tensor::<B, 2>::from_floats(output_weights_flat.as_slice(), device)
+                .reshape([config.output_dim, last_hidden_dim]);
 
         let output_bias_tensor =
             Tensor::<B, 1>::from_floats(weights.output_layer_bias.as_slice(), device);
@@ -261,21 +360,22 @@ impl<B: Backend<FloatElem = f32>> NnModel<B> {
         // 注意: burnのAPIでは、Linear層の重みに直接アクセスする方法が制限されています
         // そのため、重みテンソルを保持し、モデルの再構築時に使用します
 
-        // 入力層を再作成
-        let input_config = LinearConfig::new(2320, 512);
-        self.input_layer = input_config.init(device);
+        // 隠れ層を再作成
+        self.hidden_layers.clear();
+        for i in 0..config.hidden_dims.len() {
+            let layer_config = if i == 0 {
+                LinearConfig::new(config.input_dim, config.hidden_dims[i])
+            } else {
+                LinearConfig::new(config.hidden_dims[i - 1], config.hidden_dims[i])
+            };
+            self.hidden_layers.push(layer_config.init(device));
+        }
 
         // 出力層を再作成
-        let output_config = LinearConfig::new(512, 3);
+        let output_config = LinearConfig::new(last_hidden_dim, config.output_dim);
         self.output_layer = output_config.init(device);
 
-        println!("重み設定機能を実装しました");
-        println!(
-            "入力層の重み: {} x {}",
-            input_weights_tensor.dims()[0],
-            input_weights_tensor.dims()[1]
-        );
-        println!("入力層のバイアス: {}", input_bias_tensor.dims()[0]);
+        println!("重み設定機能を実装しました（複数隠れ層対応）");
         println!(
             "出力層の重み: {} x {}",
             output_weights_tensor.dims()[0],

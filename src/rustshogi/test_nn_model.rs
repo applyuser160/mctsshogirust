@@ -13,7 +13,7 @@ fn test_nn_model_config() {
     // 設定が正しいことを確認
     assert_eq!(config.input_dim, 2320);
     assert_eq!(config.output_dim, 3);
-    assert_eq!(config.hidden_dim, 512);
+    assert_eq!(config.hidden_dims, vec![512, 256, 128]);
     assert_eq!(config.dropout_rate, 0.1);
 }
 
@@ -82,9 +82,17 @@ fn test_model_save_load() {
     // ダミーのモデルデータを作成して保存
     let save_data = super::nn_model::ModelSaveData {
         config: NnModelConfig::default(),
-        input_layer_weights: vec![vec![1.0; 2320]; 512],
-        input_layer_bias: vec![0.0; 512],
-        output_layer_weights: vec![vec![1.0; 512]; 3],
+        hidden_layers_weights: vec![
+            vec![vec![1.0; 2320]; 512], // 入力層 -> 隠れ層1
+            vec![vec![1.0; 512]; 256],  // 隠れ層1 -> 隠れ層2
+            vec![vec![1.0; 256]; 128],  // 隠れ層2 -> 隠れ層3
+        ],
+        hidden_layers_bias: vec![
+            vec![0.0; 512], // 隠れ層1のバイアス
+            vec![0.0; 256], // 隠れ層2のバイアス
+            vec![0.0; 128], // 隠れ層3のバイアス
+        ],
+        output_layer_weights: vec![vec![1.0; 128]; 3],
         output_layer_bias: vec![0.0; 3],
     };
 
@@ -97,13 +105,13 @@ fn test_model_save_load() {
 
     // ファイルの内容を確認
     let contents = fs::read_to_string(test_path).unwrap();
-    assert!(contents.contains("input_layer_weights"));
+    assert!(contents.contains("hidden_layers_weights"));
     assert!(contents.contains("output_layer_weights"));
 
     // ファイルを読み込み
     let loaded_json = fs::read_to_string(test_path).unwrap();
     let loaded_data: super::nn_model::ModelSaveData = serde_json::from_str(&loaded_json).unwrap();
-    assert_eq!(loaded_data.input_layer_weights.len(), 512);
+    assert_eq!(loaded_data.hidden_layers_weights.len(), 3);
 
     // テストファイルを削除
     let _ = fs::remove_file(test_path);
@@ -114,18 +122,28 @@ fn test_model_weights_access() {
     // 重みデータの構造をテスト
     let weights = super::nn_model::ModelSaveData {
         config: NnModelConfig::default(),
-        input_layer_weights: vec![vec![0.0; 2320]; 512],
-        input_layer_bias: vec![0.0; 512],
-        output_layer_weights: vec![vec![0.0; 512]; 3],
+        hidden_layers_weights: vec![
+            vec![vec![0.0; 2320]; 512], // 入力層 -> 隠れ層1
+            vec![vec![0.0; 512]; 256],  // 隠れ層1 -> 隠れ層2
+            vec![vec![0.0; 256]; 128],  // 隠れ層2 -> 隠れ層3
+        ],
+        hidden_layers_bias: vec![
+            vec![0.0; 512], // 隠れ層1のバイアス
+            vec![0.0; 256], // 隠れ層2のバイアス
+            vec![0.0; 128], // 隠れ層3のバイアス
+        ],
+        output_layer_weights: vec![vec![0.0; 128]; 3],
         output_layer_bias: vec![0.0; 3],
     };
 
     // 重みの構造を確認
-    assert_eq!(weights.input_layer_weights.len(), 512);
-    assert_eq!(weights.input_layer_weights[0].len(), 2320);
-    assert_eq!(weights.input_layer_bias.len(), 512);
+    assert_eq!(weights.hidden_layers_weights.len(), 3);
+    assert_eq!(weights.hidden_layers_weights[0].len(), 512);
+    assert_eq!(weights.hidden_layers_weights[0][0].len(), 2320);
+    assert_eq!(weights.hidden_layers_bias.len(), 3);
+    assert_eq!(weights.hidden_layers_bias[0].len(), 512);
     assert_eq!(weights.output_layer_weights.len(), 3);
-    assert_eq!(weights.output_layer_weights[0].len(), 512);
+    assert_eq!(weights.output_layer_weights[0].len(), 128);
     assert_eq!(weights.output_layer_bias.len(), 3);
 }
 

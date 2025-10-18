@@ -13,7 +13,9 @@ pub fn example_usage() {
     let model_config = NnModelConfig::default();
     println!(
         "モデル設定: 入力={}, 隠れ層={}, 出力={}",
-        model_config.input_dim, model_config.hidden_dim, model_config.output_dim
+        model_config.input_dim,
+        model_config.hidden_dims.len(),
+        model_config.output_dim
     );
 
     // 2. 学習データを作成
@@ -151,9 +153,17 @@ pub fn example_save_load() {
     // 1. モデル保存データを作成
     let save_data = ModelSaveData {
         config: NnModelConfig::default(),
-        input_layer_weights: vec![vec![1.0; 2320]; 512],
-        input_layer_bias: vec![0.0; 512],
-        output_layer_weights: vec![vec![1.0; 512]; 3],
+        hidden_layers_weights: vec![
+            vec![vec![1.0; 2320]; 512], // 入力層 -> 隠れ層1
+            vec![vec![1.0; 512]; 256],  // 隠れ層1 -> 隠れ層2
+            vec![vec![1.0; 256]; 128],  // 隠れ層2 -> 隠れ層3
+        ],
+        hidden_layers_bias: vec![
+            vec![0.0; 512], // 隠れ層1のバイアス
+            vec![0.0; 256], // 隠れ層2のバイアス
+            vec![0.0; 128], // 隠れ層3のバイアス
+        ],
+        output_layer_weights: vec![vec![1.0; 128]; 3],
         output_layer_bias: vec![0.0; 3],
     };
 
@@ -169,10 +179,11 @@ pub fn example_save_load() {
 
     // 4. 読み込んだデータの確認
     println!("読み込んだ重みのサイズ:");
+    println!("  隠れ層数: {}", loaded_data.hidden_layers_weights.len());
     println!(
-        "  入力層重み: {} x {}",
-        loaded_data.input_layer_weights.len(),
-        loaded_data.input_layer_weights[0].len()
+        "  第1隠れ層重み: {} x {}",
+        loaded_data.hidden_layers_weights[0].len(),
+        loaded_data.hidden_layers_weights[0][0].len()
     );
     println!(
         "  出力層重み: {} x {}",
@@ -197,17 +208,26 @@ pub fn example_weight_setting() {
     // 2. カスタム重みデータを作成
     let custom_weights = ModelSaveData {
         config: model_config.clone(),
-        input_layer_weights: vec![vec![0.5; 2320]; 512], // カスタム重み
-        input_layer_bias: vec![0.1; 512],                // カスタムバイアス
-        output_layer_weights: vec![vec![0.3; 512]; 3],
+        hidden_layers_weights: vec![
+            vec![vec![0.5; 2320]; 512], // 入力層 -> 隠れ層1
+            vec![vec![0.5; 512]; 256],  // 隠れ層1 -> 隠れ層2
+            vec![vec![0.5; 256]; 128],  // 隠れ層2 -> 隠れ層3
+        ],
+        hidden_layers_bias: vec![
+            vec![0.1; 512], // 隠れ層1のバイアス
+            vec![0.1; 256], // 隠れ層2のバイアス
+            vec![0.1; 128], // 隠れ層3のバイアス
+        ],
+        output_layer_weights: vec![vec![0.3; 128]; 3],
         output_layer_bias: vec![0.2; 3],
     };
 
     println!("カスタム重みデータを作成しました");
+    println!("隠れ層数: {}", custom_weights.hidden_layers_weights.len());
     println!(
-        "入力層重み: {} x {}",
-        custom_weights.input_layer_weights.len(),
-        custom_weights.input_layer_weights[0].len()
+        "第1隠れ層重み: {} x {}",
+        custom_weights.hidden_layers_weights[0].len(),
+        custom_weights.hidden_layers_weights[0][0].len()
     );
     println!(
         "出力層重み: {} x {}",
@@ -225,8 +245,8 @@ pub fn example_weight_setting() {
     let current_weights = model.get_weights();
     println!("現在の重み:");
     println!(
-        "  入力層重みの最初の値: {}",
-        current_weights.input_layer_weights[0][0]
+        "  第1隠れ層重みの最初の値: {}",
+        current_weights.hidden_layers_weights[0][0][0]
     );
     println!(
         "  出力層重みの最初の値: {}",
