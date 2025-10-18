@@ -10,6 +10,8 @@ pub mod color;
 pub mod common;
 #[path = "rustshogi/direction.rs"]
 pub mod direction;
+#[path = "rustshogi/evaluator.rs"]
+pub mod evaluator;
 #[path = "rustshogi/game.rs"]
 pub mod game;
 #[path = "rustshogi/hand.rs"]
@@ -52,6 +54,9 @@ pub mod test_common;
 #[cfg(test)]
 #[path = "rustshogi/test_direction.rs"]
 pub mod test_direction;
+#[cfg(test)]
+#[path = "rustshogi/test_evaluator.rs"]
+pub mod test_evaluator;
 #[cfg(test)]
 #[path = "rustshogi/test_game.rs"]
 pub mod test_game;

@@ -4381,6 +4381,7 @@ dependencies = [
  "pyo3",
  "rand 0.8.5",
  "rayon",
+ "rusqlite",
  "serde",
  "serde_json",
  "strum 0.27.2",
