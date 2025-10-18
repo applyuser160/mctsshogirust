@@ -204,6 +204,23 @@ impl Game {
 
         results
     }
+
+    pub fn generate_random_board(&mut self) -> Board {
+        let mut random = Random::new(0, 300);
+        let move_count = random.generate_one() as usize;
+
+        for _ in 0..move_count {
+            let moves = self.board.search_moves(self.turn);
+            let mut random = Random::new(0, (moves.len() - 1) as u16);
+            let amove = &moves[random.generate_one() as usize].clone();
+            self.execute_move(amove);
+
+            if self.is_finished().0 {
+                break;
+            }
+        }
+        self.board.clone()
+    }
 }
 
 #[pymethods]
@@ -264,5 +281,10 @@ impl Game {
     #[pyo3(name = "random_play")]
     pub fn python_random_play(&mut self) -> Self {
         self.random_play()
+    }
+
+    #[pyo3(name = "generate_random_board")]
+    pub fn python_generate_random_board(&mut self) -> Board {
+        self.generate_random_board()
     }
 }

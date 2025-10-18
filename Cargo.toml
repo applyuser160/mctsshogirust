@@ -17,6 +17,8 @@ rayon = "1.8.1"
 num_cpus = "1.16.0"
 lru = "0.12.5"
 once_cell = "1.19.0"
+ndarray = "0.15"
+nalgebra = "0.33"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

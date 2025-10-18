@@ -90,4 +90,20 @@ mod tests {
         assert_eq!(result.0, true);
         assert_eq!(result.1, ColorType::White);
     }
+
+    #[test]
+    fn test_board_to_vector() {
+        let mut board = Board::new();
+        board.startpos();
+        let vector = board.to_vector(None);
+        assert_eq!(vector.len(), 2320);
+    }
+
+    #[test]
+    fn test_board_to_vector_with_options() {
+        let mut board = Board::new();
+        board.startpos();
+        let vector = board.to_vector(Some(300));
+        assert_eq!(vector.len(), 300);
+    }
 }

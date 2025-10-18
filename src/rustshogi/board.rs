@@ -9,6 +9,7 @@ use super::direction::{Direction, DirectionName};
 use super::hand::Hand;
 use super::move_pattern;
 use super::moves::Move;
+use super::pca::apply_pca_compression;
 use super::piece::{MoveType, Piece, PieceType, PIECE_TYPE_NUMBER, PROMOTE};
 
 use lru::LruCache;
@@ -721,6 +722,68 @@ impl Board {
         }
         (is_finish, winner)
     }
+
+    pub fn to_vector(&self, target_dimensions: Option<usize>) -> Vec<f32> {
+        // 全特徴量を取得
+        let mut features = Vec::with_capacity(2320);
+
+        // 基本盤面情報 (2304次元) - 各マスについて全てのBitBoardの値を連続配置
+        let mut board_vector = [0f32; 2304];
+
+        let bitboards = [
+            self.has_piece,
+            self.player_prossesion[ColorType::White as usize],
+            self.player_prossesion[ColorType::Black as usize],
+            self.has_specific_piece[PieceType::None as usize],
+            self.has_specific_piece[PieceType::King as usize],
+            self.has_specific_piece[PieceType::Gold as usize],
+            self.has_specific_piece[PieceType::Rook as usize],
+            self.has_specific_piece[PieceType::Bichop as usize],
+            self.has_specific_piece[PieceType::Silver as usize],
+            self.has_specific_piece[PieceType::Knight as usize],
+            self.has_specific_piece[PieceType::Lance as usize],
+            self.has_specific_piece[PieceType::Pawn as usize],
+            self.has_specific_piece[PieceType::Dragon as usize],
+            self.has_specific_piece[PieceType::Horse as usize],
+            self.has_specific_piece[PieceType::ProSilver as usize],
+            self.has_specific_piece[PieceType::ProKnight as usize],
+            self.has_specific_piece[PieceType::ProLance as usize],
+            self.has_specific_piece[PieceType::ProPawn as usize],
+        ];
+
+        // 各マス（index）について、そのマスに関連する全てのBitBoardの値を連続配置
+        for index in 0..128 {
+            let mut bitboard_offset = 0;
+            for bitboard in &bitboards {
+                let u128_value = bitboard.to_u128();
+                board_vector[index * 18 + bitboard_offset] =
+                    if (u128_value >> (127 - index)) & 1 != 0 {
+                        1.0
+                    } else {
+                        0.0
+                    };
+                bitboard_offset += 1;
+            }
+        }
+
+        features.extend_from_slice(&board_vector);
+
+        // 持ち駒情報 (16次元: 2色 × 8駒種)
+        let hand_features = self.hand.to_vector();
+        features.extend_from_slice(&hand_features);
+
+        // 合計: 2304 + 16 = 2320次元
+
+        // 次元圧縮が必要な場合
+        if let Some(target_dims) = target_dimensions {
+            if target_dims < features.len() {
+                // PCAによる次元圧縮
+                return apply_pca_compression(&features, target_dims);
+            }
+        }
+
+        features
+    }
 }
 
 #[pymethods]
@@ -789,6 +852,12 @@ impl Board {
     #[pyo3(name = "is_finished")]
     pub fn python_is_finished(&self) -> (bool, ColorType) {
         self.is_finished()
+    }
+
+    #[pyo3(name = "to_vector")]
+    #[pyo3(signature = (target_dimensions = None))]
+    pub fn python_to_vector(&self, target_dimensions: Option<usize>) -> Vec<f32> {
+        self.to_vector(target_dimensions)
     }
 }
 

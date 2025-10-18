@@ -82,6 +82,30 @@ impl Hand {
         self.counts[index as usize] = self.counts[index as usize].saturating_sub(1);
     }
 
+    /// 持ち駒をベクター形式で返す
+    pub fn to_vector(&self) -> Vec<f32> {
+        let mut features = Vec::with_capacity(16);
+
+        // 各色、各駒種の枚数をベクターに追加
+        for color in [color::ColorType::Black, color::ColorType::White] {
+            for piece_type in [
+                piece::PieceType::King,
+                piece::PieceType::Gold,
+                piece::PieceType::Rook,
+                piece::PieceType::Bichop,
+                piece::PieceType::Silver,
+                piece::PieceType::Knight,
+                piece::PieceType::Lance,
+                piece::PieceType::Pawn,
+            ] {
+                let count = self.get_count(color, piece_type);
+                features.push(count as f32);
+            }
+        }
+
+        features
+    }
+
     pub fn get_player_pieces(&self, color_type: color::ColorType) -> Vec<piece::Piece> {
         let mut res: Vec<piece::Piece> = Vec::new();
         for i in piece::PieceType::King as usize..=piece::NOT_PRO_PIECE_TYPE_NUMBER as usize {
